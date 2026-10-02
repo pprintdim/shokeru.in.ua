@@ -8366,3 +8366,109 @@ body.about-modal-open{ overflow:hidden; }
 .prod__review-submit{align-self:flex-start;cursor:pointer}
 .prod__review-error{color:#c0392b;margin:0}
 .prod__review-success{color:#1e8449;margin:0}
+
+/* ===== Мобільні правки (Trello «shokeru.in.ua», 2026-10-02) ===== */
+@media (max-width: 767px) {
+    /* 1. Бічні відступи 14px. Раніше контейнер мав max-width 390/480 px і центрувався —
+          на ширших телефонах збоку виходило по 30+ px порожнечі. */
+    .container {
+        max-width: 100%;
+        padding-left: 14px;
+        padding-right: 14px;
+    }
+
+    /* 2. Шапка: лого не налазить на «обране», бургер видно.
+          Між лого й іконками був проміжок 100 px, а повне лого (260 px) вилазило з бокса 60 px. */
+    .header__inner {
+        gap: 12px;
+    }
+    .header__logo,
+    .header__menu-logo {
+        flex: 0 1 auto;
+        min-width: 0;
+        max-width: 150px;
+    }
+    .header__logo img,
+    .header__menu-logo img {
+        display: block;
+        width: 100%;
+        max-width: 150px;
+        height: auto;
+    }
+    .header__content {
+        flex: 1 1 auto;
+        min-width: 0;
+        max-width: none;
+    }
+    .header__top {
+        gap: 10px;
+        justify-content: flex-end;
+    }
+
+    /* 3. Вирівнювання: кнопка «В каталог» під слайдером була вузькою й по центру,
+          тоді як решта закликів — на всю ширину під текстом зліва. Робимо однаково. */
+    .productSlider__btn {
+        width: 100%;
+        max-width: 100%;
+        margin-left: 0;
+        margin-right: 0;
+    }
+
+    /* 4. Visa / Mastercard менші, нижня смуга футера компактніша */
+    .footer__inner {
+        padding: 40px 0 32px;
+    }
+    .footer__bottom {
+        padding: 14px 0 16px;
+    }
+    .footer__bottom-inner {
+        gap: 10px;
+    }
+    .footer__bottom-icons {
+        gap: 10px;
+    }
+    .footer__bottom-icon svg,
+    .footer__bottom-icon img {
+        width: auto;
+        height: 22px;
+    }
+
+    /* 6. Блок із цифрами на головній: 2 колонки по 2 пункти й менший кегль */
+    .about__block {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 28px 16px;
+    }
+    .about__item {
+        gap: 6px;
+        font-size: 13px;
+    }
+    /* 36 px — найбільший кегль, при якому «10 років» влазить у колонку без переносу (заміряно) */
+    .about__item > span {
+        font-size: 36px;
+        line-height: 1;
+        white-space: nowrap;
+    }
+    .about__item:nth-of-type(2) {
+        order: 0;
+    }
+    .about__item:nth-of-type(4)::before {
+        display: none;
+    }
+}
+
+/* 5. Форма повернення товару: текст у полях на 2 px менший і звичайної ваги (на всіх екранах) */
+.refund__form .form-input,
+.refund__form input[type="text"],
+.refund__form input[type="email"],
+.refund__form input[type="tel"],
+.refund__form input[type="date"],
+.refund__form textarea {
+    font-size: 18px;
+    font-weight: 400;
+}
+.refund__form .form-input::placeholder,
+.refund__form input::placeholder,
+.refund__form textarea::placeholder {
+    font-size: 18px;
+    font-weight: 400;
+}
