@@ -1,0 +1,21 @@
+{% if reviews %}
+  <div class="prod__reviews-list">
+    {% for review in reviews %}
+      <div class="prod__review" itemprop="review" itemscope itemtype="https://schema.org/Review">
+        <div class="prod__review-top">
+          <strong class="prod__review-author" itemprop="author">{{ review.author }}</strong>
+          <span class="prod__review-date" itemprop="datePublished">{{ review.date_added }}</span>
+        </div>
+        <div class="prod__review-rating" itemprop="reviewRating" itemscope itemtype="https://schema.org/Rating">
+          <meta itemprop="ratingValue" content="{{ review.rating }}">
+          <meta itemprop="bestRating" content="5">
+          {% for i in 1..5 %}<span class="prod__review-star{% if review.rating >= i %} is-on{% endif %}">★</span>{% endfor %}
+        </div>
+        <p class="prod__review-text" itemprop="reviewBody">{{ review.text }}</p>
+      </div>
+    {% endfor %}
+  </div>
+  {% if pagination %}<div class="prod__reviews-pagination">{{ pagination }}</div>{% endif %}
+{% else %}
+  <p class="prod__reviews-empty">{{ text_no_reviews }}</p>
+{% endif %}

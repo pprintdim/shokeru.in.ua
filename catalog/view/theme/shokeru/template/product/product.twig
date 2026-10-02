@@ -127,6 +127,37 @@
 	                                </div>
 	                            </div>
 	                        {% endfor %}
+                            {% if review_status %}
+                            <div class="prod__item prod__item--reviews">
+                                <h3 class="prod__item-title">{{ tab_review }}</h3>
+                                <div class="prod__item-content prod__item-info">
+                                    <div id="review" class="prod__reviews"></div>
+                                    <form class="prod__review-form" id="form-review">
+                                        <h4 class="prod__review-form-title">{{ text_write }}</h4>
+                                        {% if review_guest %}
+                                        <div class="prod__review-row">
+                                            <label for="input-name">{{ entry_name }}</label>
+                                            <input type="text" name="name" value="{{ customer_name }}" id="input-name" class="form-control">
+                                        </div>
+                                        <div class="prod__review-row">
+                                            <label for="input-review">{{ entry_review }}</label>
+                                            <textarea name="text" rows="4" id="input-review" class="form-control"></textarea>
+                                        </div>
+                                        <div class="prod__review-row prod__review-row--rating">
+                                            <span>{{ entry_rating }}</span>
+                                            {% for i in 1..5 %}
+                                            <label class="prod__review-radio"><input type="radio" name="rating" value="{{ i }}"> {{ i }}</label>
+                                            {% endfor %}
+                                        </div>
+                                        {{ captcha }}
+                                        <button type="button" id="button-review" class="prod__review-submit btn">{{ button_continue }}</button>
+                                        {% else %}
+                                        <p class="prod__reviews-empty">{{ text_login|raw }}</p>
+                                        {% endif %}
+                                    </form>
+                                </div>
+                            </div>
+                            {% endif %}
                             <div class="prod__item">
                                 <h3 class="prod__item-title">{{ text_warranty }}</h3>
                                 <div class="prod__item-content prod__item-info">
@@ -337,5 +368,60 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
+// відгуки: підвантаження списку і надсилання форми (стокові маршрути OpenCart)
+(function () {
+    var box = document.getElementById('review');
+    if (!box) return;
+    function load(page) {
+        fetch('index.php?route=product/product/review&product_id={{ product_id }}&page=' + (page || 1), {headers: {'X-Requested-With': 'XMLHttpRequest'}})
+            .then(function (r) { return r.text(); })
+            .then(function (html) {
+                box.innerHTML = html;
+                box.querySelectorAll('.prod__reviews-pagination a').forEach(function (a) {
+                    a.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        var m = a.href.match(/page=(\d+)/);
+                        load(m ? m[1] : 1);
+                    });
+                });
+            });
+    }
+    load(1);
+    var btn = document.getElementById('button-review');
+    if (btn) {
+        btn.addEventListener('click', function () {
+            var form = document.getElementById('form-review');
+            btn.disabled = true;
+            fetch('index.php?route=product/product/write&product_id={{ product_id }}', {
+                method: 'POST',
+                headers: {'X-Requested-With': 'XMLHttpRequest'},
+                body: new FormData(form)
+            })
+                .then(function (r) { return r.json(); })
+                .then(function (json) {
+                    btn.disabled = false;
+                    form.querySelectorAll('.prod__review-error').forEach(function (n) { n.remove(); });
+                    if (json.error) {
+                        Object.keys(json.error).forEach(function (k) {
+                            var note = document.createElement('p');
+                            note.className = 'prod__review-error';
+                            note.textContent = json.error[k];
+                            form.prepend(note);
+                        });
+                    }
+                    if (json.success) {
+                        form.reset();
+                        var ok = document.createElement('p');
+                        ok.className = 'prod__review-success';
+                        ok.textContent = json.success;
+                        form.prepend(ok);
+                        load(1);
+                    }
+                })
+                .catch(function () { btn.disabled = false; });
+        });
+    }
+})();
 </script>
 

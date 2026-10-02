@@ -8345,3 +8345,24 @@ body.about-modal-open{ overflow:hidden; }
 .product__item-image img{ transition: transform .6s cubic-bezier(.2,.7,.2,1); will-change: transform; }
 .product__item:hover .product__item-image img{ transform: scale(1.07); }
 @media (hover: none){ .product__item:hover .product__item-image img{ transform: none; } }
+
+/* відгуки на сторінці товару */
+.prod__item--reviews .prod__item-content{display:block}
+.prod__review{border-bottom:1px solid rgba(0,0,0,.08);padding:14px 0}
+.prod__review:last-child{border-bottom:none}
+.prod__review-top{display:flex;justify-content:space-between;gap:12px;align-items:baseline}
+.prod__review-author{font-weight:600}
+.prod__review-date{opacity:.6;font-size:13px}
+.prod__review-rating{margin:6px 0}
+.prod__review-star{color:rgba(0,0,0,.2);font-size:15px}
+.prod__review-star.is-on{color:#f5a623}
+.prod__review-text{margin:6px 0 0}
+.prod__reviews-empty{opacity:.7}
+.prod__review-form{margin-top:18px;display:flex;flex-direction:column;gap:10px}
+.prod__review-form-title{margin:0 0 4px;font-size:16px;font-weight:600}
+.prod__review-row{display:flex;flex-direction:column;gap:4px}
+.prod__review-row--rating{flex-direction:row;align-items:center;gap:14px;flex-wrap:wrap}
+.prod__review-radio{display:inline-flex;align-items:center;gap:4px;cursor:pointer}
+.prod__review-submit{align-self:flex-start;cursor:pointer}
+.prod__review-error{color:#c0392b;margin:0}
+.prod__review-success{color:#1e8449;margin:0}
