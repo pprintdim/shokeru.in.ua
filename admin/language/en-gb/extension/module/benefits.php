@@ -27,3 +27,4 @@ $_['button_remove'] = 'Remove';
 // Error
 $_['error_permission'] = 'You do not have permission!';
 $_['error_name']       = 'Module Name must be between 3 and 64 characters!';
+$_['text_form'] = 'Benefits block';

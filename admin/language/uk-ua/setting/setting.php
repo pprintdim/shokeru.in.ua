@@ -160,3 +160,8 @@ $_['help_account'] = 'Вимагати підтвердження згоди з 
 $_['help_invoice_prefix'] = 'Виберіть префікс Рахунку. Приклад: INV-2016-00';
 
 $_['entry_logo_mob'] = 'Логотип (моб. навігація)';
+$_['entry_instagram'] = 'Instagram';
+$_['entry_facebook'] = 'Facebook';
+$_['entry_telegram'] = 'Telegram';
+$_['entry_tiktok'] = 'TikTok';
+$_['entry_youtube'] = 'YouTube';

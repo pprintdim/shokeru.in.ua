@@ -10,7 +10,18 @@ class ControllerSettingSetting extends Controller {
 		$this->load->model('setting/setting');
 
 		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validate()) {
-			$this->model_setting_setting->editSetting('config', $this->request->post);
+			// Стокова модель видаляє ВСІ рядки з кодом `config` і пише лише те, що прийшло
+			// з форми, тому ключі без власного поля при кожному збереженні зникали.
+			// Переносимо такі ключі з поточних налаштувань.
+			$post = $this->request->post;
+
+			foreach (array('config_url', 'config_ssl', 'config_ftp_status', 'config_ftp_hostname', 'config_ftp_port', 'config_ftp_username', 'config_ftp_password', 'config_ftp_root', 'config_google_analytics', 'config_fraud_detection', 'config_facebook_app_id') as $key) {
+				if (!isset($post[$key]) && $this->config->has($key)) {
+					$post[$key] = $this->config->get($key);
+				}
+			}
+
+			$this->model_setting_setting->editSetting('config', $post);
 
 //			if ($this->config->get('config_currency_auto')) {
 //				$this->load->model('localisation/currency');
@@ -270,6 +281,36 @@ class ControllerSettingSetting extends Controller {
 			$data['config_telephone'] = $this->request->post['config_telephone'];
 		} else {
 			$data['config_telephone'] = $this->config->get('config_telephone');
+		}
+
+		if (isset($this->request->post['config_instagram'])) {
+			$data['config_instagram'] = $this->request->post['config_instagram'];
+		} else {
+			$data['config_instagram'] = $this->config->get('config_instagram');
+		}
+
+		if (isset($this->request->post['config_facebook'])) {
+			$data['config_facebook'] = $this->request->post['config_facebook'];
+		} else {
+			$data['config_facebook'] = $this->config->get('config_facebook');
+		}
+
+		if (isset($this->request->post['config_telegram'])) {
+			$data['config_telegram'] = $this->request->post['config_telegram'];
+		} else {
+			$data['config_telegram'] = $this->config->get('config_telegram');
+		}
+
+		if (isset($this->request->post['config_tiktok'])) {
+			$data['config_tiktok'] = $this->request->post['config_tiktok'];
+		} else {
+			$data['config_tiktok'] = $this->config->get('config_tiktok');
+		}
+
+		if (isset($this->request->post['config_youtube'])) {
+			$data['config_youtube'] = $this->request->post['config_youtube'];
+		} else {
+			$data['config_youtube'] = $this->config->get('config_youtube');
 		}
 		
 		if (isset($this->request->post['config_fax'])) {

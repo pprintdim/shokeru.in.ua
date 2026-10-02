@@ -72,18 +72,17 @@
                     </div>
                     <div class="footer__block">
                         <div class="footer__social">
-                            <a class="footer__social-link" href="#" target="_blank">
+{% if instagram %}<a class="footer__social-link" rel="noopener" aria-label="Instagram" href="{{ instagram }}" target="_blank">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 25 25" fill="none">
                                     <path d="M18.2327 0H6.76727C3.03574 0 0 3.03574 0 6.76727V18.2329C0 21.9643 3.03574 25 6.76727 25H18.2329C21.9643 25 25 21.9643 25 18.2329V6.76727C25 3.03574 21.9643 0 18.2327 0ZM12.5 19.3357C8.7307 19.3357 5.66425 16.2693 5.66425 12.5C5.66425 8.7307 8.7307 5.66425 12.5 5.66425C16.2693 5.66425 19.3357 8.7307 19.3357 12.5C19.3357 16.2693 16.2693 19.3357 12.5 19.3357ZM19.4992 7.27634C18.3853 7.27634 17.4793 6.37035 17.4793 5.25646C17.4793 4.14257 18.3853 3.23639 19.4992 3.23639C20.6131 3.23639 21.5193 4.14257 21.5193 5.25646C21.5193 6.37035 20.6131 7.27634 19.4992 7.27634Z" fill="#D2D2D2"/>
                                     <path d="M12.5 7C9.46743 7 7 9.46724 7 12.5C7 15.5326 9.46743 18 12.5 18C15.5328 18 18 15.5326 18 12.5C18 9.46724 15.5328 7 12.5 7Z" fill="#D2D2D2"/>
                                 </svg>
-                            </a>
-                            <a class="footer__social-link" href="#" target="_blank">
+                            </a>{% endif %}
+{% if facebook %}<a class="footer__social-link" rel="noopener" aria-label="Facebook" href="{{ facebook }}" target="_blank">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 25 25" fill="none">
                                     <path d="M21.3379 0H3.66211C1.64299 0 0 1.64299 0 3.66211V21.3379C0 23.357 1.64299 25 3.66211 25H11.0352V16.1621H8.10547V11.7676H11.0352V8.78906C11.0352 6.36578 13.0064 4.39453 15.4297 4.39453H19.873V8.78906H15.4297V11.7676H19.873L19.1406 16.1621H15.4297V25H21.3379C23.357 25 25 23.357 25 21.3379V3.66211C25 1.64299 23.357 0 21.3379 0Z" fill="#D2D2D2"/>
                                 </svg>
-                            </a>
-                        </div>
+                            </a>{% endif %}</div>
                     </div>
                 </div>
             </div>

@@ -209,3 +209,8 @@ $_['error_log_extension']            = 'Расширение Log файла до
 $_['error_encryption']               = 'Ключ шифрования должен быть от 32 до 1024 символов!';
 
 $_['entry_logo_mob'] = 'Логотип (моб. навигация)';
+$_['entry_instagram'] = 'Instagram';
+$_['entry_facebook'] = 'Facebook';
+$_['entry_telegram'] = 'Telegram';
+$_['entry_tiktok'] = 'TikTok';
+$_['entry_youtube'] = 'YouTube';

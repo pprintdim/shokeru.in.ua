@@ -22,3 +22,4 @@ $_['button_remove']       = 'Remove';
 
 // Error
 $_['error_permission']    = 'You do not have permission to modify Different Shokers module!';
+$_['text_form'] = 'Different shockers block';

@@ -215,3 +215,8 @@ $_['error_log_extension']            = 'Error Log Filename extension needs to be
 $_['error_encryption']               = 'Encryption Key must be between 32 and 1024 characters!';
 
 $_['entry_logo_mob'] = 'Mobile Logo (nav)';
+$_['entry_instagram'] = 'Instagram';
+$_['entry_facebook'] = 'Facebook';
+$_['entry_telegram'] = 'Telegram';
+$_['entry_tiktok'] = 'TikTok';
+$_['entry_youtube'] = 'YouTube';

@@ -23,3 +23,5 @@ $_['button_cancel']    = 'Скасувати';
 
 // Error
 $_['error_permission'] = 'У вас немає прав для зміни модуля!';
+$_['entry_status'] = 'Статус';
+$_['text_scripts'] = 'Власні скрипти';

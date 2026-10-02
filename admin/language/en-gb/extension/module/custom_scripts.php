@@ -22,3 +22,5 @@ $_['button_cancel']    = 'Cancel';
 
 // Error
 $_['error_permission'] = 'You do not have permission to modify this module!';
+$_['entry_status'] = 'Status';
+$_['text_scripts'] = 'Custom scripts';

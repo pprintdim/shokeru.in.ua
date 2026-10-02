@@ -15,3 +15,4 @@ $_['entry_image']        = 'Image';
 $_['button_save']        = 'Save';
 $_['button_cancel']      = 'Cancel';
 $_['error_permission']   = 'You do not have permission to edit this module!';
+$_['entry_strip_status'] = 'Show the text strip';
