@@ -976,6 +976,9 @@ main.main{
     .header__menu-list{
         margin-bottom: 227px;
     }
+    .header__menu-list ul{
+        gap: 24px;
+    }
     .header__menu-list ul li a{
         font-size: 24px;
     }
@@ -1696,7 +1699,20 @@ main.main{
 }
 @media (max-width: 767px) {
     .hero__slide{
-        padding-bottom: 108px;
+        padding-bottom: 72px;
+    }
+    /* .swiper-slide з CDN підключається після style.css і ставить display:block,
+       тому тут потрібні два класи. */
+    .hero__slide.swiper-slide{
+        display: flex;
+        flex-direction: column;
+    }
+    /* height:100% контейнера рахується від заданої height слайда, а не від
+       фактичної (її тягне min-height) — через це текст висів вище дна з
+       мертвою зоною знизу. Flex розтягує контейнер на реальну висоту. */
+    .hero__slide .container{
+        flex: 1 1 auto;
+        height: auto;
     }
     .hero__slide-descr{
         margin-top: 16px;
@@ -1892,6 +1908,10 @@ main.main{
         font-size: 12px;
     }
     .product__item-price{
+        font-size: 14px;
+        gap: 8px;
+    }
+    .product__item-price span{
         font-size: 12px;
     }
 }
