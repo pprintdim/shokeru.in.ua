@@ -152,7 +152,8 @@
                                         {{ captcha }}
                                         <button type="button" id="button-review" class="prod__review-submit btn">{{ button_continue }}</button>
                                         {% else %}
-                                        <p class="prod__reviews-empty">{{ text_login|raw }}</p>
+                                        <p class="prod__reviews-empty">{{ text_review_login_note }}</p>
+                                        <button type="button" class="prod__review-submit btn" data-review-login>{{ button_review_login }}</button>
                                         {% endif %}
                                     </form>
                                 </div>
@@ -388,6 +389,18 @@ document.addEventListener('DOMContentLoaded', () => {
             });
     }
     load(1);
+    // гість: відкриваємо попап входу; після входу/реєстрації повертаємось сюди до форми відгуку
+    var reviewLogin = document.querySelector('[data-review-login]');
+    if (reviewLogin) {
+        reviewLogin.addEventListener('click', function () {
+            var back = window.location.href.split('#')[0];
+            back += (back.indexOf('?') > -1 ? '&' : '?') + 'review=1#form-review';
+            document.querySelectorAll('[data-popup-redirect]').forEach(function (input) { input.value = back; });
+            var popup = document.querySelector('.userPopup');
+            if (popup) popup.classList.add('active');
+        });
+    }
+
     var btn = document.getElementById('button-review');
     if (btn) {
         btn.addEventListener('click', function () {

@@ -412,11 +412,9 @@ class ControllerProductProduct extends Controller {
 
 			$data['review_status'] = $this->config->get('config_review_status');
 
-			if ($this->config->get('config_review_guest') || $this->customer->isLogged()) {
-				$data['review_guest'] = true;
-			} else {
-				$data['review_guest'] = false;
-			}
+			// відгук лишає лише покупець, що увійшов (як у групі hydrophob): гостю кнопка
+			// відкриває попап входу і повертає на товар до форми відгуку
+			$data['review_guest'] = $this->customer->isLogged();
 
 			if ($this->customer->isLogged()) {
 				$data['customer_name'] = $this->customer->getFirstName() . '&nbsp;' . $this->customer->getLastName();
@@ -696,6 +694,10 @@ class ControllerProductProduct extends Controller {
 			
 				if (empty($this->request->post['rating']) || $this->request->post['rating'] < 0 || $this->request->post['rating'] > 5) {
 					$json['error'] = $this->language->get('error_rating');
+				}
+
+				if (!isset($json['error']) && !$this->customer->isLogged()) {
+					$json['error'] = $this->language->get('error_review_login');
 				}
 
 				// Captcha

@@ -55,3 +55,6 @@ $_['text_product_add']                       = 'Add to Cart';
 $_['entry_captcha']                          = 'Enter the code in the box below:';
 $_['error_captcha']                          = 'Warning: Captcha code is incorrect!';
 $_['text_payment_until_canceled_description'] = 'Amount: %s; recurring: %d %s; Number of Payments: until cancelled';
+$_['text_review_login_note'] = 'Only registered customers can leave reviews. Sign in or register — it takes a minute.';
+$_['button_review_login']   = 'Sign in to leave a review';
+$_['error_review_login']     = 'Sign in to leave a review.';

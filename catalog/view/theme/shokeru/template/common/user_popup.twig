@@ -61,6 +61,7 @@
                 {# ===== ЛОГІН (email + пароль) ===== #}
                 <div class="userPopup__result active" data-userPopup-result="login">
                     <form id="popup-login-form" class="userPopup__form">
+                        <input type="hidden" name="redirect" value="" data-popup-redirect>
                         <div class="userPopup__form-block">
                             <div class="userPopup__form-item">
                                 <input type="email" name="email" class="userPopup__form-input" placeholder="Email*" required>
@@ -166,6 +167,7 @@
                 {# ===== РЕЄСТРАЦІЯ (по коду на email) ===== #}
                 <div class="userPopup__result" data-userPopup-result="register">
                     <form id="popup-register-form" class="userPopup__form otp-form" data-otp-type="register" data-verify-label="{{ text_verify }}">
+                        <input type="hidden" name="redirect" value="" data-popup-redirect>
                         <div class="userPopup__form-box otp-step-fields">
                             <div class="userPopup__form-item">
                                 <input class="userPopup__form-input" type="text" name="firstname" placeholder="{{ text_firstname }}*" required>

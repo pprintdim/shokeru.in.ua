@@ -136,6 +136,7 @@ class ControllerCommonUserPopup extends Controller {
                     'lastname'  => $lastname,
                     'email'     => $email,
                     'telephone' => $telephone,
+                'redirect'  => $this->returnUrl(),
                     'password'  => $password,
                     'newsletter'=> 0,
                 ]);
@@ -185,7 +186,7 @@ class ControllerCommonUserPopup extends Controller {
                     } else {
                         $this->model_account_customer->deleteLoginAttempts($email);
                         $json['success'] = true; // просто успішний статус
-                        $json['redirect'] = $this->url->link('account/account', '', true); // URL редіректу
+                        $json['redirect'] = $this->returnUrl(); // URL редіректу
                     }
 
                 }
@@ -413,12 +414,28 @@ class ControllerCommonUserPopup extends Controller {
             if (!$json) {
                 $json['success']  = true;
                 $json['message']  = $msg;
-                $json['redirect'] = $this->url->link('account/account', '', true);
+                $json['redirect'] = $otp['redirect'] ?? $this->url->link('account/account', '', true);
             }
         }
 
         $this->response->addHeader('Content-Type: application/json');
         $this->response->setOutput(json_encode($json));
+    }
+
+    // Куди повернутись після входу: сторінка, з якої відкрили попап (поле redirect, напр. відгук
+    // на товарі) — лише свій домен; інакше кабінет.
+    private function returnUrl() {
+        $target = isset($this->request->post['redirect']) ? trim((string)$this->request->post['redirect']) : '';
+
+        if ($target !== '' && preg_match('#^https?://#i', $target)) {
+            foreach (array($this->config->get('config_url'), $this->config->get('config_ssl')) as $base) {
+                if ($base && strpos($target, (string)$base) === 0) {
+                    return $target;
+                }
+            }
+        }
+
+        return $this->url->link('account/account', '', true);
     }
 
     private function sendCodeMail($email, $code) {
