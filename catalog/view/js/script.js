@@ -360,6 +360,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
 document.addEventListener("DOMContentLoaded", function () {
     if (typeof Swiper !== "undefined") {
+        // усі слайдери гортаються трекпадом: лише горизонтальний жест, вертикальний скрол сторінки не чіпаємо
+        if (Swiper.extendDefaults) {
+            Swiper.extendDefaults({ mousewheel: { forceToAxis: true, thresholdDelta: 10, releaseOnEdges: true } });
+        }
+
         let heroSwiper = new Swiper(".hero__slider", {
             loop: false,
             spaceBetween: 0,

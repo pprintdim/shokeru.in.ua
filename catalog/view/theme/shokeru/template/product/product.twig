@@ -280,6 +280,7 @@ const thumbsSwiper = new Swiper('.prod__thumbs', {
 
 const mainSwiper = new Swiper('.prod__slider-inner', {
     slidesPerView: 1,
+    mousewheel: { forceToAxis: true, thresholdDelta: 10, releaseOnEdges: true }, // гортання трекпадом
     spaceBetween: 16,
     simulateTouch: true,
     grabCursor: true,
