@@ -8641,3 +8641,42 @@ html {
 .affiliate-login__form .affiliate-login__btn {
     margin-top: 8px;
 }
+
+/* Опис товару (спільна розмітка групи шокерів, materials/parser/tools/desc_markup.php):
+   .pd-desc > p.pd-lead, h2, ul.pd-points («Коротко про модель»), table.pd-specs, ul.pd-list, p.pd-cta.
+   Кольори — від кольору тексту теми (currentColor), акцент — --pd-accent (задається темою). */
+.pd-desc { line-height: 1.7; }
+.pd-desc > * + * { margin-top: 1.1em; }
+.pd-desc .pd-lead { font-size: 1.125em; line-height: 1.6; font-weight: 500; opacity: 1; }
+.pd-desc h2 { margin-top: 1.9em; margin-bottom: .2em; font-size: 1.25em; line-height: 1.3; font-weight: 600; letter-spacing: 0; }
+.pd-desc ul.pd-points, .pd-desc ul.pd-list { list-style: none; margin-left: 0; padding-left: 0; display: grid; gap: .55em; }
+.pd-desc ul.pd-points { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: .6em 1.6em; }
+.pd-desc ul.pd-points li, .pd-desc ul.pd-list li { position: relative; padding-left: 1.6em; margin: 0; }
+.pd-desc ul.pd-points li::before { content: ""; position: absolute; left: 0; top: .62em; width: .6em; height: .6em; border-radius: 2px; background: var(--pd-accent, currentColor); transform: rotate(45deg); }
+.pd-desc ul.pd-list li::before { content: ""; position: absolute; left: .15em; top: .45em; width: .45em; height: .8em; border: solid var(--pd-accent, currentColor); border-width: 0 2px 2px 0; transform: rotate(45deg); }
+.pd-desc table.pd-specs { width: 100%; border-collapse: collapse; font-size: .95em; border: 1px solid color-mix(in srgb, currentColor 14%, transparent); border-radius: 10px; overflow: hidden; display: table; }
+.pd-desc table.pd-specs th, .pd-desc table.pd-specs td { padding: .7em 1em; text-align: left; vertical-align: top; border-bottom: 1px solid color-mix(in srgb, currentColor 10%, transparent); }
+.pd-desc table.pd-specs tr:last-child th, .pd-desc table.pd-specs tr:last-child td { border-bottom: 0; }
+.pd-desc table.pd-specs th { width: 45%; font-weight: 500; opacity: .75; background: color-mix(in srgb, currentColor 4%, transparent); }
+.pd-desc table.pd-specs td { font-weight: 600; }
+.pd-desc table.pd-specs tr:nth-child(even) td { background: color-mix(in srgb, currentColor 2.5%, transparent); }
+.pd-desc .pd-cta { margin-top: 1.8em; padding: 1em 1.2em; border-left: 3px solid var(--pd-accent, currentColor); background: color-mix(in srgb, currentColor 5%, transparent); border-radius: 0 10px 10px 0; font-weight: 500; }
+@media (max-width: 640px) {
+  .pd-desc table.pd-specs th, .pd-desc table.pd-specs td { display: block; width: auto; padding: .45em .9em; }
+  .pd-desc table.pd-specs th { padding-top: .75em; border-bottom: 0; background: none; font-size: .85em; }
+  .pd-desc table.pd-specs td { padding-bottom: .75em; }
+  .pd-desc table.pd-specs tr:nth-child(even) td { background: none; }
+  .pd-desc table.pd-specs tr { display: block; border-bottom: 1px solid color-mix(in srgb, currentColor 10%, transparent); }
+  .pd-desc table.pd-specs tr:last-child { border-bottom: 0; }
+}
+/* shokeru: акордеон товару має свої стилі p/ul/li — гасимо їх для pd-desc */
+.pd-desc { --pd-accent: #202222; font-size: 14px; color: #202222; }
+.prod__item-content .pd-desc p { font-size: inherit; line-height: 1.7; }
+.prod__item-content .pd-desc .pd-lead { font-size: 16px; line-height: 1.6; }
+.prod__item-content .pd-desc ul { margin-top: 0; }
+.prod__item-content .pd-desc ul li { font-size: inherit; line-height: 1.6; padding-left: 1.6em; }
+.prod__item-content .pd-desc ul li::before { background-color: transparent; border-radius: 0; }
+.prod__item-content .pd-desc ul.pd-points li::before { background: var(--pd-accent); border-radius: 2px; top: .55em; left: 0; width: .55em; height: .55em; }
+.prod__item-content .pd-desc ul.pd-list li::before { top: .3em; left: .15em; width: .45em; height: .8em; }
+.pd-desc h2 { font-size: 16px; font-weight: 700; text-transform: uppercase; line-height: 1.4; }
+.pd-desc .pd-cta { background: #c5ff24; border-left-color: #202222; }
