@@ -10,21 +10,27 @@
             {% if item.image %}
               <div class="safemode__image swiper-slide">
 
-                {# desktop #}
-                <img
-                  class="hide-mobile"
-                  src="{{ item.image }}"
-                  alt="{{ item.title|e }}"
-                  loading="lazy"
-                >
+                {# Фото веде туди ж, куди кнопка «Детальніше» цього слайда —
+                   інакше по картинці не можна було перейти на товар. #}
+                <a class="safemode__image-link" href="{{ item.link ?: '#' }}"{% if not item.link %} aria-hidden="true" tabindex="-1"{% endif %}>
 
-                {# mobile (fallback на desktop) #}
-                <img
-                  class="show-mobile"
-                  src="{{ item.mob_image ?: item.image }}"
-                  alt="{{ item.title|e }}"
-                  loading="lazy"
-                >
+                  {# desktop #}
+                  <img
+                    class="hide-mobile"
+                    src="{{ item.image }}"
+                    alt="{{ item.title|e }}"
+                    loading="lazy"
+                  >
+
+                  {# mobile (fallback на desktop) #}
+                  <img
+                    class="show-mobile"
+                    src="{{ item.mob_image ?: item.image }}"
+                    alt="{{ item.title|e }}"
+                    loading="lazy"
+                  >
+
+                </a>
 
               </div>
             {% endif %}
