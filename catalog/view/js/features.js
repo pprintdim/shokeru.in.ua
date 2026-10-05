@@ -150,6 +150,7 @@
     var topBtn = fab.querySelector('[data-scroll-top]');
     var banner = document.querySelector('[data-cookie-banner]');
     var bar = document.querySelector('[data-purchase-bar]');
+    var quick = document.querySelector('.prod__quick');
     var ticking = false;
     var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -172,6 +173,15 @@
       }
 
       fab.style.setProperty('--fab-lift', Math.round(lift) + 'px');
+
+      // телефон: плаваючі кнопки ховаються, поки вони перекривають «Купити в один клік» на картці товару
+      if (quick) {
+        var q = quick.getBoundingClientRect();
+        var fr = fab.getBoundingClientRect();
+        var hit = window.innerWidth <= 767 && q.height > 0 && q.bottom > fr.top - 6 && q.top < fr.bottom + 6 && q.right > fr.left - 6 && q.left < fr.right;
+
+        fab.classList.toggle('is-dodging', hit);
+      }
     }
 
     function queue() {
@@ -203,11 +213,12 @@
 
     function open(mode) {
       var tab = popup.querySelector('.userPopup__btn[data-userpopup-select="' + mode + '"]');
-      var menu = document.querySelector('.header__menu');
 
-      popup.classList.add('active');
+      if (typeof window.shokeruCloseMenu === 'function') window.shokeruCloseMenu();
       if (tab) tab.click();
-      if (menu) menu.classList.remove('active');
+
+      // script.js: inert/aria, фокус-пастка, блок прокрутки
+      if (window.shokeruPopup) window.shokeruPopup.open(); else popup.classList.add('active');
     }
 
     window.shokeruAuth = { open: open };
@@ -588,4 +599,252 @@
 
     document.addEventListener('keydown', function (event) { if (event.key === 'Escape') close(); });
   }
+})();
+
+/* ---------- Попап входу: перевірка полів реєстрації, перехід login→register / register→login за відповіддю сервера,
+   сторінки умов/політики — у модальному вікні (information/information/agree). Обробники common.js (ShokeruOtp) не чіпаємо:
+   валідація йде в capture-фазі submit, серверні помилки читає обгортка fetch. ---------- */
+(function () {
+  'use strict';
+
+  function field(form, name) { return form.querySelector('[name="' + name + '"]'); }
+
+  function clearField(input) {
+    var item = input.closest('.userPopup__form-item, .userPopup__form-checkbox');
+
+    if (!item) return;
+
+    item.classList.remove('is-invalid');
+    input.removeAttribute('aria-invalid');
+
+    var note = item.querySelector('.userPopup__field-error');
+
+    if (note) note.remove();
+  }
+
+  function markField(form, name, message) {
+    var input = field(form, name);
+
+    if (!input) return null;
+
+    var item = input.closest('.userPopup__form-item, .userPopup__form-checkbox');
+
+    if (!item) return null;
+
+    clearField(input);
+    item.classList.add('is-invalid');
+    input.setAttribute('aria-invalid', 'true');
+
+    var note = document.createElement('p');
+
+    note.className = 'userPopup__field-error';
+    note.setAttribute('role', 'alert');
+    note.textContent = message;
+    item.appendChild(note);
+
+    return input;
+  }
+
+  function clearAll(form) {
+    form.querySelectorAll('input').forEach(clearField);
+  }
+
+  function attr(form, key) { return form.getAttribute('data-' + key) || ''; }
+
+  function stageIsFields(form) {
+    var wrap = form.querySelector('.otp-step-fields');
+
+    return !wrap || !wrap.hidden;
+  }
+
+  // порожня/хибна форма реєстрації: позначаємо ВСІ проблемні поля, а не лише перше
+  document.addEventListener('submit', function (event) {
+    var form = event.target;
+
+    if (!form || form.id !== 'popup-register-form' || !stageIsFields(form)) return;
+
+    clearAll(form);
+
+    var firstBad = null;
+    var bad = function (name, message) {
+      var input = markField(form, name, message);
+
+      if (input && !firstBad) firstBad = input;
+    };
+
+    if (!field(form, 'firstname').value.trim()) bad('firstname', attr(form, 'error-firstname'));
+    if (field(form, 'telephone').value.replace(/\D/g, '').length < 9) bad('telephone', attr(form, 'error-telephone'));
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(field(form, 'email').value.trim())) bad('email', attr(form, 'error-email'));
+
+    var agree = field(form, 'agree');
+
+    if (agree && agree.type === 'checkbox' && !agree.checked) bad('agree', attr(form, 'error-agree'));
+
+    if (firstBad) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      firstBad.focus();
+    }
+  }, true);
+
+  document.addEventListener('input', function (event) {
+    if (event.target && event.target.closest && event.target.closest('.userPopup__form')) clearField(event.target);
+  });
+  document.addEventListener('change', function (event) {
+    if (event.target && event.target.closest && event.target.closest('.userPopup__form')) clearField(event.target);
+  });
+
+  function switchTab(mode, email, hintOn) {
+    var popup = document.querySelector('.userPopup');
+    var tab = popup && popup.querySelector('.userPopup__btn[data-userpopup-select="' + mode + '"]');
+
+    if (!tab) return;
+
+    tab.click();
+
+    var form = popup.querySelector('#popup-' + mode + '-form');
+    var input = form && field(form, 'email');
+
+    if (input && email && !input.readOnly) input.value = email;
+
+    var hint = form && form.querySelector('[data-register-hint]');
+
+    if (hint) hint.hidden = !hintOn;
+
+    var target = form && (hintOn ? field(form, 'firstname') : field(form, 'email'));
+
+    if (target) setTimeout(function () { target.focus(); }, 60);
+  }
+
+  // відповідь sendCode: серверні помилки по полях і перехід між вкладками
+  function onSendCode(json, body) {
+    if (!json || !json.errors) return;
+
+    var type = body && body.get ? body.get('type') : 'login';
+    var email = body && body.get ? String(body.get('email') || '') : '';
+    var form = document.getElementById('popup-' + (type === 'register' ? 'register' : 'login') + '-form');
+
+    if (!form) return;
+
+    clearAll(form);
+
+    var errors = json.errors;
+
+    if (type === 'login' && errors.email && errors.email === attr(form, 'error-no-account')) {
+      setTimeout(function () {
+        var box = form.querySelector('.otp-error');
+
+        if (box) { box.textContent = ''; box.style.display = 'none'; }
+
+        switchTab('register', email, true);
+      }, 80);
+
+      return;
+    }
+
+    if (type === 'register' && errors.email && errors.email === attr(form, 'error-email-exists')) {
+      setTimeout(function () { switchTab('login', email, false); }, 80);
+    }
+
+    Object.keys(errors).forEach(function (name) { markField(form, name, errors[name]); });
+  }
+
+  if (window.fetch) {
+    var nativeFetch = window.fetch;
+
+    window.fetch = function (input, init) {
+      var request = nativeFetch.apply(this, arguments);
+
+      try {
+        var url = typeof input === 'string' ? input : (input && input.url) || '';
+
+        if (/user_popup(\/|%2F)sendCode/.test(url) && init && init.body) {
+          request.then(function (response) { return response.clone().json(); })
+            .then(function (json) { onSendCode(json, init.body); })
+            .catch(function () {});
+        }
+      } catch (e) { /* обгортка не має ламати запит */ }
+
+      return request;
+    };
+  }
+
+  /* Умови й політика — модальне вікно поверх попапа (Esc / клік по фону / хрестик, фокус повертається на посилання) */
+  var modal = null;
+  var returnTo = null;
+
+  function closeModal() {
+    if (!modal) return;
+
+    modal.classList.remove('is-open');
+
+    var el = modal;
+
+    modal = null;
+    setTimeout(function () { el.remove(); }, 200);
+
+    if (returnTo && document.contains(returnTo)) returnTo.focus();
+  }
+
+  function openModal(url, title, trigger) {
+    closeModal();
+    returnTo = trigger;
+
+    var closeText = document.documentElement.getAttribute('data-text-close') || 'Close';
+    var el = document.createElement('div');
+
+    el.className = 'sk-info-modal';
+    el.setAttribute('role', 'dialog');
+    el.setAttribute('aria-modal', 'true');
+    el.setAttribute('aria-label', title);
+    el.innerHTML = '<div class="sk-info-modal__box"><div class="sk-info-modal__head"><h2 class="sk-info-modal__title"></h2>'
+      + '<button type="button" class="sk-info-modal__close" aria-label="' + closeText.replace(/"/g, '&quot;') + '">'
+      + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></div>'
+      + '<div class="sk-info-modal__body" tabindex="0"></div></div>';
+    el.querySelector('.sk-info-modal__title').textContent = title;
+    document.body.appendChild(el);
+    modal = el;
+
+    var body = el.querySelector('.sk-info-modal__body');
+    var closeBtn = el.querySelector('.sk-info-modal__close');
+
+    el.addEventListener('click', function (event) {
+      if (event.target === el || event.target.closest('.sk-info-modal__close')) closeModal();
+    });
+    requestAnimationFrame(function () { el.classList.add('is-open'); closeBtn.focus(); });
+
+    fetch(url, { credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+      .then(function (r) { return r.text(); })
+      .then(function (html) { body.innerHTML = html; })
+      .catch(function () { closeModal(); window.open(url, '_blank', 'noopener'); });
+  }
+
+  document.addEventListener('click', function (event) {
+    var link = event.target.closest ? event.target.closest('.userPopup a.agree') : null;
+
+    if (!link) return;
+
+    event.preventDefault();
+    openModal(link.href, link.textContent.trim(), link);
+  });
+
+  document.addEventListener('keydown', function (event) {
+    if (!modal) return;
+
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      closeModal();
+    } else if (event.key === 'Tab') {
+      var list = Array.prototype.slice.call(modal.querySelectorAll('a[href], button, [tabindex="0"]'));
+
+      if (!list.length) return;
+
+      var first = list[0];
+      var last = list[list.length - 1];
+
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+    }
+  });
 })();

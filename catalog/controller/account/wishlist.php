@@ -89,7 +89,6 @@ class ControllerAccountWishList extends Controller {
 		$data['button_view'] = $this->language->get('button_view');
 		$data['button_catalog'] = $button_catalog != 'button_catalog' ? $button_catalog : 'Перейти в каталог';
 		$data['shop'] = $this->url->link('product/shop');
-		$data['filter'] = $this->load->controller('extension/module/filter');
 		$data['content_top'] = $this->load->controller('common/content_top');
 		$data['content_bottom'] = $this->load->controller('common/content_bottom');
 		$data['footer'] = $this->load->controller('common/footer');
@@ -247,7 +246,7 @@ class ControllerAccountWishList extends Controller {
 
 				$this->session->data['wishlist'] = array_unique($this->session->data['wishlist']);
 
-				$json['success'] = sprintf($this->language->get('text_login'), $this->url->link('account/login', '', true), $this->url->link('account/register', '', true), $this->url->link('product/product', 'product_id=' . (int)$this->request->post['product_id']), $product_info['name'], $this->url->link('account/wishlist'));
+				$json['success'] = sprintf($this->language->get('text_success'), $this->url->link('product/product', 'product_id=' . (int)$this->request->post['product_id']), $product_info['name'], $this->url->link('account/wishlist'));
 
 				$json['total'] = sprintf($this->language->get('text_wishlist'), (isset($this->session->data['wishlist']) ? count($this->session->data['wishlist']) : 0));
 			}

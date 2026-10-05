@@ -151,3 +151,5 @@ $_['co_text_step']     = 'Step %s';
 $_['co_text_contacts'] = 'Contacts';
 $_['co_text_delivery'] = 'Delivery';
 $_['co_text_payment']  = 'Payment';
+
+$_['co_text_dest_reset'] = 'Delivery method changed — please choose the branch or address again.';

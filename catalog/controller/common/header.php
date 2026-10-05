@@ -22,6 +22,12 @@ class ControllerCommonHeader extends Controller {
 
 		if (is_file(DIR_IMAGE . $this->config->get('config_icon'))) {
 			$this->document->addLink($server . 'image/' . $this->config->get('config_icon'), 'icon');
+		} elseif (is_file(DIR_ROOT . 'favicon.ico')) {
+			$this->document->addLink($server . 'favicon.ico', 'icon');
+		}
+
+		if (is_file(DIR_IMAGE . 'catalog/apple-touch-icon.png')) {
+			$this->document->addLink($server . 'image/catalog/apple-touch-icon.png', 'apple-touch-icon');
 		}
 		$language_id = (int)$this->config->get('config_language_id');
 
@@ -132,7 +138,23 @@ class ControllerCommonHeader extends Controller {
 		$data['search'] = $this->load->controller('common/search');
 		
 		$data['menu'] = $this->load->controller('common/menu');
+
+		// категорії каталогу в мобільному меню-бургері
+		$this->load->model('catalog/category');
+
+		$data['menu_categories'] = array();
+
+		foreach ($this->model_catalog_category->getCategories(0) as $category) {
+			if (!empty($category['top'])) {
+				$data['menu_categories'][] = array(
+					'name' => $category['name'],
+					'href' => $this->url->link('product/category', 'path=' . $category['category_id'])
+				);
+			}
+		}
 		$data['email'] = $this->config->get('config_email');
+		$data['instagram'] = $this->config->get('config_instagram');
+		$data['facebook'] = $this->config->get('config_facebook');
 		$data['phones'] = [];
 
 		$phones = [
@@ -155,7 +177,7 @@ class ControllerCommonHeader extends Controller {
 		// CSS/JS: мініфікація з авто-перегенерацією за mtime (зміниш файл — перемініфікується сам)
 		$data['css_main']  = $this->assetMin('catalog/view/css/style.css', 'css', '20261004');
 		$data['css_anim']  = $this->assetMin('catalog/view/css/animations.css', 'css', '20260626b');
-		$data['css_features'] = $this->assetMin('catalog/view/css/features.css', 'css', '20261005');
+		$data['css_features'] = $this->assetMin('catalog/view/css/features.css', 'css', '20261006');
 		$data['js_common'] = $this->assetMin('catalog/view/js/common.js', 'js', '20260630');
 		// «Показувати в шапці» (info_flags.sql): сторінки інформації в верхньому меню
 		$this->load->model('catalog/information');

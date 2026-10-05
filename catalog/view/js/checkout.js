@@ -112,6 +112,53 @@
       }
 
       form.querySelectorAll('.has-error').forEach(function (el) { el.classList.remove('has-error'); });
+      form.querySelectorAll('.is-invalid').forEach(function (el) { el.classList.remove('is-invalid'); el.removeAttribute('aria-invalid'); });
+      form.querySelectorAll('.co-field-error').forEach(function (el) { el.remove(); });
+    }
+
+    // Помилка під конкретним полем: is-invalid + текст (без перезапису сусідніх полів)
+    function markField(field, message) {
+      if (!field) return;
+
+      var box = holder(field);
+      box.classList.add('has-error');
+      field.classList.add('is-invalid');
+      field.setAttribute('aria-invalid', 'true');
+
+      var note = box.querySelector('.co-field-error');
+      if (!note) {
+        note = document.createElement('p');
+        note.className = 'co-field-error';
+        note.setAttribute('role', 'alert');
+        box.appendChild(note);
+      }
+      note.textContent = message || '';
+    }
+
+    function unmarkField(field) {
+      var box = holder(field);
+      box.classList.remove('has-error');
+      field.classList.remove('is-invalid');
+      field.removeAttribute('aria-invalid');
+      var note = box.querySelector('.co-field-error');
+      if (note) note.remove();
+    }
+
+    function contactError(name) {
+      var field = form.querySelector('[name="' + name + '"]');
+      if (!field) return '';
+
+      var raw = value(name);
+      var bad = !raw;
+
+      if (!bad && name === 'email') bad = !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(raw);
+
+      if (!bad && name === 'telephone') {
+        var valid = window.shokeruPhone && window.shokeruPhone.isValid ? window.shokeruPhone.isValid(field) : null;
+        bad = valid === null ? raw.replace(/\D/g, '').length < 10 : !valid;
+      }
+
+      return bad ? (field.getAttribute('data-required') || text.failed || '') : '';
     }
 
     function setLoading(on) {
@@ -182,7 +229,21 @@
 
     form.querySelectorAll('input, select, textarea').forEach(function (field) {
       field.addEventListener('input', function () {
-        holder(field).classList.remove('has-error');
+        unmarkField(field);
+      });
+    });
+
+    // валідація при виході з поля
+    ['firstname', 'lastname', 'telephone', 'email'].forEach(function (name) {
+      var field = form.querySelector('[name="' + name + '"]');
+      if (!field) return;
+
+      field.addEventListener('blur', function () {
+        setTimeout(function () {
+          if (!field.value.trim()) return;
+          var message = contactError(name);
+          if (message) markField(field, message); else unmarkField(field);
+        }, 0);
       });
     });
 
@@ -322,7 +383,12 @@
       shippingSelect.addEventListener('change', function () {
         var current = selectedShipping();
         var key = current ? current.code + current.receive : '';
-        if (key !== lastReceive) destField.value = '';
+        // місто лишається; відділення скидаємо лише коли воно вже не підходить до нового способу
+        // (інший перевізник / тип отримання) — і кажемо про це
+        if (key !== lastReceive && current && current.receive !== 'pickup' && destField.value.trim() !== '') {
+          destField.value = '';
+          if (text.destReset && typeof window.shokeruToast === 'function') window.shokeruToast(text.destReset, 'info');
+        }
         lastReceive = key;
       });
     }
@@ -358,30 +424,22 @@
       event.preventDefault();
       clearErrors();
 
-      // Contacts
-      var contacts = ['firstname', 'lastname', 'telephone', 'email'];
+      // Усі поля одразу: кожне помилкове підсвічується, фокус на першому
+      var problems = [];
 
-      for (var i = 0; i < contacts.length; i++) {
-        var field = form.querySelector('[name="' + contacts[i] + '"]');
-        if (!field) continue;
+      ['firstname', 'lastname', 'telephone', 'email'].forEach(function (name) {
+        var field = form.querySelector('[name="' + name + '"]');
+        var message = field ? contactError(name) : '';
+        if (message) problems.push({ field: field, message: message });
+      });
 
-        var raw = value(contacts[i]);
-        var bad = !raw;
-
-        if (!bad && contacts[i] === 'email') bad = !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(raw);
-        if (!bad && contacts[i] === 'telephone') bad = raw.replace(/\D/g, '').length < 10;
-
-        if (bad) { fail(field.getAttribute('data-required'), field); return; }
-      }
-
-      // Shipping
       var shipping = shippingRequired ? selectedShipping() : null;
       var city = '', address1 = '', address2 = '';
 
       if (shippingRequired) {
-        if (!shipping || !shipping.code) { fail(text.shipping, shippingSelect); return; }
-
-        if (shipping.receive === 'pickup') {
+        if (!shipping || !shipping.code) {
+          problems.push({ field: shippingSelect, message: text.shipping });
+        } else if (shipping.receive === 'pickup') {
           city = pickup.city;
           address1 = pickup.address;
         } else {
@@ -390,8 +448,8 @@
           city = cityField ? cityField.value.trim() : '';
           address1 = destField ? destField.value.trim() : '';
 
-          if (city.length < 2) { fail(text.city, cityField); return; }
-          if (address1.length < 3) { fail(type.error, destField); return; }
+          if (city.length < 2) problems.push({ field: cityField, message: text.city });
+          if (address1.length < 3) problems.push({ field: destField, message: type.error });
 
           // The chosen "carrier — receive as" option goes into address_2 for the manager.
           address2 = shipping.title;
@@ -400,7 +458,22 @@
 
       // Payment
       var payment = value('payment_method');
-      if (!payment) { fail(text.payment); return; }
+      if (!payment) problems.push({ field: null, message: text.payment });
+
+      if (problems.length) {
+        var firstField = null;
+
+        problems.forEach(function (p) {
+          if (p.field) {
+            markField(p.field, p.message);
+            if (!firstField) firstField = p.field;
+          }
+        });
+
+        fail(firstField ? '' : problems[0].message, firstField);
+        if (firstField && errorBox) errorBox.hidden = true;
+        return;
+      }
 
       var comment = value('comment');
 

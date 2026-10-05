@@ -131,6 +131,16 @@
       sync(input);
 
       return input ? input.value : '';
+    },
+    // true / false; null, якщо бібліотека ще не готова (тоді перевірку довіряємо бекенду)
+    isValid: function (input) {
+      var iti = input ? instances.get(input) : null;
+
+      if (!iti || !iti.isValidNumber) return null;
+
+      var ok = iti.isValidNumber();
+
+      return typeof ok === 'boolean' ? ok : null;
     }
   };
 })();

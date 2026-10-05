@@ -215,17 +215,36 @@ function handleResize() {
 handleResize();
 window.addEventListener('resize', handleResize);
 
+/* Блокування прокрутки сторінки, поки відкрите меню-бургер або попап входу (клас sk-lock на <html>, стилі в features.css) */
+function syncScrollLock() {
+    var locked = !!document.querySelector('.header__menu.active, .userPopup.active');
+    document.documentElement.classList.toggle('sk-lock', locked);
+}
+window.shokeruSyncLock = syncScrollLock;
+
 document.addEventListener('DOMContentLoaded', function() {
     const langSelectedAll = document.querySelectorAll('.header__lang-selected');
     langSelectedAll.forEach(langSelected => {
         const langBlock = langSelected.closest('.header__lang');
+        langSelected.setAttribute('aria-expanded', 'false');
         langSelected.addEventListener('click', function(e) {
             e.preventDefault();
             langBlock.classList.toggle('active');
+            langSelected.setAttribute('aria-expanded', langBlock.classList.contains('active') ? 'true' : 'false');
         });
+        const closeLang = function () {
+            langBlock.classList.remove('active');
+            langSelected.setAttribute('aria-expanded', 'false');
+        };
         document.addEventListener('click', function(e) {
             if (!langBlock.contains(e.target)) {
-                langBlock.classList.remove('active');
+                closeLang();
+            }
+        });
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && langBlock.classList.contains('active')) {
+                closeLang();
+                langSelected.focus();
             }
         });
     });
@@ -233,33 +252,98 @@ document.addEventListener('DOMContentLoaded', function() {
     const openMenuBtn = document.querySelector('.menu-open');
     const closeMenuBtn = document.querySelector('.menu-close');
     const headerMenu = document.querySelector('.header__menu');
-    openMenuBtn.addEventListener('click', () => {
-        headerMenu.classList.add('active');
+    // закрита панель не має потрапляти у Tab-порядок і до скрінрідера: inert + aria-hidden
+    function setMenu(open) {
+        headerMenu.classList.toggle('active', open);
+        headerMenu.setAttribute('aria-hidden', open ? 'false' : 'true');
+        if (open) { headerMenu.removeAttribute('inert'); } else { headerMenu.setAttribute('inert', ''); }
+        openMenuBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+        syncScrollLock();
+        if (open) {
+            setTimeout(function () { closeMenuBtn.focus(); }, 50);
+        } else if (document.activeElement && headerMenu.contains(document.activeElement)) {
+            openMenuBtn.focus();
+        }
+    }
+    window.shokeruCloseMenu = function () { if (headerMenu.classList.contains('active')) setMenu(false); };
+    openMenuBtn.addEventListener('click', () => setMenu(true));
+    closeMenuBtn.addEventListener('click', () => setMenu(false));
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && headerMenu.classList.contains('active')) setMenu(false);
     });
-    closeMenuBtn.addEventListener('click', () => {
-        headerMenu.classList.remove('active');
+    // посилання меню на цій самій сторінці (якір) теж закривають панель
+    headerMenu.addEventListener('click', (e) => {
+        const link = e.target.closest('a[href]');
+        if (link && link.getAttribute('href').charAt(0) === '#') setMenu(false);
     });
 
     const loginOpen = document.querySelectorAll('.header__login');
     const loginClose = document.querySelector('.userPopup__close');
     const userPopup = document.querySelector('.userPopup');
+    let popupReturnFocus = null;
+
+    // попап входу: role=dialog, inert поки закритий, Esc, фокус-пастка, повернення фокуса, блок прокрутки
+    function popupFocusables() {
+        return Array.prototype.slice.call(userPopup.querySelectorAll('a[href], button, input, select, textarea, [tabindex]:not([tabindex="-1"])')).filter(function (el) {
+            return !el.disabled && !el.hidden && el.type !== 'hidden' && el.getClientRects().length > 0 && !el.closest('[hidden]');
+        });
+    }
+    function openPopup() {
+        popupReturnFocus = document.activeElement;
+        userPopup.classList.add('active');
+        userPopup.removeAttribute('inert');
+        userPopup.setAttribute('aria-hidden', 'false');
+        syncScrollLock();
+        setTimeout(function () {
+            const first = userPopup.querySelector('.userPopup__result.active input:not([type="hidden"])') || userPopup.querySelector('.userPopup__close');
+            if (first) first.focus();
+        }, 80);
+    }
+    function closePopup() {
+        const was = userPopup.classList.contains('active');
+        userPopup.classList.remove('active');
+        userPopup.setAttribute('inert', '');
+        userPopup.setAttribute('aria-hidden', 'true');
+        syncScrollLock();
+        if (was && popupReturnFocus && popupReturnFocus.focus && document.contains(popupReturnFocus)) popupReturnFocus.focus();
+        popupReturnFocus = null;
+    }
+    window.shokeruPopup = { open: openPopup, close: closePopup };
+    document.addEventListener('keydown', (e) => {
+        if (!userPopup.classList.contains('active')) return;
+        if (document.querySelector('.sk-info-modal.is-open')) return;
+        if (e.key === 'Escape') {
+            // Esc спершу закриває підказку країн телефону, якщо вона відкрита
+            if (document.querySelector('.iti__dropdown-content:not(.iti__hide)')) return;
+            e.preventDefault();
+            closePopup();
+        } else if (e.key === 'Tab') {
+            const list = popupFocusables();
+            if (!list.length) return;
+            const first = list[0];
+            const last = list[list.length - 1];
+            if (e.shiftKey && (document.activeElement === first || !userPopup.contains(document.activeElement))) { e.preventDefault(); last.focus(); }
+            else if (!e.shiftKey && (document.activeElement === last || !userPopup.contains(document.activeElement))) { e.preventDefault(); first.focus(); }
+        }
+    });
     loginOpen.forEach(element => {
         element.addEventListener('click', () => {
-            userPopup.classList.add('active');
-            setTimeout(() => {
-                headerMenu.classList.remove('active');
-            }, 300);
+            const fromMenu = headerMenu.classList.contains('active');
+            if (fromMenu) {
+                window.shokeruCloseMenu();
+                popupReturnFocus = null;
+            }
+            openPopup();
+            if (fromMenu) popupReturnFocus = openMenuBtn;
         });
     });
-    loginClose.addEventListener('click', () => {
-        userPopup.classList.remove('active');
-    });
+    loginClose.addEventListener('click', closePopup);
     const forgotPasswordLink = document.querySelector('.userPopup__form-forgot');
     const passwordRecoverySection = document.querySelector('section[data-userData="password-recovery"]');
     if (forgotPasswordLink && passwordRecoverySection) {
         forgotPasswordLink.addEventListener('click', function(event) {
             event.preventDefault();
-            userPopup.classList.remove('active');
+            closePopup();
             passwordRecoverySection.classList.add('active');
         });
     }
@@ -312,49 +396,90 @@ document.addEventListener('DOMContentLoaded', function() {
     const searchBtn = document.querySelector('.header__search-open');
     const searchBlock = document.querySelector('.header__search');
     if (searchBtn && searchBlock) {
+        const searchInput = searchBlock.querySelector('.header__search-input');
+        const setSearch = function (open) {
+            searchBlock.classList.toggle('active', open);
+            searchBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+            // фокус у поле одразу в обробнику кліку — інакше iOS не покаже клавіатуру
+            if (open && searchInput) searchInput.focus();
+        };
         searchBtn.addEventListener('click', function (e) {
             e.stopPropagation();
-            searchBlock.classList.add('active');
+            setSearch(!searchBlock.classList.contains('active'));
         });
         searchBlock.addEventListener('click', function (e) {
             e.stopPropagation();
         });
-        document.addEventListener('click', function () {
-            searchBlock.classList.remove('active');
+        // підказки лежать поза формою: клік по них не має ховати поле
+        const searchWrap = document.getElementById('smart-search');
+        document.addEventListener('click', function (e) {
+            if (!searchWrap || !searchWrap.contains(e.target)) setSearch(false);
+        });
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && searchBlock.classList.contains('active') && window.innerWidth < 1000) {
+                setSearch(false);
+                searchBtn.focus();
+            }
         });
     }
 
+    // кошик-шухляда: вміст #cart перезавантажується ajax-ом (#cart > *), тому обробники делеговані й шукають вузли наживо
     const busket = document.querySelector('.busket');
     const busketOpenButton = document.querySelector('.cart-open');
-    const busketCloseButton = document.querySelector('.busket__close');
-    const busketInner = document.querySelector('.busket__inner');
-    if (busketOpenButton) {
-        busketOpenButton.addEventListener('click', () => {
-            if (busket) {
-                busket.classList.toggle('active');
-                busketOpenButton.classList.toggle('opened');
-            }
-        });
-        busketCloseButton.addEventListener('click', () => {
-            if (busket) {
-                busket.classList.remove('active');
-                busketOpenButton.classList.remove('opened');
-            }
-        });
-    }
-    document.addEventListener('click', (event) => {
-        if (busket && busket.classList.contains('active')) {
-            if (!busketInner.contains(event.target) && event.target !== busketOpenButton) {
-                busket.classList.remove('active');
-                busketOpenButton.classList.remove('opened');
-            }
+    function setBusket(open) {
+        if (!busket) return;
+        busket.classList.toggle('active', open);
+        if (busketOpenButton) {
+            busketOpenButton.classList.toggle('opened', open);
+            busketOpenButton.setAttribute('aria-expanded', open ? 'true' : 'false');
         }
-    });
-    if (busketInner) {
-        busketInner.addEventListener('click', (event) => {
+    }
+    if (busket && busketOpenButton) {
+        busketOpenButton.addEventListener('click', (event) => {
             event.stopPropagation();
+            setBusket(!busket.classList.contains('active'));
+        });
+        document.addEventListener('click', (event) => {
+            if (!busket.classList.contains('active')) return;
+            if (event.target.closest('.busket__close')) { setBusket(false); return; }
+            // кнопки +/− і «видалити» перемальовують шухляду — клік по вже відʼєднаному вузлу не вважаємо зовнішнім
+            if (!event.target.isConnected) return;
+            if (!event.target.closest('.busket__inner') && !event.target.closest('.cart-open') && !event.target.closest('.sk-toast')) setBusket(false);
+        });
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && busket.classList.contains('active')) {
+                setBusket(false);
+                busketOpenButton.focus();
+            }
+        });
+        // кількість у шухляді: − / + (мінімум 1, видалення — окремою кнопкою)
+        busket.addEventListener('click', (event) => {
+            const btn = event.target.closest('.busket__qty-btn');
+            if (!btn || btn.disabled || typeof cart === 'undefined') return;
+            const box = btn.closest('[data-cart-qty]');
+            const next = parseInt(box.dataset.qty, 10) + parseInt(btn.dataset.qtyStep, 10);
+            if (next < 1) return;
+            box.querySelectorAll('.busket__qty-btn').forEach(b => { b.disabled = true; });
+            cart.update(box.dataset.cartId, next);
         });
     }
+
+    // блок прокрутки й фокус-менеджмент, коли панелі відкривають інші скрипти (common.js openThemeCart, features.js)
+    if ('MutationObserver' in window) {
+        const watch = new MutationObserver(function (list) {
+            syncScrollLock();
+            list.forEach(function (m) {
+                if (m.target === busket && busket.classList.contains('active') && !busket.contains(document.activeElement)) {
+                    const close = busket.querySelector('.busket__close');
+                    if (close && close.offsetParent !== null) close.focus();
+                }
+            });
+        });
+        [document.querySelector('.header__menu'), document.querySelector('.userPopup'), busket].forEach(function (el) {
+            if (el) watch.observe(el, { attributes: true, attributeFilter: ['class'] });
+        });
+    }
+    syncScrollLock();
 });
 
 
@@ -498,13 +623,29 @@ window.addEventListener('resize', () => {
 
 
 
+// FAQ-акордеон (обробник один — у модулі faq.twig скрипта нема, інакше подвійний клік закривав би відкриту відповідь)
 document.querySelectorAll('.faq__item-title').forEach(title => {
-    title.addEventListener('click', () => {
+    title.setAttribute('role', 'button');
+    title.setAttribute('tabindex', '0');
+    title.setAttribute('aria-expanded', 'false');
+    const toggle = () => {
         const item = title.closest('.faq__item');
         const isActive = item.classList.contains('active');
-        document.querySelectorAll('.faq__item').forEach(i => i.classList.remove('active'));
+        document.querySelectorAll('.faq__item').forEach(i => {
+            i.classList.remove('active');
+            const t = i.querySelector('.faq__item-title');
+            if (t) t.setAttribute('aria-expanded', 'false');
+        });
         if (!isActive) {
             item.classList.add('active');
+            title.setAttribute('aria-expanded', 'true');
+        }
+    };
+    title.addEventListener('click', toggle);
+    title.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            toggle();
         }
     });
 });

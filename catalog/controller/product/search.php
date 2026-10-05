@@ -64,7 +64,7 @@ class ControllerProductSearch extends Controller {
 		if (isset($this->request->get['limit']) && (int)$this->request->get['limit'] > 0) {
 			$limit = (int)$this->request->get['limit'];
 		} else {
-			$limit = $this->config->get('theme_' . $this->config->get('config_theme') . '_product_limit');
+			$limit = 12;
 		}
 
 		if (isset($this->request->get['search'])) {
@@ -194,7 +194,22 @@ class ControllerProductSearch extends Controller {
 
 			$results = $this->model_catalog_product->getProducts($filter_data);
 
-			$data['text_results'] = sprintf($this->language->get('text_search'), $product_total);
+			$n = (int)$product_total;
+			$lang_code = isset($this->session->data['language']) ? $this->session->data['language'] : $this->config->get('config_language');
+			if ($lang_code == 'en-gb') {
+				$plural = ($n == 1) ? 'text_found_one' : 'text_found_many';
+			} else {
+				$m10 = $n % 10;
+				$m100 = $n % 100;
+				if ($m10 == 1 && $m100 != 11) {
+					$plural = 'text_found_one';
+				} elseif ($m10 >= 2 && $m10 <= 4 && ($m100 < 12 || $m100 > 14)) {
+					$plural = 'text_found_few';
+				} else {
+					$plural = 'text_found_many';
+				}
+			}
+			$data['text_results'] = sprintf($this->language->get($plural), '<strong>' . $n . '</strong>');
 
 			foreach ($results as $result) {
 				if ($result['image']) {

@@ -46,7 +46,9 @@ class ControllerProductSpecial extends Controller {
 			}
 		}
 
-		$this->document->setTitle($this->language->get('heading_title'));
+		$this->document->setTitle($this->language->get('heading_title') . ($page > 1 ? ' — ' . sprintf($this->language->get('text_page_n'), $page) : ''));
+		$this->document->setDescription($this->language->get('text_special_meta_description'));
+		$data['heading_title'] = $this->language->get('heading_title');
 
 		$data['breadcrumbs'] = array();
 
@@ -377,7 +379,7 @@ class ControllerProductSpecial extends Controller {
 
 		$pagination_url = $this->url->link('product/special', $url . '&page={page}');
 		$pagination_url = str_replace(array('%7Bpage%7D', '%7bpage%7d'), '{page}', $pagination_url);
-		$first_page_url = str_replace(array('&amp;page={page}', '?page={page}', '&page={page}'), '', $pagination_url);
+		$first_page_url = str_replace(array('/page-{page}', '&amp;page={page}', '?page={page}', '&page={page}'), '', $pagination_url);
 
 		$tp = (int)$data['total_pages'];
 		$show = array();

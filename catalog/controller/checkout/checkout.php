@@ -76,7 +76,7 @@ class ControllerCheckoutCheckout extends Controller {
 			'co_text_login_hint', 'co_text_login_link', 'co_text_logged_as', 'co_text_no_shipping', 'co_text_no_payment',
 			'co_button_place_order', 'co_text_consent', 'co_text_back_to_cart', 'co_text_sending',
 			'co_error_city', 'co_text_city_first', 'co_text_not_found', 'co_error_branch', 'co_error_postomat', 'co_error_address', 'co_error_firstname',
-			'co_error_lastname', 'co_error_telephone', 'co_error_email', 'co_error_shipping', 'co_error_payment', 'co_error_failed'
+			'co_error_lastname', 'co_error_telephone', 'co_error_email', 'co_error_shipping', 'co_error_payment', 'co_error_failed', 'co_text_dest_reset'
 		);
 
 		foreach ($keys as $key) {

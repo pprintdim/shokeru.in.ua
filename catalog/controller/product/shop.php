@@ -43,6 +43,11 @@ class ControllerProductShop extends Controller {
             'href' => $this->url->link('product/shop')
         ];
 
+        $page_suffix = $page > 1 ? ' — ' . sprintf($this->language->get('text_page_n'), $page) : '';
+        $this->document->setTitle($this->language->get('text_shop_meta_title') . $page_suffix);
+        $this->document->setDescription($this->language->get('text_shop_meta_description'));
+        $data['heading_title'] = $this->language->get('text_shop_heading');
+
         // ======================
         // Отримання товарів
         // ======================
@@ -145,7 +150,7 @@ class ControllerProductShop extends Controller {
 
         $pagination_url = $this->url->link('product/shop', $url . '&page={page}');
         $pagination_url = str_replace(['%7Bpage%7D', '%7bpage%7d'], '{page}', $pagination_url);
-        $first_page_url = str_replace(['&amp;page={page}', '?page={page}', '&page={page}'], '', $pagination_url);
+        $first_page_url = str_replace(['/page-{page}', '&amp;page={page}', '?page={page}', '&page={page}'], '', $pagination_url);
 
         $tp = (int)$data['total_pages'];
         $show = [];

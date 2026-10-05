@@ -201,7 +201,7 @@ class ControllerProductLatest extends Controller {
 
         $pagination_url = $this->url->link('product/latest', $url . '&page={page}');
         $pagination_url = str_replace(['%7Bpage%7D', '%7bpage%7d'], '{page}', $pagination_url);
-        $first_page_url = str_replace(['&amp;page={page}', '?page={page}', '&page={page}'], '', $pagination_url);
+        $first_page_url = str_replace(['/page-{page}', '&amp;page={page}', '?page={page}', '&page={page}'], '', $pagination_url);
 
         $tp = (int)$data['total_pages'];
         $show = [];

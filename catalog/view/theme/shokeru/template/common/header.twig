@@ -60,6 +60,7 @@
 </script>
 </head>
 <body class="body" data-currency="{{ currency_code }}" data-wishlist-products="{{ wishlist_product_ids|json_encode|e('html_attr') }}" data-wishlist-url="{{ wishlist }}" data-wishlist-total="{{ wishlist_total }}">
+    <a class="skip-link" href="#main">{{ text_skip }}</a>
     <div class="page-progress" id="page-progress" aria-hidden="true"></div>
     <header class="header">
         <div class="container">
@@ -77,19 +78,19 @@
                         <nav class="header__top-menu">
                             <ul>
                                 <li>
-                                    <a href="{{ shop }}">{{ text_catalog ?: 'Каталог'}}</a>
+                                    <a href="{{ shop }}">{{ text_catalog }}</a>
                                 </li>
                                 <li>
-                                    <a href="{{ latest }}">{{ text_latest ?: 'Новинки'}}</a>
+                                    <a href="{{ latest }}">{{ text_latest }}</a>
                                 </li>
                                 {# На телефоні цей рядок показується в бургері, а там
                                    «Блог» уже є в основному меню — другий раз не
                                    виводимо (ховається класом у style.css). #}
                                 <li class="header__top-menu-blog">
-                                    <a href="{{ blog }}">{{ text_nav_blog ?: 'Блог'}}</a>
+                                    <a href="{{ blog }}">{{ text_nav_blog }}</a>
                                 </li>
                                 <li>
-                                    <a class="header__menu-sales" href="{{ special }}">{{ 'Sales'}}</a>
+                                    <a class="header__menu-sales" href="{{ special }}">{{ text_sales_menu }}</a>
                                 </li>
                                 {% for info in informations_top %}
                                 <li>
@@ -103,8 +104,8 @@
                             <div class="header__switch">{{ language }}{{ currency }}</div>
                             <span class="header__box-line"></span>
                             <div class="header__user">
-                                <a class="header__favourite" href="{{ wishlist }}"><span>{{ wishlist_total }}</span></a>
-                                <button class="header__cart cart-open"><span>{{ cart_total }}</span></button>
+                                <a class="header__favourite" href="{{ wishlist }}" aria-label="{{ text_wishlist|e('html_attr') }}"><span>{{ wishlist_total }}</span></a>
+                                <button type="button" class="header__cart cart-open" aria-label="{{ text_shopping_cart|e('html_attr') }}" aria-haspopup="dialog"><span>{{ cart_total }}</span></button>
                             </div>
                             <span class="header__box-line"></span>
                             {% if logged %}
@@ -113,8 +114,8 @@
                                 <button class="header__login">{{ text_login }}</button>
                             {% endif %}
                             
-                            <button class="header__search-open"></button>
-                            <button class="header__open menu-open">
+                            <button type="button" class="header__search-open" aria-label="{{ text_open_search|e('html_attr') }}" aria-expanded="false" aria-controls="search-form"></button>
+                            <button type="button" class="header__open menu-open" aria-label="{{ text_open_menu|e('html_attr') }}" aria-expanded="false" aria-controls="site-menu" aria-haspopup="dialog">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40" fill="none">
                                     <path d="M20 30H34V26H20V30ZM6 10V14H20V10H6ZM6 22H34V18H6V22Z" fill="#C5FF24"/>
                                 </svg>
@@ -124,7 +125,7 @@
                     {{ search }}
                 </div>
             </div>
-            <div class="header__menu">
+            <div class="header__menu" id="site-menu" role="dialog" aria-modal="true" aria-label="{{ text_open_menu|e('html_attr') }}" aria-hidden="true" inert>
                 <div class="container">
                     <div class="header__menu-inner">
                         <div class="header__menu-top">
@@ -137,7 +138,7 @@
                                 {% endif %}
                             </a>
                             <button class="header__login">{{ text_login }}</button>
-                            <button class="header__menu-close menu-close">{{ text_close }}</button>
+                            <button type="button" class="header__menu-close menu-close" aria-label="{{ text_close|e('html_attr') }}">{{ text_close }}</button>
                         </div>
                         <div class="header__menu-content">
                             <div class="header__menu-image">
@@ -160,12 +161,19 @@
                                         <a href="{{ customers }}">{{ text_menu_customers }}</a>
                                     </li>
                                     <li>
-                                        <a href="{{ blog }}">{{ text_nav_blog ?: 'Блог' }}</a>
+                                        <a href="{{ blog }}">{{ text_nav_blog }}</a>
                                     </li>
                                     <li>
                                         <a href="{{ contact }}">{{ text_menu_contact }}</a>
                                     </li>
                                 </ul>
+                                {% if menu_categories %}
+                                <ul class="header__menu-cats" aria-label="{{ text_catalog|e('html_attr') }}">
+                                    {% for category in menu_categories %}
+                                    <li><a href="{{ category.href }}">{{ category.name }}</a></li>
+                                    {% endfor %}
+                                </ul>
+                                {% endif %}
                             </nav>
                             <div class="header__menu-bottom">
                                 <div class="header__menu-block">
@@ -192,19 +200,19 @@
                                     </div>
                                     <a class="header__menu-link" href="mailto:{{ email }}">{{ email }}</a>
                                 </div>
-                                <div class="header__menu-social">
-                                    <a href="#" target="_blank">
+                                {% if instagram or facebook %}<div class="header__menu-social">
+                                    {% if instagram %}<a href="{{ instagram }}" target="_blank" rel="noopener" aria-label="Instagram">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 25 25" fill="none">
                                             <path d="M18.2327 0H6.76727C3.03574 0 0 3.03574 0 6.76727V18.2329C0 21.9643 3.03574 25 6.76727 25H18.2329C21.9643 25 25 21.9643 25 18.2329V6.76727C25 3.03574 21.9643 0 18.2327 0ZM12.5 19.3357C8.7307 19.3357 5.66425 16.2693 5.66425 12.5C5.66425 8.7307 8.7307 5.66425 12.5 5.66425C16.2693 5.66425 19.3357 8.7307 19.3357 12.5C19.3357 16.2693 16.2693 19.3357 12.5 19.3357ZM19.4992 7.27634C18.3853 7.27634 17.4793 6.37035 17.4793 5.25646C17.4793 4.14257 18.3853 3.23639 19.4992 3.23639C20.6131 3.23639 21.5193 4.14257 21.5193 5.25646C21.5193 6.37035 20.6131 7.27634 19.4992 7.27634Z" fill="#D2D2D2"/>
                                             <path d="M12.5 7C9.46743 7 7 9.46724 7 12.5C7 15.5326 9.46743 18 12.5 18C15.5328 18 18 15.5326 18 12.5C18 9.46724 15.5328 7 12.5 7Z" fill="#D2D2D2"/>
                                         </svg>
-                                    </a>
-                                    <a href="#" target="_blank">
+                                    </a>{% endif %}
+                                    {% if facebook %}<a href="{{ facebook }}" target="_blank" rel="noopener" aria-label="Facebook">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 25 25" fill="none">
                                             <path d="M21.3379 0H3.66211C1.64299 0 0 1.64299 0 3.66211V21.3379C0 23.357 1.64299 25 3.66211 25H11.0352V16.1621H8.10547V11.7676H11.0352V8.78906C11.0352 6.36578 13.0064 4.39453 15.4297 4.39453H19.873V8.78906H15.4297V11.7676H19.873L19.1406 16.1621H15.4297V25H21.3379C23.357 25 25 23.357 25 21.3379V3.66211C25 1.64299 23.357 0 21.3379 0Z" fill="#D2D2D2"/>
                                         </svg>
-                                    </a>
-                                </div>
+                                    </a>{% endif %}
+                                </div>{% endif %}
                                 <div class="header__menu-block header__menu-switch">
                                     <div class="header__switch">{{ language }}{{ currency }}</div>
                                 </div>
@@ -215,4 +223,4 @@
             </div>
         </div>
     </header>
-    <main class="main">
+    <main class="main" id="main">

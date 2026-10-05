@@ -22,6 +22,19 @@ class ControllerExtensionModuleSlideshow extends Controller {
         return nl2br($text);
     }
 
+    // Порожнє посилання, «#» і «/» (головна) → каталог: «Детальніше» не має вести на ту саму сторінку
+    private function bannerLink($link) {
+        $link = trim((string)$link);
+        $base = rtrim((string)$this->config->get('config_url'), '/') . '/';
+        $base_ssl = rtrim((string)$this->config->get('config_ssl'), '/') . '/';
+
+        if ($link === '' || $link === '#' || $link === '/' || $link === $base || $link === $base_ssl || $link === rtrim($base, '/') || $link === rtrim($base_ssl, '/')) {
+            return $this->url->link('product/shop');
+        }
+
+        return $link;
+    }
+
     // Чи має MP4 звукову доріжку: у moov шукаємо hdlr із типом «soun». Результат кешується за шляхом і mtime.
     private function hasAudio($src) {
         $src = (string)$src;
@@ -56,6 +69,10 @@ class ControllerExtensionModuleSlideshow extends Controller {
         $this->load->model('design/banner');
         $this->load->model('tool/image');
 
+        // один H1 на сторінку: на головній заголовок банера — H1, на каталозі/акціях — h2 (там свій H1)
+        $route = isset($this->request->get['route']) ? $this->request->get['route'] : 'common/home';
+        $data['hero_tag'] = ($route === 'common/home' || $route === '') ? 'h1' : 'h2';
+
         $data['banners'] = [];
 
         if (empty($setting['banner_id'])) {
@@ -85,7 +102,7 @@ class ControllerExtensionModuleSlideshow extends Controller {
 
                 $data['banners'][] = [
                     'title'        => $this->parseBannerText($result['title']),
-                    'link'         => $result['link'],
+                    'link'         => $this->bannerLink($result['link']),
                     'description'  => $this->parseBannerText($result['description']),
                     'is_video'     => true,
                     'is_video_mob' => true,
@@ -110,7 +127,7 @@ class ControllerExtensionModuleSlideshow extends Controller {
 
                 $data['banners'][] = [
                     'title'        => $this->parseBannerText($result['title']),
-                    'link'         => $result['link'],
+                    'link'         => $this->bannerLink($result['link']),
                     'description'  => $this->parseBannerText($result['description']),
                     'is_video'     => false,
                     'is_video_mob' => false,

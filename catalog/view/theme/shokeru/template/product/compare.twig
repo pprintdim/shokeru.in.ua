@@ -1,0 +1,77 @@
+{{ header }}
+    <section class="pageInfo">
+        <div class="container">
+            <ul class="breadcrumbs">
+                {% for breadcrumb in breadcrumbs %}
+                    <li><a href="{{ breadcrumb.href }}"{% if loop.last %} class="active"{% endif %}>{{ breadcrumb.text }}</a></li>
+                {% endfor %}
+            </ul>
+            <div class="pageInfo__inner">
+                <h1 class="pageInfo__title main-title">{{ heading_title }}</h1>
+            </div>
+        </div>
+    </section>
+
+    <section class="compare">
+        <div class="container">
+            {% if success %}<div class="alert alert-success">{{ success }}</div>{% endif %}
+            {% if products %}
+            <div class="compare__scroll">
+                <table class="compare__table">
+                    <tbody>
+                        <tr>
+                            <th scope="row">{{ text_name }}</th>
+                            {% for product in products %}
+                            <td>
+                                <a class="compare__thumb" href="{{ product.href }}">{% if product.thumb %}<img src="{{ product.thumb }}" alt="{{ product.name }}" loading="lazy">{% endif %}</a>
+                                <a class="compare__name" href="{{ product.href }}">{{ product.name }}</a>
+                            </td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <th scope="row">{{ text_price }}</th>
+                            {% for product in products %}
+                            <td>{% if product.special %}<s>{{ product.price }}</s> <strong>{{ product.special }}</strong>{% else %}<strong>{{ product.price }}</strong>{% endif %}</td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <th scope="row">{{ text_manufacturer }}</th>
+                            {% for product in products %}<td>{{ product.manufacturer }}</td>{% endfor %}
+                        </tr>
+                        <tr>
+                            <th scope="row">{{ text_model }}</th>
+                            {% for product in products %}<td>{{ product.model }}</td>{% endfor %}
+                        </tr>
+                        <tr>
+                            <th scope="row">{{ text_availability }}</th>
+                            {% for product in products %}<td>{{ product.availability }}</td>{% endfor %}
+                        </tr>
+                        {% for group in attribute_groups %}
+                        <tr class="compare__group"><th colspan="{{ products|length + 1 }}">{{ group.name }}</th></tr>
+                        {% for key, attribute in group.attribute %}
+                        <tr>
+                            <th scope="row">{{ attribute.name }}</th>
+                            {% for product in products %}<td>{{ product.attribute[key] ?? '—' }}</td>{% endfor %}
+                        </tr>
+                        {% endfor %}
+                        {% endfor %}
+                        <tr>
+                            <th scope="row"></th>
+                            {% for product in products %}
+                            <td class="compare__actions">
+                                <button class="product__item-btn btn" type="button" data-product-id="{{ product.product_id }}" data-quantity="{{ product.minimum|default(1) }}" data-added-text="{{ text_added }}">{{ button_cart }}</button>
+                                <a class="compare__remove" href="{{ product.remove }}">{{ text_compare_remove }}</a>
+                            </td>
+                            {% endfor %}
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="compare__empty">{{ text_empty }}</p>
+            <a class="btn-4 compare__back" href="{{ continue }}">{{ text_compare_back }}</a>
+            {% endif %}
+        </div>
+    </section>
+{{ content_bottom }}
+{{ footer }}

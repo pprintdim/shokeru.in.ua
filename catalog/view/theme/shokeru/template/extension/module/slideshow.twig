@@ -68,9 +68,9 @@
             {% endif %}
 
             {% if banner.title %}
-              <h1 class="hero__slide-title title">
+              <{{ hero_tag }} class="hero__slide-title title">
                 {{ banner.title }}
-              </h1>
+              </{{ hero_tag }}>
             {% endif %}
 
             {% if banner.description %}

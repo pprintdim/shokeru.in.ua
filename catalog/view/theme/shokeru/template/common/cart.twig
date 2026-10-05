@@ -1,8 +1,8 @@
-<section id="cart" class="busket" data-cart-products="{{ cart_product_ids|json_encode|e('html_attr') }}">
+<section id="cart" class="busket" role="dialog" aria-modal="true" aria-label="{{ text_shopping_cart|e('html_attr') }}" data-cart-products="{{ cart_product_ids|json_encode|e('html_attr') }}">
     <div class="busket__inner">
         <div class="busket__top">
             <h2 class="busket__title">{{ text_items }}</h2>
-            <button class="busket__close">
+            <button type="button" class="busket__close" aria-label="{{ text_close|e('html_attr') }}">
                 <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40" fill="none">
                     <rect x="9" y="28.7988" width="28" height="4" transform="rotate(-45 9 28.7988)" fill="#202222"/>
                     <rect x="28.7988" y="31.627" width="9" height="4" transform="rotate(-135 28.7988 31.627)" fill="#202222"/>
@@ -30,7 +30,12 @@
                                 {% endif %}
                                 {{ product.special ?: product.price }}
                             </p>
-                            <button onclick="cart.remove({{ product.cart_id }});" class="busket__item-delete"></button>
+                            <div class="busket__qty" data-cart-qty data-cart-id="{{ product.cart_id }}" data-qty="{{ product.quantity }}" role="group" aria-label="{{ text_quantity|e('html_attr') }}">
+                                <button type="button" class="busket__qty-btn" data-qty-step="-1" aria-label="{{ text_qty_minus|e('html_attr') }}"{% if product.quantity <= 1 %} disabled{% endif %}>&minus;</button>
+                                <span class="busket__qty-val" aria-live="polite">{{ product.quantity }}</span>
+                                <button type="button" class="busket__qty-btn" data-qty-step="1" aria-label="{{ text_qty_plus|e('html_attr') }}">+</button>
+                            </div>
+                            <button type="button" onclick="cart.remove({{ product.cart_id }});" class="busket__item-delete" aria-label="{{ text_remove|e('html_attr') }}: {{ product.name|e('html_attr') }}"></button>
                         </div>
                     </div>
                 {% endfor %}

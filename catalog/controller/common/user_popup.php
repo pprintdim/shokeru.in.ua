@@ -68,6 +68,8 @@ class ControllerCommonUserPopup extends Controller {
             : '';
 
         $data['email'] = $this->config->get('config_email');
+		$data['instagram'] = $this->config->get('config_instagram');
+		$data['facebook'] = $this->config->get('config_facebook');
         $data['phones'] = [];
 
         $phones = [

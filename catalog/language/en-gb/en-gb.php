@@ -301,3 +301,28 @@ $_['text_hero_note'] = 'Original stun guns with warranty — shipping across Ukr
 $_['text_nav_blog'] = 'Blog';
 
 $_['button_quick_order'] = 'Buy in one click';
+
+// Catalog/shop (SEO + UX)
+$_['text_shop_heading'] = 'Stun gun catalog';
+$_['text_shop_meta_title'] = 'Stun gun catalog — buy in Ukraine';
+$_['text_shop_meta_description'] = 'Shokeru stun gun catalog: flashlight, classic and powerful models. Delivery across Ukraine, warranty, consultation.';
+$_['text_special_meta_description'] = 'Shokeru stun gun deals: great prices and discounts on popular models.';
+$_['text_page_n'] = 'Page %s';
+$_['text_found_one'] = '%s product found';
+$_['text_found_few'] = '%s products found';
+$_['text_found_many'] = '%s products found';
+
+// Product page UX
+$_['text_gallery_prev'] = 'Previous photo';
+$_['text_gallery_next'] = 'Next photo';
+$_['text_qty_minus'] = 'Decrease quantity';
+$_['text_qty_plus'] = 'Increase quantity';
+$_['text_specs'] = 'Specifications';
+$_['text_gallery_counter'] = 'Photo %s of %s';
+$_['text_qty_label'] = 'Quantity';
+
+// Compare
+$_['text_compare_add'] = 'Add to compare';
+$_['text_compare_title'] = 'Compare';
+$_['text_compare_remove'] = 'Remove from compare';
+$_['text_compare_back'] = 'Back to catalog';

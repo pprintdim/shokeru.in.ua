@@ -20,3 +20,7 @@ $_['text_menu_about']     = 'About Us';
 $_['text_menu_shop']      = 'Shop';
 $_['text_menu_customers'] = 'Customer Info';
 $_['text_menu_contact']   = 'Contacts';
+$_['text_skip'] = 'Skip to main content';
+$_['text_open_menu'] = 'Open menu';
+$_['text_open_search'] = 'Open search';
+$_['text_sales_menu'] = 'Sales';

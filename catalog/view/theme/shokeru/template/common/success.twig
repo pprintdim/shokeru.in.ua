@@ -1,17 +1,94 @@
 {{ header }}
-    <section class="thanks">
+    {% if breadcrumbs %}
+    <div class="container">
+        <ul class="breadcrumbs">{% for breadcrumb in breadcrumbs %}<li><a href="{{ breadcrumb.href }}"{% if loop.last %} class="active" aria-current="page"{% endif %}>{{ breadcrumb.text }}</a></li>{% endfor %}</ul>
+    </div>
+    {% endif %}
+    <section class="thanks thanks--order">
         <div class="container">
             <div class="thanks__inner">
-                <h2 class="thanks__title">
-                    {{ text_order_accepted }}
-                    {% if order_id %}<br>{{ text_order_number }} №{{ order_id }}{% endif %}
-                </h2>
-                <a class="thanks__btn btn" href="{{ continue }}">
-                    {{ button_home }}
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-                        <path fill-rule="evenodd" clip-rule="evenodd" d="M4.66602 12.0002L8.66602 8.00016L4.66602 4.00016L5.99935 2.66683L11.3327 8.00016L5.99935 13.3335L4.66602 12.0002Z" fill="#202222"/>
-                    </svg>
-                </a>
+                <div class="thanks__head">
+                    <h1 class="thanks__title">{{ text_order_accepted }}</h1>
+                    {% if order.number is defined and order.number %}
+                    <p class="thanks__number"><span>{{ text_order_number }}</span> <strong>№{{ order.number }}</strong></p>
+                    {% elseif order_id %}
+                    <p class="thanks__number"><span>{{ text_order_number }}</span> <strong>№{{ order_id }}</strong></p>
+                    {% endif %}
+                    {% if order.email is defined and order.email %}
+                    <p class="thanks__confirm">{{ text_confirm_sent|format(order.email) }}</p>
+                    {% endif %}
+                </div>
+
+                {% if order is defined and order and order.number is defined %}
+                <section class="thanks__block" aria-labelledby="thanks-details">
+                    <h2 class="thanks__sub" id="thanks-details">{{ text_order_details }}</h2>
+                    <dl class="thanks__facts">
+                        {% if order.date %}<div><dt>{{ text_order_date }}</dt><dd>{{ order.date }}</dd></div>{% endif %}
+                        {% if order.name %}<div><dt>{{ text_order_name }}</dt><dd>{{ order.name }}</dd></div>{% endif %}
+                        {% if order.telephone %}<div><dt>{{ text_order_phone }}</dt><dd><a href="tel:{{ order.telephone|replace({' ': '', '(': '', ')': '', '-': ''}) }}">{{ order.telephone }}</a></dd></div>{% endif %}
+                        {% if order.email %}<div><dt>{{ text_order_email }}</dt><dd>{{ order.email }}</dd></div>{% endif %}
+                        {% if order.shipping %}<div><dt>{{ text_order_shipping }}</dt><dd>{{ order.shipping }}</dd></div>{% endif %}
+                        {% if order.address %}<div><dt>{{ text_order_address }}</dt><dd>{{ order.address }}</dd></div>{% endif %}
+                        {% if order.payment %}<div><dt>{{ text_order_payment }}</dt><dd>{{ order.payment }}</dd></div>{% endif %}
+                    </dl>
+                </section>
+                {% endif %}
+
+                {% if order_items %}
+                <section class="thanks__block" aria-labelledby="thanks-items">
+                    <h2 class="thanks__sub" id="thanks-items">{{ text_order_items }}</h2>
+                    <table class="thanks__table">
+                        <thead>
+                            <tr>
+                                <th scope="col">{{ column_product }}</th>
+                                <th scope="col" class="thanks__num">{{ column_quantity }}</th>
+                                <th scope="col" class="thanks__num">{{ column_price }}</th>
+                                <th scope="col" class="thanks__num">{{ column_total }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in order_items %}
+                            <tr>
+                                <td data-label="{{ column_product|e('html_attr') }}">
+                                    <span class="thanks__item-name">{{ item.name }}</span>
+                                    {% if item.model %}<span class="thanks__item-model">{{ item.model }}</span>{% endif %}
+                                    {% if item.options %}<ul class="thanks__item-options">{% for option in item.options %}<li>{{ option.name }}: {{ option.value }}</li>{% endfor %}</ul>{% endif %}
+                                </td>
+                                <td class="thanks__num" data-label="{{ column_quantity|e('html_attr') }}">{{ item.quantity }}</td>
+                                <td class="thanks__num" data-label="{{ column_price|e('html_attr') }}">{{ item.price }}</td>
+                                <td class="thanks__num" data-label="{{ column_total|e('html_attr') }}">{{ item.total }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% if order_totals %}
+                    <dl class="thanks__totals">
+                        {% for total in order_totals %}
+                        <div{% if loop.last %} class="is-grand"{% endif %}><dt>{{ total.title }}</dt><dd>{{ total.text }}</dd></div>
+                        {% endfor %}
+                    </dl>
+                    {% endif %}
+                </section>
+                {% endif %}
+
+                <section class="thanks__block" aria-labelledby="thanks-next">
+                    <h2 class="thanks__sub" id="thanks-next">{{ text_next_title }}</h2>
+                    <ol class="thanks__steps">
+                        <li>{{ text_next_1 }}</li>
+                        <li>{{ text_next_2 }}</li>
+                        <li>{{ text_next_3 }}</li>
+                    </ol>
+                </section>
+
+                <div class="thanks__actions">
+                    <a class="thanks__btn btn" href="{{ continue }}">
+                        {{ button_home }}
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                            <path fill-rule="evenodd" clip-rule="evenodd" d="M4.66602 12.0002L8.66602 8.00016L4.66602 4.00016L5.99935 2.66683L11.3327 8.00016L5.99935 13.3335L4.66602 12.0002Z" fill="#202222"/>
+                        </svg>
+                    </a>
+                    {% if catalog is defined and catalog %}<a class="thanks__btn thanks__btn--ghost btn-3" href="{{ catalog }}">{{ button_catalog }}</a>{% endif %}
+                </div>
             </div>
         </div>
     </section>

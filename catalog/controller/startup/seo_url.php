@@ -30,6 +30,14 @@ class ControllerStartupSeoUrl extends Controller {
 			$retired = array('login' => 'login', 'register' => 'register', 'forgot-password' => 'login', 'forgotten' => 'login', 'vhod' => 'login', 'registraciya' => 'register');
 			$slug = trim((string)$this->request->get['_route_'], '/');
 
+			// /wishlist → канонічний слаг обраного (/obrane тощо), якщо він інший
+			if ($slug === 'wishlist') {
+				$wl = str_replace('&amp;', '&', $this->url->link('account/wishlist'));
+				if (strpos($wl, 'index.php') === false && rtrim(parse_url($wl, PHP_URL_PATH), '/') !== '/wishlist') {
+					$this->response->redirect($wl, 301);
+				}
+			}
+
 			if (isset($retired[$slug])) {
 				$this->response->redirect($this->url->link('common/home', 'auth=' . $retired[$slug]), 301);
 			}
@@ -54,8 +62,18 @@ class ControllerStartupSeoUrl extends Controller {
 				'rating-low'=> array('rating', 'ASC'),
 			);
 
+			$seg_page = false;
+			$seg_sort = '';
+
 			foreach ($parts as $part) {
+				if (preg_match('/^page-(\d+)$/', $part, $pm)) {
+					$this->request->get['page'] = max(1, (int)$pm[1]);
+					$seg_page = true;
+					continue;
+				}
+
 				if (isset($sort_seo[$part])) {
+					$seg_sort = $part;
 					$this->request->get['sort']  = $sort_seo[$part][0];
 					$this->request->get['order'] = $sort_seo[$part][1];
 					continue;
@@ -131,7 +149,84 @@ class ControllerStartupSeoUrl extends Controller {
 					$this->request->get['route'] = 'information/information';
 				}
 			}
+
+			$this->canonicalListing($seg_page, $seg_sort);
 		}
+	}
+
+	// 301: ?filter=1,2 та ?page=N у листингах → слаг-URL (/katalog/<slug>/page-N)
+	private function canonicalListing($seg_page, $seg_sort) {
+		$route = $this->request->get['route'] ?? '';
+
+		if (!in_array($route, array('product/shop', 'product/special', 'product/category', 'product/latest'))
+			|| ($this->request->server['REQUEST_METHOD'] ?? 'GET') !== 'GET'
+			|| !empty($this->request->server['HTTP_X_REQUESTED_WITH'])
+			|| isset($this->request->get['ajax'])) {
+			return;
+		}
+
+		$has_filter_q = !empty($this->request->get['filter']) && strpos((string)($this->request->server['QUERY_STRING'] ?? ''), 'filter=') !== false;
+		$has_page_q = isset($this->request->get['page']) && !$seg_page;
+
+		if (!$has_filter_q && !$has_page_q) {
+			return;
+		}
+
+		$params = $this->request->get;
+		unset($params['route'], $params['_route_'], $params['sort'], $params['order']);
+
+		if (isset($params['page']) && (int)$params['page'] <= 1) {
+			unset($params['page']);
+		}
+
+		$link = str_replace('&amp;', '&', $this->url->link($route, http_build_query($params)));
+
+		if (strpos($link, 'index.php') !== false) {
+			return;
+		}
+
+		if ($has_filter_q && strpos($link, 'filter=') !== false) {
+			return;
+		}
+
+		$parts = explode('?', $link, 2);
+		$base = rtrim($parts[0], '/');
+		$extra = array();
+
+		if ($seg_sort) {
+			$base .= '/' . $seg_sort;
+		} elseif (isset($this->request->get['sort'])) {
+			$extra['sort'] = $this->request->get['sort'];
+			if (isset($this->request->get['order'])) {
+				$extra['order'] = $this->request->get['order'];
+			}
+		}
+
+		if (isset($parts[1])) {
+			parse_str($parts[1], $q);
+			$extra = array_merge($q, $extra);
+		}
+
+		$this->response->redirect($base . ($extra ? '?' . http_build_query($extra) : ''), 301);
+	}
+
+	private function pageSeg(&$data, $route) {
+		if (!in_array($route, array('product/shop', 'product/special', 'product/category', 'product/latest')) || !isset($data['page'])) {
+			return '';
+		}
+
+		$p = (string)$data['page'];
+
+		if ($p === '{page}' || (ctype_digit($p) && (int)$p > 1)) {
+			unset($data['page']);
+			return '/page-' . $p;
+		}
+
+		if (ctype_digit($p)) {
+			unset($data['page']);
+		}
+
+		return '';
 	}
 
 	public function rewrite($link) {
@@ -193,6 +288,7 @@ class ControllerStartupSeoUrl extends Controller {
 			$rq = $this->db->query("SELECT keyword FROM " . DB_PREFIX . "seo_url WHERE `query` = '" . $this->db->escape($data['route']) . "' AND store_id = '" . (int)$this->config->get('config_store_id') . "' AND language_id = '" . (int)$this->config->get('config_language_id') . "' LIMIT 1");
 
 			if ($rq->num_rows && $rq->row['keyword']) {
+				$rq_route = $data['route'];
 				unset($data['route']);
 
 				$fpath = '';
@@ -210,6 +306,8 @@ class ControllerStartupSeoUrl extends Controller {
 					}
 					if ($okall && $fpath !== '') { unset($data['filter']); } else { $fpath = ''; }
 				}
+
+				$fpath .= $this->pageSeg($data, $rq_route);
 
 				$query = '';
 
@@ -278,6 +376,7 @@ class ControllerStartupSeoUrl extends Controller {
 		}
 
 		if ($url) {
+			$url .= $this->pageSeg($data, $data['route'] ?? '');
 			unset($data['route']);
 
 			$query = '';

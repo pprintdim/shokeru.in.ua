@@ -1,6 +1,6 @@
 <?php
 // Heading
-$_['heading_title']            = 'Корзина покупок';
+$_['heading_title'] = 'Корзина';
 
 // Text
 $_['text_success']             = '<a href="%s">%s</a> добавлен <a href="%s">в корзину покупок</a>!';
@@ -45,3 +45,12 @@ $_['error_recurring_required'] = 'Пожалуйста, выберите пер�
 $_['text_until_cancelled']                    = 'до отмены';
 $_['text_length']                             = 'Количество платежей: %s';
 $_['text_payment_until_canceled_description'] = ': %s; Периодичность: %d %s; Количество платежей: до отмены';
+
+$_['text_order_details'] = 'Информация о заказе';
+$_['text_clear_cart'] = 'Очистить корзину';
+$_['text_continue_shopping'] = 'Продолжить покупки';
+$_['text_free_delivery'] = 'Бесплатно';
+$_['text_cart_discount_notice'] = 'При заказе на сумму 1000 грн вы получите скидку 10% на ваш заказ!';
+$_['text_coupon_label'] = 'Промокод';
+$_['button_coupon_apply'] = 'Применить';
+$_['text_remove_item'] = 'Удалить товар';

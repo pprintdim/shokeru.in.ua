@@ -1,7 +1,7 @@
 <div class="shop__content">
     <form class="shop__filters" action="{{ action }}" method="get">
         <div class="shop__filters-top">
-            <button class="shop__filters-open" type="button">{{ text_filter }}</button>
+            <button class="shop__filters-open" type="button" aria-expanded="false">{{ text_filter }}</button>
 
             {# Вибрані фільтри #}
             <div class="shop__filters-selected filters-selected">
@@ -43,7 +43,7 @@
             </div>
             <div class="container">
                 <div class="shop__filters-menu">
-                    <button class="shop__filters-close" type="button"></button>
+                    <button class="shop__filters-close" type="button" aria-label="{{ button_close }}"></button>
                     <select class="shop__filters-sort" name="sort_order_mobile">
                         {% for option in sort_options %}
                             <option value="{{ option.value }}"
@@ -58,7 +58,7 @@
                     {% if filter_groups %}
                         <div class="filters-open-mobile">
                             {% for group in filter_groups %}
-                                <button class="filters-open-title" type="button" data-filter-target="{{ group.filter_group_id }}">{{ group.name }}</button>
+                                <button class="filters-open-title" type="button" aria-expanded="false" data-filter-target="{{ group.filter_group_id }}">{{ group.name }}</button>
                             {% endfor %}
                         </div>
                     {% endif %}
@@ -78,7 +78,7 @@
                                     {% endfor %}
                                 </div>
                                 <div class="shop__filters-end">
-                                    <button class="shop__filters-send btn-4" type="submit">{{ button_confirm }}</button>
+                                    <button class="shop__filters-send btn-4" type="submit">{{ button_apply }}</button>
                                     <button class="shop__filters-resets btn-3" type="button">{{ button_reset_filter }}</button>
                                 </div>
                             </div>
@@ -143,13 +143,25 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Відкриття / закриття фільтрів
     const toggleBtn = document.querySelector(".shop__filters-open");
-    if (toggleBtn) toggleBtn.addEventListener("click", () => filterForm.classList.toggle("active"));
+    const mobileMq = window.matchMedia('(max-width: 767px)');
+
+    function setDrawer(open) {
+        filterForm.classList.toggle("active", open);
+        if (toggleBtn) toggleBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+        // блокуємо прокрутку сторінки лише коли відкрита мобільна шторка
+        document.documentElement.classList.toggle('filters-lock', open && mobileMq.matches);
+    }
+
+    if (toggleBtn) toggleBtn.addEventListener("click", () => setDrawer(!filterForm.classList.contains("active")));
 
     const closeBtn = document.querySelector(".shop__filters-close");
-    if (closeBtn) closeBtn.addEventListener("click", () => filterForm.classList.remove("active"));
+    if (closeBtn) closeBtn.addEventListener("click", () => setDrawer(false));
 
     const backBtn = document.querySelector(".shop__filters-back");
-    if (backBtn) backBtn.addEventListener("click", () => filterForm.classList.remove("active"));
+    if (backBtn) backBtn.addEventListener("click", () => setDrawer(false));
+
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && filterForm.classList.contains('active')) setDrawer(false); });
+    mobileMq.addEventListener && mobileMq.addEventListener('change', () => setDrawer(filterForm.classList.contains('active')));
 
     const filterTabButtons = document.querySelectorAll(".filters-open-title[data-filter-target]");
     const filterPanels = document.querySelectorAll(".shop__filters-box[data-filter-id]");
@@ -165,6 +177,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     panel.classList.remove("active");
                 }
             });
+            filterTabButtons.forEach(b => b.setAttribute('aria-expanded', b === tabBtn ? 'true' : 'false'));
         });
     });
 
@@ -174,6 +187,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (title) {
             title.addEventListener("click", () => {
                 filterPanels.forEach(item => item.classList.remove("active"));
+                filterTabButtons.forEach(b => b.setAttribute('aria-expanded', 'false'));
             });
         }
     });
@@ -210,8 +224,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Сортування — одразу застосовуємо
     const sortSelects = document.querySelectorAll('.shop__filters-sort');
+    let sortTouched = false;
     sortSelects.forEach(select => {
         select.addEventListener('change', () => {
+            sortTouched = true;
             sortSelects.forEach(otherSelect => {
                 if (otherSelect !== select) {
                     otherSelect.value = select.value;
@@ -270,7 +286,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
         const sortSelect = filterForm.querySelector('.shop__filters-sort');
         const sortValue = sortSelect?.value;
-        if (sortValue) {
+        const sortIsActive = sortTouched || {{ (sort ? 'true' : 'false') }};
+        if (sortValue && sortIsActive) {
             if (sortSlugs && sortSlugs[sortValue]) {
                 // SEO: сорт у шлях (/.../popular)
                 path += '/' + sortSlugs[sortValue];

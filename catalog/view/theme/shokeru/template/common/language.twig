@@ -2,14 +2,14 @@
   <div class="header__lang">
 
     {# ПОТОЧНА МОВА #}
-    <div class="header__lang-selected">
+    <button type="button" class="header__lang-selected" aria-haspopup="true">
       {{ current.name|upper }}
-    </div>
+    </button>
 
     {# ІНШІ МОВИ #}
     <div class="header__lang-content">
       {% for lang in languages %}
-        <a href="index.php?route=common/language/set&code={{ lang.code }}">
+        <a href="index.php?route=common/language/set&code={{ lang.code }}" hreflang="{{ lang.code|split('-')|first }}" lang="{{ lang.code|split('-')|first }}">
           {{ lang.name|upper }}
         </a>
       {% endfor %}

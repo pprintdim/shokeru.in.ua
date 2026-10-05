@@ -1,6 +1,6 @@
 <?php
 // Heading
-$_['heading_title']            = 'Shopping Cart';
+$_['heading_title'] = 'Cart';
 
 // Text
 $_['text_success']             = 'Success: You have added <a href="%s">%s</a> to your <a href="%s">shopping cart</a>!';
@@ -42,3 +42,12 @@ $_['error_recurring_required'] = 'Please select a payment recurring!';
 $_['text_until_cancelled']                    = 'until cancelled';
 $_['text_length']                             = 'Number of Payments: %s';
 $_['text_payment_until_canceled_description'] = ': %s; Period: %d %s; Number of Payments: until cancelled';
+
+$_['text_order_details'] = 'Order details';
+$_['text_clear_cart'] = 'Clear cart';
+$_['text_continue_shopping'] = 'Continue shopping';
+$_['text_free_delivery'] = 'Free';
+$_['text_cart_discount_notice'] = 'Order over UAH 1000 and get a 10% discount on your order!';
+$_['text_coupon_label'] = 'Promo code';
+$_['button_coupon_apply'] = 'Apply';
+$_['text_remove_item'] = 'Remove item';

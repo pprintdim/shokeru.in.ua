@@ -383,7 +383,7 @@ class ControllerProductCategory extends Controller {
 
 			$pagination_url = $this->url->link('product/category', 'path=' . $this->request->get['path'] . $url . '&page={page}');
 			$pagination_url = str_replace(array('%7Bpage%7D', '%7bpage%7d'), '{page}', $pagination_url);
-			$first_page_url = str_replace(array('&amp;page={page}', '?page={page}', '&page={page}'), '', $pagination_url);
+			$first_page_url = str_replace(array('/page-{page}', '&amp;page={page}', '?page={page}', '&page={page}'), '', $pagination_url);
 
 			$tp = (int)$data['total_pages'];
 			$show = array();

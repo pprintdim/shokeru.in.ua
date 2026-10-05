@@ -189,3 +189,28 @@ $_['text_hero_note'] = 'Оригинальные электрошокеры с �
 $_['text_nav_blog'] = 'Блог';
 
 $_['button_quick_order'] = 'Купить в один клик';
+
+// Catalog/shop (SEO + UX)
+$_['text_shop_heading'] = 'Каталог электрошокеров';
+$_['text_shop_meta_title'] = 'Каталог электрошокеров — купить в Украине';
+$_['text_shop_meta_description'] = 'Каталог электрошокеров Shokeru: фонари, классические, мощные модели. Доставка по Украине, гарантия, консультация.';
+$_['text_special_meta_description'] = 'Акции на электрошокеры Shokeru: выгодные цены и скидки на популярные модели.';
+$_['text_page_n'] = 'Страница %s';
+$_['text_found_one'] = 'Найден %s товар';
+$_['text_found_few'] = 'Найдено %s товара';
+$_['text_found_many'] = 'Найдено %s товаров';
+
+// Product page UX
+$_['text_gallery_prev'] = 'Предыдущее фото';
+$_['text_gallery_next'] = 'Следующее фото';
+$_['text_qty_minus'] = 'Уменьшить количество';
+$_['text_qty_plus'] = 'Увеличить количество';
+$_['text_specs'] = 'Характеристики';
+$_['text_gallery_counter'] = 'Фото %s из %s';
+$_['text_qty_label'] = 'Количество';
+
+// Compare
+$_['text_compare_add'] = 'Добавить в сравнение';
+$_['text_compare_title'] = 'Сравнение';
+$_['text_compare_remove'] = 'Убрать из сравнения';
+$_['text_compare_back'] = 'Назад в каталог';

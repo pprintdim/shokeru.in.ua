@@ -113,8 +113,7 @@ function addThemeProductCardToCart(button, productId, quantity) {
         return;
     }
 
-    if (button.classList.contains('added')) {
-        openThemeCart();
+    if (button.dataset.flashing === '1') {
         return;
     }
 
@@ -123,15 +122,21 @@ function addThemeProductCardToCart(button, productId, quantity) {
             window.ShokeruGA4.trackAddToCartFromElement(button, quantity || 1);
         }
 
+        // «Додано» на 2 с, далі кнопка повертається і дозволяє додати ще (дропдаун кошика — лише з іконки в шапці)
+        button.dataset.flashing = '1';
         setProductButtonAdded(button);
-        openThemeCart();
+
+        setTimeout(function() {
+            resetProductButtonAdded(button);
+            button.dataset.flashing = '';
+        }, 2000);
     });
 }
 
 function syncProductCartButtons() {
     var productIds = getThemeCartProductIds();
 
-    document.querySelectorAll('[data-product-id][data-added-text]').forEach(function(button) {
+    document.querySelectorAll('[data-product-id][data-added-text]:not(.product__item-btn)').forEach(function(button) {
         if (productIds.indexOf(String(button.dataset.productId)) !== -1) {
             setProductButtonAdded(button);
         } else {
@@ -626,19 +631,35 @@ document.addEventListener('click', function(event) {
 });
 
 var compare = {
-    'add': function(product_id) {
+    'ids': function() {
+        try { return JSON.parse(document.body.dataset.compareIds || '[]'); } catch (e) { return []; }
+    },
+    'sync': function(ids, count) {
+        ids = (ids || []).map(String);
+        document.body.dataset.compareIds = JSON.stringify(ids);
+        document.querySelectorAll('[data-compare-id]').forEach(function(btn) {
+            var on = ids.indexOf(String(btn.dataset.compareId)) !== -1;
+            btn.classList.toggle('active', on);
+            btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+        });
+        // лічильник у шапці: [data-compare-count] (розмітка шапки — окремо)
+        document.querySelectorAll('[data-compare-count]').forEach(function(el) {
+            el.textContent = String(count !== undefined ? count : ids.length);
+            el.hidden = !(count !== undefined ? count : ids.length);
+        });
+    },
+    'request': function(route, product_id) {
         $.ajax({
-            url: 'index.php?route=product/compare/add',
+            url: 'index.php?route=' + route,
             type: 'post',
             data: 'product_id=' + product_id,
             dataType: 'json',
             success: function(json) {
-                $('.alert-dismissible').remove();
+                if (Array.isArray(json['product_ids'])) {
+                    compare.sync(json['product_ids'], json['total_count']);
+                }
 
                 if (json['success']) {
-
-                    $('#compare-total').html(json['total']);
-
                     themeToast(json['success'], 'success');
                 }
             },
@@ -647,10 +668,21 @@ var compare = {
             }
         });
     },
-    'remove': function() {
-
+    'add': function(product_id) { this.request('product/compare/add', product_id); },
+    'remove': function(product_id) { this.request('product/compare/remove', product_id); },
+    'toggle': function(product_id) {
+        if (this.ids().indexOf(String(product_id)) !== -1) { this.remove(product_id); } else { this.add(product_id); }
     }
 }
+
+document.addEventListener('click', function(event) {
+    var btn = event.target.closest('[data-compare-id]');
+
+    if (btn) {
+        event.preventDefault();
+        compare.toggle(btn.dataset.compareId);
+    }
+});
 
 /* alert dismiss (заміна bootstrap.js) */
 document.addEventListener('click', function (e) {
@@ -802,3 +834,29 @@ window.ShokeruOtp = (function () {
 
     return { init: init };
 })();
+
+/* Load More: адреса відповідає останній підвантаженій сторінці (/katalog/page-N).
+   Логіка підвантаження — script.js; тут лише слідкуємо за заміною .shop__bottom. */
+(function () {
+    function syncUrl() {
+        var active = document.querySelector('.shop__bottom .shop__pages-content a.active[href]');
+        if (!active || !window.history || !history.replaceState) { return; }
+        var href = active.getAttribute('href');
+        if (href && href !== location.href && href.indexOf('http') === 0) {
+            history.replaceState({}, '', href);
+        }
+    }
+    document.addEventListener('DOMContentLoaded', function () {
+        var results = document.querySelector('.shop__results');
+        if (!results || !window.MutationObserver) { return; }
+        new MutationObserver(function () { syncUrl(); }).observe(results.parentNode, { childList: true });
+    });
+})();
+
+document.addEventListener('DOMContentLoaded', function () {
+    if (!document.querySelector('[data-compare-id], [data-compare-count]')) { return; }
+    fetch('index.php?route=product/compare/state', { credentials: 'same-origin' })
+        .then(function (r) { return r.json(); })
+        .then(function (j) { compare.sync(j.product_ids || [], j.total_count || 0); })
+        .catch(function () {});
+});

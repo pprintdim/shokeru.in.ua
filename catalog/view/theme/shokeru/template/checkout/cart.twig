@@ -10,7 +10,8 @@
                 {% endfor %}
             </ul>
 
-            <div class="cart__inner">
+            <h1 class="cart__heading">{{ heading_title }}</h1>
+            <div class="cart__inner" id="cart-page">
                 {% if products %}
                     <div class="cart__top">
                         <button class="cart__clear" type="button">
@@ -61,9 +62,9 @@
                                     </a>
 
                                     <div class="cart__item-quantity">
-                                        <button class="quantity-minus" type="button" aria-label="Minus"></button>
-                                        <input class="quantity-count" type="number" value="{{ product.quantity }}" min="1" max="999">
-                                        <button class="quantity-plus" type="button" aria-label="Plus"></button>
+                                        <button class="quantity-minus" type="button" aria-label="{{ text_qty_minus }}"></button>
+                                        <input class="quantity-count" type="number" value="{{ product.quantity }}" min="1" max="99" step="1" inputmode="numeric" aria-label="{{ text_qty_label }}">
+                                        <button class="quantity-plus" type="button" aria-label="{{ text_qty_plus }}"></button>
                                     </div>
 
                                     <p class="cart__item-price">
@@ -75,14 +76,14 @@
 
                                     <p class="cart__item-total">{{ product.total }}</p>
 
-                                    <button class="cart__item-delete" type="button" aria-label="Delete"></button>
+                                    <button class="cart__item-delete" type="button" aria-label="{{ text_remove_item }}" title="{{ text_remove_item }}"></button>
                                 </div>
                             {% endfor %}
                         </div>
 
                         <div class="cart__box">
                             <div class="cart__info">
-                                <h1 class="cart__info-title">{{ text_order_details }}</h1>
+                                <h2 class="cart__info-title">{{ text_order_details }}</h2>
                                 <div class="cart__info-block">
                                     <div class="cart__info-item">
                                         <p class="cart__info-descr">{{ text_products_sum }}</p>
@@ -94,6 +95,12 @@
                                             <p class="cart__info-descr">{{ cart_special_discount }}</p>
                                         </div>
                                     {% endif %}
+                                    {% if cart_coupon_discount %}
+                                        <div class="cart__info-item">
+                                            <p class="cart__info-descr">{{ cart_coupon_title }}</p>
+                                            <p class="cart__info-descr">{{ cart_coupon_discount }}</p>
+                                        </div>
+                                    {% endif %}
                                     <div class="cart__info-item">
                                         <p class="cart__info-descr">{{ text_shipping_label }}</p>
                                         <p class="cart__info-descr">{{ cart_shipping_total }}</p>
@@ -103,6 +110,16 @@
                                         <p class="cart__info-name">{{ cart_grand_total }}</p>
                                     </div>
                                 </div>
+                                {% if coupon_enabled %}
+                                <form class="cart__coupon" id="cart-coupon" novalidate>
+                                    <label class="cart__coupon-label" for="cart-coupon-input">{{ text_coupon_label }}</label>
+                                    <div class="cart__coupon-row">
+                                        <input class="cart__coupon-input" id="cart-coupon-input" type="text" name="coupon" value="{{ coupon }}" placeholder="{{ text_coupon_label }}" autocomplete="off">
+                                        <button class="cart__coupon-btn btn-3" type="submit">{{ button_coupon_apply }}</button>
+                                    </div>
+                                    <p class="cart__coupon-msg" role="alert"></p>
+                                </form>
+                                {% endif %}
                                 <a class="cart__btn btn-4" href="{{ checkout }}">{{ button_checkout }}</a>
                             </div>
 
@@ -130,46 +147,92 @@
 
     <script>
     (function($) {
-        function submitCartQuantity($item, quantity) {
-            var cartId = $item.data('cart-id');
-            var safeQuantity = Math.max(1, parseInt(quantity, 10) || 1);
+        var busy = false;
 
-            $item.find('.quantity-count').val(safeQuantity);
-            cart.update(cartId, safeQuantity);
+        function refreshCart() {
+            return fetch(window.location.href, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                .then(function(r) { return r.text(); })
+                .then(function(html) {
+                    var doc = new DOMParser().parseFromString(html, 'text/html');
+                    var fresh = doc.getElementById('cart-page');
+                    var cur = document.getElementById('cart-page');
+                    if (fresh && cur) { cur.innerHTML = fresh.innerHTML; }
+                    if (typeof reloadThemeCart === 'function') { reloadThemeCart(); }
+                })
+                .catch(function() { window.location.reload(); })
+                .then(function() { busy = false; });
         }
 
-        $(document).on('click', '.cart__item .quantity-plus', function() {
-            var $item = $(this).closest('.cart__item');
-            var $input = $item.find('.quantity-count');
-            submitCartQuantity($item, (parseInt($input.val(), 10) || 1) + 1);
-        });
+        function post(route, data) {
+            if (busy) { return; }
+            busy = true;
+            $.ajax({
+                url: 'index.php?route=' + route,
+                type: 'post',
+                data: data,
+                dataType: 'json',
+                success: function(json) {
+                    if (json && json.total !== undefined) { $('.header__cart span').text(json.total); }
+                    refreshCart();
+                },
+                error: function(xhr, o, err) {
+                    busy = false;
+                    if (typeof themeAjaxError === 'function') { themeAjaxError(xhr, err); }
+                }
+            });
+        }
 
-        $(document).on('click', '.cart__item .quantity-minus', function() {
-            var $item = $(this).closest('.cart__item');
-            var $input = $item.find('.quantity-count');
-            submitCartQuantity($item, Math.max(1, (parseInt($input.val(), 10) || 1) - 1));
-        });
+        function setQty($item, quantity) {
+            var q = Math.min(99, Math.max(1, parseInt(quantity, 10) || 1));
+            $item.find('.quantity-count').val(q);
+            post('checkout/cart/edit', { key: $item.data('cart-id'), quantity: q });
+        }
 
-        $(document).on('change', '.cart__item .quantity-count', function() {
-            submitCartQuantity($(this).closest('.cart__item'), $(this).val());
+        $(document).on('click', '#cart-page .quantity-plus', function() {
+            var $i = $(this).closest('.cart__item');
+            setQty($i, (parseInt($i.find('.quantity-count').val(), 10) || 1) + 1);
         });
-
-        $(document).on('click', '.cart__item-delete', function() {
-            var cartId = $(this).closest('.cart__item').data('cart-id');
-            cart.remove(cartId);
+        $(document).on('click', '#cart-page .quantity-minus', function() {
+            var $i = $(this).closest('.cart__item');
+            setQty($i, (parseInt($i.find('.quantity-count').val(), 10) || 1) - 1);
         });
-
-        $(document).on('click', '.cart__clear', function() {
+        $(document).on('change', '#cart-page .quantity-count', function() {
+            setQty($(this).closest('.cart__item'), $(this).val());
+        });
+        $(document).on('click', '#cart-page .cart__item-delete', function() {
+            post('checkout/cart/remove', { key: $(this).closest('.cart__item').data('cart-id') });
+        });
+        $(document).on('click', '#cart-page .cart__clear', function() {
+            if (busy) { return; }
+            busy = true;
             $.ajax({
                 url: 'index.php?route=checkout/cart/clear',
                 type: 'post',
                 dataType: 'json',
                 success: function(json) {
-                    $('.header__cart span').text(json.total || 0);
-                    window.location.href = json.redirect || 'index.php?route=checkout/cart';
+                    $('.header__cart span').text((json && json.total) || 0);
+                    refreshCart();
                 },
-                error: function(xhr, ajaxOptions, thrownError) {
-                    alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+                error: function(xhr, o, err) {
+                    busy = false;
+                    if (typeof themeAjaxError === 'function') { themeAjaxError(xhr, err); }
+                }
+            });
+        });
+        $(document).on('submit', '#cart-coupon', function(e) {
+            e.preventDefault();
+            var $msg = $(this).find('.cart__coupon-msg').text('');
+            $.ajax({
+                url: 'index.php?route=extension/total/coupon/coupon',
+                type: 'post',
+                data: { coupon: $(this).find('input[name=coupon]').val() },
+                dataType: 'json',
+                success: function(json) {
+                    if (json.error) { $msg.text(json.error); return; }
+                    refreshCart();
+                },
+                error: function(xhr, o, err) {
+                    if (typeof themeAjaxError === 'function') { themeAjaxError(xhr, err); }
                 }
             });
         });

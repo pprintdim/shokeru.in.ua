@@ -22,17 +22,3 @@
 {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{% for item in items %}{"@type":"Question","name":"{{ item.question|e('js') }}","acceptedAnswer":{"@type":"Answer","text":"{{ item.content|striptags|e('js') }}"}}{% if not loop.last %},{% endif %}{% endfor %}]}
 </script>
 {% endif %}
-<script>
-document.querySelectorAll('.faq__item-title').forEach(title => {
-    title.addEventListener('click', () => {
-        const item = title.closest('.faq__item');
-        const isActive = item.classList.contains('active');
-
-        document.querySelectorAll('.faq__item').forEach(i => i.classList.remove('active'));
-
-        if (!isActive) {
-            item.classList.add('active');
-        }
-    });
-});
-</script>

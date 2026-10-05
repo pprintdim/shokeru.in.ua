@@ -324,3 +324,7 @@ a.co-line__name:hover{ text-decoration: underline; }
     .co .co-input,
     .co .co-choice{ transition: none; }
 }
+
+/* поля з помилкою: текст під полем */
+.co .co-input.is-invalid{ border-color: var(--co-danger); }
+.co .co-field-error{ margin: 6px 0 0; font-size: 13px; line-height: 1.3; color: var(--co-danger); }

@@ -1,0 +1,22 @@
+<section class="reviews" aria-labelledby="reviews-title">
+    <div class="container">
+        <div class="reviews__inner">
+            <h2 class="reviews__title title" id="reviews-title">{{ heading }}</h2>
+            <ul class="reviews__list">
+                {% for review in reviews %}
+                <li class="reviews__item">
+                    <div class="reviews__top">
+                        <span class="reviews__stars" role="img" aria-label="{{ text_rating|format(review.rating) }}">{% for i in 1..5 %}<span class="reviews__star{{ i <= review.rating ? ' is-on' : '' }}" aria-hidden="true"></span>{% endfor %}</span>
+                        <time class="reviews__date">{{ review.date }}</time>
+                    </div>
+                    <p class="reviews__text">{{ review.text }}</p>
+                    <div class="reviews__bottom">
+                        <span class="reviews__author">{{ review.author }}</span>
+                        <a class="reviews__product" href="{{ review.href }}">{{ review.product }}</a>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</section>

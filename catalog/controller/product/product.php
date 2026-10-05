@@ -264,9 +264,12 @@ class ControllerProductProduct extends Controller {
 			
 			$this->document->addStyle('https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css');
 			$this->document->addScript('https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js');
+			$this->document->addScript('catalog/view/js/product.js');
 
 			
 			$data['heading_title'] = $product_info['name'];
+			$data['name'] = $product_info['name'];
+			$data['qty_max'] = ((int)$product_info['quantity'] > 0) ? min(99, (int)$product_info['quantity']) : 99;
 
 			$data['text_minimum'] = sprintf($this->language->get('text_minimum'), $product_info['minimum']);
 			$data['text_login'] = sprintf($this->language->get('text_login'), $this->url->link('account/login', '', true), $this->url->link('account/register', '', true));
@@ -414,7 +417,7 @@ class ControllerProductProduct extends Controller {
 
 			// відгук лишає лише покупець, що увійшов (як у групі hydrophob): гостю кнопка
 			// відкриває попап входу і повертає на товар до форми відгуку
-			$data['review_guest'] = $this->customer->isLogged();
+			$data['review_guest'] = true; // відгук можуть лишати й гості
 
 			if ($this->customer->isLogged()) {
 				$data['customer_name'] = $this->customer->getFirstName() . '&nbsp;' . $this->customer->getLastName();
@@ -694,10 +697,6 @@ class ControllerProductProduct extends Controller {
 			
 				if (empty($this->request->post['rating']) || $this->request->post['rating'] < 0 || $this->request->post['rating'] > 5) {
 					$json['error'] = $this->language->get('error_rating');
-				}
-
-				if (!isset($json['error']) && !$this->customer->isLogged()) {
-					$json['error'] = $this->language->get('error_review_login');
 				}
 
 				// Captcha

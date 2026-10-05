@@ -17,12 +17,18 @@ class ControllerCheckoutCart extends Controller {
 			'text' => $this->language->get('heading_title')
 		);
 
-		$data['text_order_details'] = 'Інформація про замовлення';
-		$data['text_clear_cart'] = 'Очистити корзину';
-		$data['text_continue_shopping'] = 'Продовжити покупки';
-		$data['text_free_delivery'] = 'Безкоштовно';
-		$data['text_cart_discount_notice'] = 'При замовленні на суму 1000 грн Ви отримаєте знижку 10% на Ваше замовлення!';
+		$data['text_order_details'] = $this->language->get('text_order_details');
+		$data['text_clear_cart'] = $this->language->get('text_clear_cart');
+		$data['text_continue_shopping'] = $this->language->get('text_continue_shopping');
+		$data['text_free_delivery'] = $this->language->get('text_free_delivery');
+		$data['text_cart_discount_notice'] = $this->language->get('text_cart_discount_notice');
 		$data['text_empty'] = $this->language->get('text_empty');
+		$data['heading_title'] = $this->language->get('heading_title');
+		$data['text_coupon_label'] = $this->language->get('text_coupon_label');
+		$data['button_coupon_apply'] = $this->language->get('button_coupon_apply');
+		$data['text_remove_item'] = $this->language->get('text_remove_item');
+		$data['coupon_enabled'] = (bool)$this->config->get('total_coupon_status');
+		$data['coupon'] = isset($this->session->data['coupon']) ? $this->session->data['coupon'] : '';
 		$data['continue'] = $this->url->link('common/home');
 		$data['checkout'] = $this->url->link('checkout/checkout', '', true);
 		$data['products'] = array();
@@ -37,6 +43,8 @@ class ControllerCheckoutCart extends Controller {
 		$data['cart_shipping_total'] = $data['text_free_delivery'];
 		$data['cart_grand_total'] = '';
 		$data['has_special_discount'] = false;
+		$data['cart_coupon_discount'] = '';
+		$data['cart_coupon_title'] = '';
 
 		if ($this->cart->hasProducts() || !empty($this->session->data['vouchers'])) {
 			if (!$this->cart->hasStock() && (!$this->config->get('config_stock_checkout') || $this->config->get('config_stock_warning'))) {
@@ -266,6 +274,12 @@ class ControllerCheckoutCart extends Controller {
 					'text'  => $this->currency->format($total['value'], $this->session->data['currency'])
 				);
 
+				if (isset($total['code']) && $total['code'] == 'coupon') {
+					$coupon_value = (float)$total['value'];
+					$data['cart_coupon_title'] = $total['title'];
+					$data['cart_coupon_discount'] = $this->currency->format($coupon_value, $this->session->data['currency']);
+				}
+
 				if (isset($total['code']) && $total['code'] == 'shipping') {
 					$data['cart_shipping_total'] = $total['value'] > 0 ? $this->currency->format($total['value'], $this->session->data['currency']) : $data['text_free_delivery'];
 					$shipping_total_value = max(0, (float)$total['value']);
@@ -274,7 +288,7 @@ class ControllerCheckoutCart extends Controller {
 
 			$data['cart_subtotal'] = $this->currency->format($cart_subtotal_value, $this->session->data['currency']);
 			$data['cart_special_discount'] = $this->currency->format($cart_special_discount_value, $this->session->data['currency']);
-			$data['cart_grand_total'] = $this->currency->format($cart_products_total_value + (isset($shipping_total_value) ? $shipping_total_value : 0), $this->session->data['currency']);
+			$data['cart_grand_total'] = $this->currency->format($cart_products_total_value + (isset($coupon_value) ? $coupon_value : 0) + (isset($shipping_total_value) ? $shipping_total_value : 0), $this->session->data['currency']);
 			$data['has_special_discount'] = $cart_special_discount_value > 0;
 
 			$this->load->model('setting/extension');

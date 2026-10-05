@@ -170,7 +170,46 @@ class ControllerProductCompare extends Controller {
 			$json['total'] = sprintf($this->language->get('text_compare'), (isset($this->session->data['compare']) ? count($this->session->data['compare']) : 0));
 		}
 
+		$json['product_ids'] = array_values(array_map('intval', $this->session->data['compare']));
+		$json['total_count'] = count($json['product_ids']);
+		$json['active'] = in_array((int)$product_id, $json['product_ids']);
+
 		$this->response->addHeader('Content-Type: application/json');
 		$this->response->setOutput(json_encode($json));
+	}
+
+	public function remove() {
+		$this->load->language('product/compare');
+
+		$json = array();
+
+		if (!isset($this->session->data['compare'])) {
+			$this->session->data['compare'] = array();
+		}
+
+		$product_id = isset($this->request->post['product_id']) ? (int)$this->request->post['product_id'] : 0;
+
+		foreach ($this->session->data['compare'] as $key => $id) {
+			if ((int)$id === $product_id) {
+				unset($this->session->data['compare'][$key]);
+			}
+		}
+
+		$this->session->data['compare'] = array_values($this->session->data['compare']);
+
+		$json['success'] = $this->language->get('text_remove');
+		$json['product_ids'] = array_values(array_map('intval', $this->session->data['compare']));
+		$json['total_count'] = count($json['product_ids']);
+		$json['active'] = false;
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
+
+	public function state() {
+		$ids = isset($this->session->data['compare']) ? array_values(array_map('intval', $this->session->data['compare'])) : array();
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode(array('product_ids' => $ids, 'total_count' => count($ids))));
 	}
 }

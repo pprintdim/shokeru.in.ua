@@ -20,3 +20,7 @@ $_['text_menu_about']     = 'О нас';
 $_['text_menu_shop']      = 'Магазин';
 $_['text_menu_customers'] = 'Информация покупателям';
 $_['text_menu_contact']   = 'Контакты';
+$_['text_skip'] = 'Перейти к основному содержимому';
+$_['text_open_menu'] = 'Открыть меню';
+$_['text_open_search'] = 'Открыть поиск';
+$_['text_sales_menu'] = 'Акции';

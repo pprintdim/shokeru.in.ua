@@ -182,3 +182,28 @@ $_['text_hero_note'] = 'Оригінальні електрошокери з г�
 $_['text_nav_blog'] = 'Блог';
 
 $_['button_quick_order'] = 'Купити в один клік';
+
+// Catalog/shop (SEO + UX)
+$_['text_shop_heading'] = 'Каталог електрошокерів';
+$_['text_shop_meta_title'] = 'Каталог електрошокерів — купити в Україні';
+$_['text_shop_meta_description'] = 'Каталог електрошокерів Shokeru: ліхтарі, класичні, потужні моделі. Доставка по Україні, гарантія, консультація.';
+$_['text_special_meta_description'] = 'Акції на електрошокери Shokeru: вигідні ціни та знижки на популярні моделі.';
+$_['text_page_n'] = 'Сторінка %s';
+$_['text_found_one'] = 'Знайдено %s товар';
+$_['text_found_few'] = 'Знайдено %s товари';
+$_['text_found_many'] = 'Знайдено %s товарів';
+
+// Product page UX
+$_['text_gallery_prev'] = 'Попереднє фото';
+$_['text_gallery_next'] = 'Наступне фото';
+$_['text_qty_minus'] = 'Зменшити кількість';
+$_['text_qty_plus'] = 'Збільшити кількість';
+$_['text_specs'] = 'Характеристики';
+$_['text_gallery_counter'] = 'Фото %s з %s';
+$_['text_qty_label'] = 'Кількість';
+
+// Compare
+$_['text_compare_add'] = 'Додати до порівняння';
+$_['text_compare_title'] = 'Порівняння';
+$_['text_compare_remove'] = 'Прибрати з порівняння';
+$_['text_compare_back'] = 'Назад до каталогу';

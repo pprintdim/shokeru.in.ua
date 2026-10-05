@@ -42,3 +42,5 @@ $_['error_code_invalid']   = 'Please request a code first.';
 $_['error_code_expired']   = 'Code expired. Request a new one.';
 $_['error_code_wrong']     = 'Invalid code.';
 $_['error_network']        = 'Something went wrong, please try again';
+$_['error_firstname_required'] = 'Enter your name';
+$_['text_register_hint'] = 'No account with this email yet. Fill in the details to register.';

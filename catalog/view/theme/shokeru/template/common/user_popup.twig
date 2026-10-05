@@ -1,4 +1,4 @@
-<section class="userPopup">
+<section class="userPopup" role="dialog" aria-modal="true" aria-label="{{ text_login|e('html_attr') }}" aria-hidden="true" inert>
     <div class="userPopup__image">
         <img src="catalog/view/theme/shokeru/images/userPopup.png" alt="" aria-hidden="true">
     </div>
@@ -8,7 +8,7 @@
             <a class="userPopup__logo" href="{{ home }}">
                 <img src="{{ logo }}?v=20260626b" alt="{{ name }}" width="260" height="38">
             </a>
-            <button class="userPopup__close">{{ text_close }}</button>
+            <button type="button" class="userPopup__close" aria-label="{{ text_close|e('html_attr') }}">{{ text_close }}</button>
         </div>
         <div class="userPopup__bottom">
             <div class="userPopup__left">
@@ -37,19 +37,19 @@
                         </div>
                         <a class="header__menu-link" href="mailto:{{ email }}">{{ email }}</a>
                     </div>
-                    <div class="header__menu-social">
-                        <a href="#" target="_blank">
+                    {% if instagram or facebook %}<div class="header__menu-social">
+                        {% if instagram %}<a href="{{ instagram }}" target="_blank" rel="noopener" aria-label="Instagram">
                             <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 25 25" fill="none">
                                 <path d="M18.2327 0H6.76727C3.03574 0 0 3.03574 0 6.76727V18.2329C0 21.9643 3.03574 25 6.76727 25H18.2329C21.9643 25 25 21.9643 25 18.2329V6.76727C25 3.03574 21.9643 0 18.2327 0ZM12.5 19.3357C8.7307 19.3357 5.66425 16.2693 5.66425 12.5C5.66425 8.7307 8.7307 5.66425 12.5 5.66425C16.2693 5.66425 19.3357 8.7307 19.3357 12.5C19.3357 16.2693 16.2693 19.3357 12.5 19.3357ZM19.4992 7.27634C18.3853 7.27634 17.4793 6.37035 17.4793 5.25646C17.4793 4.14257 18.3853 3.23639 19.4992 3.23639C20.6131 3.23639 21.5193 4.14257 21.5193 5.25646C21.5193 6.37035 20.6131 7.27634 19.4992 7.27634Z" fill="#D2D2D2"/>
                                 <path d="M12.5 7C9.46743 7 7 9.46724 7 12.5C7 15.5326 9.46743 18 12.5 18C15.5328 18 18 15.5326 18 12.5C18 9.46724 15.5328 7 12.5 7Z" fill="#D2D2D2"/>
                             </svg>
-                        </a>
-                        <a href="#" target="_blank">
+                        </a>{% endif %}
+                        {% if facebook %}<a href="{{ facebook }}" target="_blank" rel="noopener" aria-label="Facebook">
                             <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 25 25" fill="none">
                                 <path d="M21.3379 0H3.66211C1.64299 0 0 1.64299 0 3.66211V21.3379C0 23.357 1.64299 25 3.66211 25H11.0352V16.1621H8.10547V11.7676H11.0352V8.78906C11.0352 6.36578 13.0064 4.39453 15.4297 4.39453H19.873V8.78906H15.4297V11.7676H19.873L19.1406 16.1621H15.4297V25H21.3379C23.357 25 25 23.357 25 21.3379V3.66211C25 1.64299 23.357 0 21.3379 0Z" fill="#D2D2D2"/>
                             </svg>
-                        </a>
-                    </div>
+                        </a>{% endif %}
+                    </div>{% endif %}
                 </div>
             </div>
             <div class="userPopup__content">
@@ -60,7 +60,7 @@
 
                 {# ===== ВХІД: email → код з листа ===== #}
                 <div class="userPopup__result active" data-userPopup-result="login">
-                    <form id="popup-login-form" class="userPopup__form otp-form" data-otp-type="login" data-send-url="{{ send_url }}" data-verify-url="{{ verify_url }}" data-verify-label="{{ text_verify }}" data-error-network="{{ error_network|e('html_attr') }}" data-code-required="{{ error_code_required|e('html_attr') }}" novalidate>
+                    <form id="popup-login-form" class="userPopup__form otp-form" data-otp-type="login" data-error-no-account="{{ error_no_account|e('html_attr') }}" data-error-email="{{ error_email_invalid|e('html_attr') }}" data-send-url="{{ send_url }}" data-verify-url="{{ verify_url }}" data-verify-label="{{ text_verify }}" data-error-network="{{ error_network|e('html_attr') }}" data-code-required="{{ error_code_required|e('html_attr') }}" novalidate>
                         <input type="hidden" name="redirect" value="" data-popup-redirect>
                         <div class="userPopup__form-box otp-step-fields">
                             <p class="userPopup__code-note">{{ text_login_hint }}</p>
@@ -87,9 +87,10 @@
 
                 {# ===== РЕЄСТРАЦІЯ: імʼя, телефон, email, згода → код з листа ===== #}
                 <div class="userPopup__result" data-userPopup-result="register">
-                    <form id="popup-register-form" class="userPopup__form otp-form" data-otp-type="register" data-error-agree="{{ error_agree|e('html_attr') }}" data-send-url="{{ send_url }}" data-verify-url="{{ verify_url }}" data-verify-label="{{ text_verify }}" data-error-network="{{ error_network|e('html_attr') }}" data-code-required="{{ error_code_required|e('html_attr') }}" novalidate>
+                    <form id="popup-register-form" class="userPopup__form otp-form" data-otp-type="register" data-error-email-exists="{{ error_email_exists|e('html_attr') }}" data-error-email="{{ error_email_invalid|e('html_attr') }}" data-error-firstname="{{ error_firstname_required|e('html_attr') }}" data-error-telephone="{{ error_telephone|e('html_attr') }}" data-error-agree="{{ error_agree|e('html_attr') }}" data-send-url="{{ send_url }}" data-verify-url="{{ verify_url }}" data-verify-label="{{ text_verify }}" data-error-network="{{ error_network|e('html_attr') }}" data-code-required="{{ error_code_required|e('html_attr') }}" novalidate>
                         <input type="hidden" name="redirect" value="" data-popup-redirect>
                         <div class="userPopup__form-box otp-step-fields">
+                            <p class="userPopup__hint" data-register-hint role="status" hidden>{{ text_register_hint }}</p>
                             <div class="userPopup__form-item">
                                 <input class="userPopup__form-input" type="text" name="firstname" placeholder="{{ text_firstname }}*" autocomplete="given-name" required>
                             </div>

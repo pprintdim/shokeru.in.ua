@@ -1,7 +1,7 @@
 <?php
 // Heading
 $_['heading_title'] = 'Мої закладки';
-$_['text_guest_heading'] = 'Избранное';
+$_['text_guest_heading'] = 'Обране';
 
 // Text
 $_['text_account'] = 'Особистий Кабінет';

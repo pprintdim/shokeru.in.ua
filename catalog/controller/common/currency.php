@@ -15,8 +15,11 @@ class ControllerCommonCurrency extends Controller {
 
 		foreach ($results as $result) {
 			if ($result['status']) {
+				$key = 'currency_title_' . $result['code'];
+				$title = $this->language->get($key);
+
 				$data['currencies'][] = array(
-					'title'        => $result['title'],
+					'title'        => ($title !== $key) ? $title : $result['title'],
 					'code'         => $result['code'],
 					'symbol_left'  => $result['symbol_left'],
 					'symbol_right' => $result['symbol_right']
