@@ -288,7 +288,7 @@
 		                                        <h3>{{ product.name }}</h3>
 		                                    </a>
 		                                    <p class="product__item-price">
-		                                        {% if product.special %}
+		                                        {% if product.special and product.special != product.price %}
 		                                            <span>{{ product.price }}</span>
 		                                        {% endif %}
 		                                        {{ product.special ?: product.price }}

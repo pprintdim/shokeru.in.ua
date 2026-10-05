@@ -25,7 +25,7 @@
                             </a>
 
                             <p class="busket__item-price">
-                                {% if product.special %}
+                                {% if product.special and product.special != product.price %}
                                     <span class="price-old">{{ product.price }}</span> 
                                 {% endif %}
                                 {{ product.special ?: product.price }}

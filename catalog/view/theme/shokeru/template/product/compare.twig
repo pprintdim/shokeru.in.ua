@@ -31,7 +31,7 @@
                         <tr>
                             <th scope="row">{{ text_price }}</th>
                             {% for product in products %}
-                            <td>{% if product.special %}<s>{{ product.price }}</s> <strong>{{ product.special }}</strong>{% else %}<strong>{{ product.price }}</strong>{% endif %}</td>
+                            <td>{% if product.special and product.special != product.price %}<s>{{ product.price }}</s> <strong>{{ product.special }}</strong>{% else %}<strong>{{ product.price }}</strong>{% endif %}</td>
                             {% endfor %}
                         </tr>
                         <tr>
