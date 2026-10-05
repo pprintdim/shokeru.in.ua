@@ -318,9 +318,24 @@ class ControllerCheckoutCheckout extends Controller {
 		), JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP);
 
 		// Pickup point = the store address from the settings.
-		$data['pickup_address'] = nl2br($this->config->get('config_address'));
-		$data['pickup_address_line'] = trim(preg_replace('/\s*[\r\n]+\s*/', ', ', (string)$this->config->get('config_address')));
-		$data['pickup_hours'] = $this->config->get('config_open') ? nl2br($this->config->get('config_open')) : '';
+		// shokeru зберігає адресу/графік масивом по мовах (language_id => текст)
+		$localized = function ($key) {
+			$value = $this->config->get($key);
+
+			if (is_array($value)) {
+				$lid = (int)$this->config->get('config_language_id');
+				$value = isset($value[$lid]) ? $value[$lid] : (string)reset($value);
+			}
+
+			return (string)$value;
+		};
+
+		$address = $localized('config_address');
+		$open = $localized('config_open');
+
+		$data['pickup_address'] = nl2br($address);
+		$data['pickup_address_line'] = trim(preg_replace('/\s*[\r\n]+\s*/', ', ', $address));
+		$data['pickup_hours'] = $open !== '' ? nl2br($open) : '';
 	}
 
 	// Payment: WayForPay (card) + cod / bank_transfer for paid carts, free_checkout for a zero total.
