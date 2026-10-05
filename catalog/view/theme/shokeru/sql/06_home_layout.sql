@@ -29,7 +29,7 @@ WHERE NOT EXISTS (SELECT 1 FROM `oc_module` WHERE `code` = 'feedback');
 
 -- 5) порядок секцій
 DROP TEMPORARY TABLE IF EXISTS `tmp_home_order`;
-CREATE TEMPORARY TABLE `tmp_home_order` (`mcode` VARCHAR(40) NOT NULL, `alt` VARCHAR(40) NULL, `sort_order` INT NOT NULL, `do_insert` TINYINT NOT NULL DEFAULT 0);
+CREATE TEMPORARY TABLE `tmp_home_order` (`mcode` VARCHAR(40) NOT NULL, `alt` VARCHAR(40) NULL, `sort_order` INT NOT NULL, `do_insert` TINYINT NOT NULL DEFAULT 0) DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 INSERT INTO `tmp_home_order` (`mcode`, `alt`, `sort_order`, `do_insert`) VALUES
   ('slideshow', NULL, 10, 0),
   ('featured', 'bestseller', 20, 0),
@@ -43,19 +43,19 @@ INSERT INTO `tmp_home_order` (`mcode`, `alt`, `sort_order`, `do_insert`) VALUES
 
 -- 5a) наявні рядки в content_top — лише змінюємо sort_order
 UPDATE `oc_layout_module` lm JOIN `tmp_home_order` t
-  ON (lm.`code` = CONCAT('extension/module/', t.`mcode`) OR lm.`code` LIKE CONCAT('extension/module/', t.`mcode`, '.%')
-      OR (t.`alt` IS NOT NULL AND (lm.`code` = CONCAT('extension/module/', t.`alt`) OR lm.`code` LIKE CONCAT('extension/module/', t.`alt`, '.%'))))
+  ON (lm.`code` = CONCAT(t.`mcode`) OR lm.`code` LIKE CONCAT(t.`mcode`, '.%')
+      OR (t.`alt` IS NOT NULL AND (lm.`code` = CONCAT(t.`alt`) OR lm.`code` LIKE CONCAT(t.`alt`, '.%'))))
 SET lm.`sort_order` = t.`sort_order`
 WHERE lm.`layout_id` = @lid AND lm.`position` = 'content_top';
 
 -- 5b) нових рядків додаємо лише для do_insert=1 і лише якщо цього модуля ще нема в макеті на жодній позиції
 INSERT INTO `oc_layout_module` (`layout_id`, `code`, `position`, `sort_order`)
-SELECT @lid, CONCAT('extension/module/', m.`code`, '.', m.`module_id`), 'content_top', t.`sort_order`
+SELECT @lid, CONCAT(m.`code`, '.', m.`module_id`), 'content_top', t.`sort_order`
 FROM `tmp_home_order` t
 JOIN (SELECT `code`, MIN(`module_id`) AS `module_id` FROM `oc_module` GROUP BY `code`) m ON m.`code` = t.`mcode`
 WHERE t.`do_insert` = 1 AND @lid IS NOT NULL AND NOT EXISTS (
   SELECT 1 FROM `oc_layout_module` x WHERE x.`layout_id` = @lid
-    AND (x.`code` = CONCAT('extension/module/', t.`mcode`) OR x.`code` LIKE CONCAT('extension/module/', t.`mcode`, '.%')));
+    AND (x.`code` = CONCAT(t.`mcode`) OR x.`code` LIKE CONCAT(t.`mcode`, '.%')));
 
 DROP TEMPORARY TABLE IF EXISTS `tmp_home_order`;
 
