@@ -299,3 +299,5 @@ $_['text_recommended'] = 'You recently viewed';
 $_['text_hero_note'] = 'Original stun guns with warranty — shipping across Ukraine daily';
 
 $_['text_nav_blog'] = 'Blog';
+
+$_['button_quick_order'] = 'Buy in one click';

@@ -22,6 +22,34 @@ class ControllerExtensionModuleSlideshow extends Controller {
         return nl2br($text);
     }
 
+    // Чи має MP4 звукову доріжку: у moov шукаємо hdlr із типом «soun». Результат кешується за шляхом і mtime.
+    private function hasAudio($src) {
+        $src = (string)$src;
+
+        if ($src === '' || preg_match('~^(https?:)?//~i', $src)) {
+            return false;
+        }
+
+        $file = strpos($src, 'image/') === 0 ? DIR_IMAGE . substr($src, 6) : DIR_APPLICATION . '../' . ltrim($src, '/');
+
+        if (!is_file($file)) {
+            return false;
+        }
+
+        $key = 'shokeru.hero.audio.' . md5($file . filemtime($file));
+        $cached = $this->cache->get($key);
+
+        if ($cached !== false && $cached !== null) {
+            return (bool)$cached;
+        }
+
+        $audio = (bool)preg_match('~hdlr.{8}soun~s', (string)file_get_contents($file));
+
+        $this->cache->set($key, $audio ? 1 : 0);
+
+        return $audio;
+    }
+
     public function index($setting) {
         static $module = 0;
 
@@ -61,6 +89,8 @@ class ControllerExtensionModuleSlideshow extends Controller {
                     'description'  => $this->parseBannerText($result['description']),
                     'is_video'     => true,
                     'is_video_mob' => true,
+                    'audio'        => $this->hasAudio($desktop),
+                    'audio_mob'    => $this->hasAudio($mob),
                     'poster'       => $poster,
                     'mob_poster'   => $mob_poster,
                     'images' => [
@@ -84,6 +114,8 @@ class ControllerExtensionModuleSlideshow extends Controller {
                     'description'  => $this->parseBannerText($result['description']),
                     'is_video'     => false,
                     'is_video_mob' => false,
+                    'audio'        => false,
+                    'audio_mob'    => false,
                     'poster'       => '',
                     'mob_poster'   => '',
                     'images' => [
@@ -96,6 +128,19 @@ class ControllerExtensionModuleSlideshow extends Controller {
         }
 
         $data['module'] = $module++;
+
+        // кнопка «Звук»: показується лише якщо в слайдері є відео зі звуковою доріжкою
+        $data['has_sound'] = false;
+
+        foreach ($data['banners'] as $banner) {
+            if (!empty($banner['audio']) || !empty($banner['audio_mob'])) {
+                $data['has_sound'] = true;
+            }
+        }
+
+        $this->load->language('extension/module/slideshow');
+        $data['text_sound_on'] = $this->language->get('text_sound_on');
+        $data['text_sound_off'] = $this->language->get('text_sound_off');
 
         $data['catalog_url'] = $this->url->link('product/shop');
 

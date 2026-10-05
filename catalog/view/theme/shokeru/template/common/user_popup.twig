@@ -1,12 +1,12 @@
 <section class="userPopup">
     <div class="userPopup__image">
-        <img src="catalog/view/theme/shokeru/images/userPopup.png" alt="">
+        <img src="catalog/view/theme/shokeru/images/userPopup.png" alt="" aria-hidden="true">
     </div>
     <div class="container">
         <div class="userPopup__inner">
             <div class="userPopup__top">
-            <a class="userPopup__logo" href="{{ name }}">
-                <img src="{{ logo }}?v=20260626b" alt="" width="260" height="38">
+            <a class="userPopup__logo" href="{{ home }}">
+                <img src="{{ logo }}?v=20260626b" alt="{{ name }}" width="260" height="38">
             </a>
             <button class="userPopup__close">{{ text_close }}</button>
         </div>
@@ -35,7 +35,7 @@
                                 <path d="M22 6L12 13L2 6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
                         </div>
-                        <a class="header__menu-link" href="mailto:admin@trikobakh.com">{{ email }}</a>
+                        <a class="header__menu-link" href="mailto:{{ email }}">{{ email }}</a>
                     </div>
                     <div class="header__menu-social">
                         <a href="#" target="_blank">
@@ -54,132 +54,18 @@
             </div>
             <div class="userPopup__content">
                 <div class="userPopup__select userPopup__select-login">
-                    <button class="userPopup__btn active" data-userPopup-select="login">{{ button_login }}</button>
-                    <button class="userPopup__btn" data-userPopup-select="register">{{ button_register }}</button>
+                    <button type="button" class="userPopup__btn active" data-userPopup-select="login">{{ button_login }}</button>
+                    <button type="button" class="userPopup__btn" data-userPopup-select="register">{{ button_register }}</button>
                 </div>
 
-                {# ===== ЛОГІН (email + пароль) ===== #}
+                {# ===== ВХІД: email → код з листа ===== #}
                 <div class="userPopup__result active" data-userPopup-result="login">
-                    <form id="popup-login-form" class="userPopup__form">
-                        <input type="hidden" name="redirect" value="" data-popup-redirect>
-                        <div class="userPopup__form-block">
-                            <div class="userPopup__form-item">
-                                <input type="email" name="email" class="userPopup__form-input" placeholder="Email*" required>
-                            </div>
-                            <div class="userPopup__form-item">
-                                <button class="userPopup__form-show form-show-password" type="button"></button>
-                                <input type="password" name="password" class="userPopup__form-input" placeholder="{{ text_password }}*" required>
-                            </div>
-                        </div>
-
-                        <a class="userPopup__form-forgot" href="#">{{ text_forgot }}</a>
-
-                        <div class="userPopup__form-error login-error" style="display:none;"></div>
-
-                        <button type="submit" class="userPopup__form-btn btn">{{ button_login }}</button>
-
-                        <div class="userPopup__form-more"><span></span> {{ text_or }} <span></span></div>
-
-                        <div class="userPopup__form-buttons">
-                            {% if google_client_id %}
-                                <button type="button" class="userPopup__form-log btn-2" id="btn-google-login">{{ button_google }}</button>
-                            {% else %}
-                                <button type="button" class="userPopup__form-log btn-2" disabled title="{{ text_google_oauth_off }}">{{ button_google }}</button>
-                            {% endif %}
-                            {% if facebook_app_id %}
-                                <button type="button" class="userPopup__form-log btn-2" id="btn-facebook-login">{{ button_facebook }}</button>
-                            {% else %}
-                                <button type="button" class="userPopup__form-log btn-2" disabled title="{{ text_fb_oauth_off }}">{{ button_facebook }}</button>
-                            {% endif %}
-                        </div>
-                    </form>
-
-                    <script>
-                    (function() {
-                        const form    = document.getElementById('popup-login-form');
-                        const errorEl = form.querySelector('.login-error');
-                        function showError(msg) { errorEl.textContent = msg; errorEl.style.display = 'block'; }
-                        function clearError() { errorEl.textContent = ''; errorEl.style.display = 'none'; }
-                        form.addEventListener('submit', function(event) {
-                            event.preventDefault();
-                            clearError();
-
-                            fetch('index.php?route=common/user_popup/login', {
-                                method: 'POST',
-                                body: new FormData(form),
-                                credentials: 'same-origin'
-                            })
-                            .then(function(r) { return r.json(); })
-                            .then(function(json) {
-                                if (json.success) window.location.href = json.redirect;
-                                else showError(json.error || '{{ error_login }}');
-                            })
-                            .catch(function() { showError('Сталася помилка, спробуйте ще раз'); });
-                        });
-
-                        {% if google_client_id %}
-                        // Google
-                        window.handleGoogleCredential = function(response) {
-                            fetch('index.php?route=common/user_popup/googleLogin', {
-                                method: 'POST',
-                                body: new URLSearchParams({ credential: response.credential }),
-                                credentials: 'same-origin'
-                            })
-                            .then(function(r) { return r.json(); })
-                            .then(function(json) {
-                                if (json.success) window.location.href = json.redirect;
-                                else showError(json.error || 'Помилка входу через Google');
-                            })
-                            .catch(function() { showError('Сталася помилка Google'); });
-                        };
-
-                        document.getElementById('btn-google-login').addEventListener('click', function() {
-                            if (window.google && google.accounts) {
-                                google.accounts.id.prompt();
-                            }
-                        });
-                        {% endif %}
-
-                        {% if facebook_app_id %}
-                        // Facebook
-                        document.getElementById('btn-facebook-login').addEventListener('click', function() {
-                            FB.login(function(response) {
-                                if (response.authResponse) {
-                                    fetch('index.php?route=common/user_popup/facebookLogin', {
-                                        method: 'POST',
-                                        body: new URLSearchParams({ access_token: response.authResponse.accessToken }),
-                                        credentials: 'same-origin'
-                                    })
-                                    .then(function(r) { return r.json(); })
-                                    .then(function(json) {
-                                        if (json.success) window.location.href = json.redirect;
-                                        else showError(json.error || 'Помилка входу через Facebook');
-                                    })
-                                    .catch(function() { showError('Сталася помилка Facebook'); });
-                                }
-                            }, { scope: 'email' });
-                        });
-                        {% endif %}
-                    })();
-                    </script>
-                </div>
-
-                {# ===== РЕЄСТРАЦІЯ (по коду на email) ===== #}
-                <div class="userPopup__result" data-userPopup-result="register">
-                    <form id="popup-register-form" class="userPopup__form otp-form" data-otp-type="register" data-verify-label="{{ text_verify }}">
+                    <form id="popup-login-form" class="userPopup__form otp-form" data-otp-type="login" data-send-url="{{ send_url }}" data-verify-url="{{ verify_url }}" data-verify-label="{{ text_verify }}" data-error-network="{{ error_network|e('html_attr') }}" data-code-required="{{ error_code_required|e('html_attr') }}" novalidate>
                         <input type="hidden" name="redirect" value="" data-popup-redirect>
                         <div class="userPopup__form-box otp-step-fields">
-                            <div class="userPopup__form-item">
-                                <input class="userPopup__form-input" type="text" name="firstname" placeholder="{{ text_firstname }}*" required>
-                            </div>
-                            <div class="userPopup__form-item">
-                                <input class="userPopup__form-input" type="text" name="lastname" placeholder="{{ text_lastname }}">
-                            </div>
-                            <div class="userPopup__form-item">
-                                <input class="userPopup__form-input" type="tel" name="telephone" placeholder="{{ text_telephone }}*" required>
-                            </div>
+                            <p class="userPopup__code-note">{{ text_login_hint }}</p>
                             <div class="userPopup__form-item otp-email-item">
-                                <input class="userPopup__form-input" type="email" name="email" placeholder="Email*" required>
+                                <input class="userPopup__form-input" type="email" name="email" placeholder="{{ text_email }}*" autocomplete="email" required>
                                 <span class="otp-email-check" aria-hidden="true"></span>
                             </div>
                         </div>
@@ -192,139 +78,58 @@
                             <button type="button" class="userPopup__code-resend otp-resend">{{ text_code_resend }} <span class="otp-timer"></span></button>
                         </div>
 
+                        <div class="userPopup__form-error otp-error" role="alert" style="display:none;"></div>
+                        <div class="userPopup__code-success otp-success" role="status" hidden></div>
+
+                        <button class="userPopup__form-btn btn otp-submit" type="submit">{{ text_get_code }}</button>
+                    </form>
+                </div>
+
+                {# ===== РЕЄСТРАЦІЯ: імʼя, телефон, email, згода → код з листа ===== #}
+                <div class="userPopup__result" data-userPopup-result="register">
+                    <form id="popup-register-form" class="userPopup__form otp-form" data-otp-type="register" data-error-agree="{{ error_agree|e('html_attr') }}" data-send-url="{{ send_url }}" data-verify-url="{{ verify_url }}" data-verify-label="{{ text_verify }}" data-error-network="{{ error_network|e('html_attr') }}" data-code-required="{{ error_code_required|e('html_attr') }}" novalidate>
+                        <input type="hidden" name="redirect" value="" data-popup-redirect>
+                        <div class="userPopup__form-box otp-step-fields">
+                            <div class="userPopup__form-item">
+                                <input class="userPopup__form-input" type="text" name="firstname" placeholder="{{ text_firstname }}*" autocomplete="given-name" required>
+                            </div>
+                            <div class="userPopup__form-item">
+                                <input class="userPopup__form-input" type="text" name="lastname" placeholder="{{ text_lastname }}" autocomplete="family-name">
+                            </div>
+                            <div class="userPopup__form-item">
+                                <input class="userPopup__form-input" type="tel" name="telephone" placeholder="{{ text_telephone }}*" autocomplete="tel" required data-phone-input>
+                            </div>
+                            <div class="userPopup__form-item otp-email-item">
+                                <input class="userPopup__form-input" type="email" name="email" placeholder="{{ text_email }}*" autocomplete="email" required>
+                                <span class="otp-email-check" aria-hidden="true"></span>
+                            </div>
+                        </div>
+
+                        <div class="userPopup__code otp-step-code" hidden>
+                            <p class="userPopup__code-note">{{ text_code_sent }} <b class="otp-email-label"></b></p>
+                            <div class="userPopup__form-item">
+                                <input type="text" name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" class="userPopup__form-input otp-code-input" placeholder="{{ text_code_placeholder }}">
+                            </div>
+                            <button type="button" class="userPopup__code-resend otp-resend">{{ text_code_resend }} <span class="otp-timer"></span></button>
+                        </div>
+
+                        {% if text_agree %}
                         <label class="userPopup__form-checkbox checkbox-block otp-agree-row">
                             <input type="checkbox" name="agree" value="1" class="visually-hidden" checked required>
                             <span>{{ text_agree }}</span>
                         </label>
+                        {% else %}
+                        <input type="hidden" name="agree" value="1">
+                        {% endif %}
 
-                        <div class="userPopup__form-error otp-error" style="display:none;"></div>
-                        <div class="userPopup__code-success otp-success" hidden></div>
+                        <div class="userPopup__form-error otp-error" role="alert" style="display:none;"></div>
+                        <div class="userPopup__code-success otp-success" role="status" hidden></div>
 
                         <button class="userPopup__form-btn btn otp-submit" type="submit">{{ text_get_code }}</button>
-
-                        <div class="userPopup__form-more"><span></span> {{ text_or }} <span></span></div>
-
-                        <div class="userPopup__form-buttons">
-                            {% if google_client_id %}
-                                <button type="button" class="userPopup__form-log btn-2" id="btn-google-register">{{ button_google }}</button>
-                            {% else %}
-                                <button type="button" class="userPopup__form-log btn-2" disabled title="{{ text_google_oauth_off }}">{{ button_google }}</button>
-                            {% endif %}
-                            {% if facebook_app_id %}
-                                <button type="button" class="userPopup__form-log btn-2" id="btn-facebook-register">{{ button_facebook }}</button>
-                            {% else %}
-                                <button type="button" class="userPopup__form-log btn-2" disabled title="{{ text_fb_oauth_off }}">{{ button_facebook }}</button>
-                            {% endif %}
-                        </div>
                     </form>
-
-                    <script>
-                    (function() {
-                        const form    = document.getElementById('popup-register-form');
-                        const errorEl = form.querySelector('.otp-error');
-                        function showError(msg) { errorEl.textContent = msg; errorEl.style.display = 'block'; }
-                        function clearError() { errorEl.textContent = ''; errorEl.style.display = 'none'; }
-                        // страховка від нативного GET-сабміту, поки OTP не забіндився
-                        form.addEventListener('submit', function (e) { if (!form.dataset.otpBound) e.preventDefault(); });
-                        function bindOtp() {
-                            if (window.ShokeruOtp) window.ShokeruOtp.init(form, { showError: showError, clearError: clearError, agreeError: '{{ error_agree }}' });
-                        }
-                        // common.js підключений з defer — чекаємо DOMContentLoaded
-                        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bindOtp);
-                        else bindOtp();
-                    })();
-                    </script>
                 </div>
             </div>
         </div>
     </div>
-</section>
-
-{% if google_client_id %}
-<script src="https://accounts.google.com/gsi/client" async defer></script>
-<div id="g_id_onload"
-     data-client_id="{{ google_client_id }}"
-     data-callback="handleGoogleCredential"
-     data-auto_prompt="false">
-</div>
-{% endif %}
-
-{% if facebook_app_id %}
-<script>
-window.fbAsyncInit = function() {
-    FB.init({ appId: '{{ facebook_app_id }}', cookie: true, xfbml: true, version: 'v19.0' });
-};
-(function(d,s,id){
-    var js, fjs = d.getElementsByTagName(s)[0];
-    if (d.getElementById(id)) return;
-    js = d.createElement(s); js.id = id;
-    js.src = 'https://connect.facebook.net/uk_UA/sdk.js';
-    fjs.parentNode.insertBefore(js, fjs);
-}(document, 'script', 'facebook-jssdk'));
-</script>
-{% endif %}
-
-<section class="userData" data-userData="password-recovery">
-    <div class="container">
-        <div class="userData__inner">
-            <button class="userData__close">
-                {{ text_close }}
-                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40" fill="none">
-                    <rect x="9" y="28.7991" width="28" height="4" transform="rotate(-45 9 28.7991)" fill="#202222"/>
-                    <rect x="28.8008" y="31.6274" width="9" height="4" transform="rotate(-135 28.8008 31.6274)" fill="#202222"/>
-                    <rect x="11.8281" y="9" width="9" height="4" transform="rotate(45 11.8281 9)" fill="#202222"/>
-                </svg>
-            </button>
-                    <div class="userData__info">
-                        <div class="userData__info-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="33" height="36" viewBox="0 0 33 36" fill="none">
-                                <path d="M6.1 14.6V6.1C6.1 4.7474 6.63732 3.45019 7.59376 2.49376C8.55019 1.53732 9.8474 1 11.2 1H21.4C22.7526 1 24.0498 1.53732 25.0062 2.49376C25.9627 3.45019 26.5 4.7474 26.5 6.1V7.8M4.4 14.6H28.2C30.0778 14.6 31.6 16.1222 31.6 18V31.6C31.6 33.4778 30.0778 35 28.2 35H4.4C2.52223 35 1 33.4778 1 31.6V18C1 16.1222 2.52223 14.6 4.4 14.6Z" stroke="#202222" stroke-width="2" stroke-linecap="square" stroke-linejoin="round"/>
-                                <circle cx="16.3013" cy="24.9656" r="1.49268" fill="#202222"/>
-                                <circle cx="11.3247" cy="24.9656" r="1.49268" fill="#202222"/>
-                                <circle cx="21.2739" cy="24.9656" r="1.49268" fill="#202222"/>
-                            </svg>
-                        </div>
-                        <div class="userData__info-content">
-                            <h2 class="userData__info-title">{{ text_forgot }}</h2>
-                            <p class="userData__info-descr">{{ text_forgot_notice }}</p>
-                        </div>
-                    </div>
-                    <form id="popup-forgotten-form" class="userData__form form-block">
-                        <div class="userData__form-item">
-                            <input class="userData__form-input form-input" type="email" name="email" placeholder="Email*" required>
-                        </div>
-                        <div class="userPopup__form-error forgotten-error" style="display:none;"></div>
-                        <div class="userPopup__code-success forgotten-success" hidden></div>
-                        <button class="userData__form-btn btn" type="submit">{{ button_recover }}</button>
-                    </form>
-                    <script>
-                    (function () {
-                        var form = document.getElementById('popup-forgotten-form');
-                        if (!form) return;
-                        var errorEl = form.querySelector('.forgotten-error');
-                        var okEl    = form.querySelector('.forgotten-success');
-                        var btn     = form.querySelector('button[type="submit"]');
-                        var item    = form.querySelector('.userData__form-item');
-                        form.addEventListener('submit', function (e) {
-                            e.preventDefault();
-                            errorEl.style.display = 'none'; errorEl.textContent = '';
-                            btn.disabled = true;
-                            fetch('index.php?route=common/user_popup/forgotten', { method: 'POST', body: new FormData(form), credentials: 'same-origin' })
-                                .then(function (r) { return r.json(); })
-                                .then(function (j) {
-                                    btn.disabled = false;
-                                    if (j.success) {
-                                        if (item) item.style.display = 'none';
-                                        btn.style.display = 'none';
-                                        if (okEl) { okEl.hidden = false; okEl.textContent = j.message || 'Готово'; }
-                                    } else {
-                                        errorEl.textContent = j.error || 'Помилка'; errorEl.style.display = 'block';
-                                    }
-                                })
-                                .catch(function () { btn.disabled = false; errorEl.textContent = 'Сталася помилка, спробуйте ще раз'; errorEl.style.display = 'block'; });
-                        });
-                    })();
-                    </script>
-       </div>
     </div>
 </section>

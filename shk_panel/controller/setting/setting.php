@@ -952,6 +952,18 @@ class ControllerSettingSetting extends Controller {
 			$data['config_mail_engine'] = $this->config->get('config_mail_engine');
 		}
 
+		if (isset($this->request->post['config_ga4_id'])) {
+			$data['config_ga4_id'] = $this->request->post['config_ga4_id'];
+		} else {
+			$data['config_ga4_id'] = $this->config->get('config_ga4_id');
+		}
+
+		if (isset($this->request->post['config_quick_order_email'])) {
+			$data['config_quick_order_email'] = $this->request->post['config_quick_order_email'];
+		} else {
+			$data['config_quick_order_email'] = $this->config->get('config_quick_order_email');
+		}
+
 		if (isset($this->request->post['config_mail_parameter'])) {
 			$data['config_mail_parameter'] = $this->request->post['config_mail_parameter'];
 		} else {

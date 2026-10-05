@@ -23,8 +23,17 @@ class ControllerCommonFooter extends Controller {
 		$this->load->model('catalog/information');
 
 		$data['informations'] = array();
+		$data['legal'] = array();
 
 		foreach ($this->model_catalog_information->getInformations() as $result) {
+			// «Показувати в підфутері» (info_flags.sql): політика, умови — у нижньому рядку поруч із ©
+			if (!empty($result['subfooter'])) {
+				$data['legal'][] = array(
+					'title' => $result['title'],
+					'href'  => $this->url->link('information/information', 'information_id=' . $result['information_id'])
+				);
+			}
+
 			if ($result['bottom']) {
 				$data['informations'][] = array(
 					'title' => $result['title'],
@@ -50,6 +59,9 @@ class ControllerCommonFooter extends Controller {
 
 		$data['cart'] = $this->load->controller('common/cart');
 		$data['user_popup'] = $this->load->controller('common/user_popup');
+		// «Купити в один клік» (попап) і cookie-банер — на кожній сторінці
+		$data['quick_order'] = $this->load->controller('common/quick_order');
+		$data['cookie'] = $this->load->controller('common/cookie');
 		$data['contact'] = $this->url->link('information/contact', '', true);
 		$data['about'] = $this->url->link('information/about', '', true);
 		$data['return'] = $this->url->link('account/return/add', '', true);
@@ -65,6 +77,20 @@ class ControllerCommonFooter extends Controller {
 		$data['wishlist'] = $this->url->link('account/wishlist', '', true);
 		$data['newsletter'] = $this->url->link('account/newsletter', '', true);
 		$data['logged'] = $this->customer->isLogged();
+		// плаваючі кнопки: перший телефон магазину
+		$data['phones'] = array();
+
+		foreach (array($this->config->get('config_telephone'), $this->config->get('config_fax')) as $phone) {
+			$phone = trim((string)$phone);
+
+			if ($phone !== '') {
+				$data['phones'][] = array(
+					'href'  => 'tel:' . preg_replace('/[^\d+]/', '', $phone),
+					'label' => $phone
+				);
+			}
+		}
+
 		$data['powered'] = sprintf($this->language->get('text_powered'), $this->config->get('config_name'), date('Y', time()));
 		$data['facebook'] = $this->config->get('config_facebook');
 		$data['instagram'] = $this->config->get('config_instagram');

@@ -1,7 +1,18 @@
 <?php
 class ModelCatalogInformation extends Model {
+	// прапорці «Показувати в шапці» / «в підфутері» — колонки top, subfooter (info_flags.sql); без них модель працює як раніше
+	private function flagsSql($data) {
+		static $has = null;
+
+		if ($has === null) {
+			$has = $this->db->query("SHOW COLUMNS FROM `" . DB_PREFIX . "information` LIKE 'subfooter'")->num_rows && $this->db->query("SHOW COLUMNS FROM `" . DB_PREFIX . "information` LIKE 'top'")->num_rows;
+		}
+
+		return $has ? ", top = '" . (isset($data['top']) ? (int)$data['top'] : 0) . "', subfooter = '" . (isset($data['subfooter']) ? (int)$data['subfooter'] : 0) . "'" : '';
+	}
+
 	public function addInformation($data) {
-		$this->db->query("INSERT INTO " . DB_PREFIX . "information SET sort_order = '" . (int)$data['sort_order'] . "', bottom = '" . (isset($data['bottom']) ? (int)$data['bottom'] : 0) . "', status = '" . (int)$data['status'] . "'");
+		$this->db->query("INSERT INTO " . DB_PREFIX . "information SET sort_order = '" . (int)$data['sort_order'] . "', bottom = '" . (isset($data['bottom']) ? (int)$data['bottom'] : 0) . "'" . $this->flagsSql($data) . ", status = '" . (int)$data['status'] . "'");
 
 		$information_id = $this->db->getLastId();
 
@@ -38,7 +49,7 @@ class ModelCatalogInformation extends Model {
 	}
 
 	public function editInformation($information_id, $data) {
-		$this->db->query("UPDATE " . DB_PREFIX . "information SET sort_order = '" . (int)$data['sort_order'] . "', bottom = '" . (isset($data['bottom']) ? (int)$data['bottom'] : 0) . "', status = '" . (int)$data['status'] . "' WHERE information_id = '" . (int)$information_id . "'");
+		$this->db->query("UPDATE " . DB_PREFIX . "information SET sort_order = '" . (int)$data['sort_order'] . "', bottom = '" . (isset($data['bottom']) ? (int)$data['bottom'] : 0) . "'" . $this->flagsSql($data) . ", status = '" . (int)$data['status'] . "' WHERE information_id = '" . (int)$information_id . "'");
 
 		$this->db->query("DELETE FROM " . DB_PREFIX . "information_description WHERE information_id = '" . (int)$information_id . "'");
 

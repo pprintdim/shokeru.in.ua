@@ -1,0 +1,103 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="pull-right">
+        <button type="submit" form="form-welcome" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-save"></i></button>
+        <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a>
+      </div>
+      <h1>{{ heading_title }}</h1>
+      <ul class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+        <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  <div class="container-fluid">
+    {% if error_warning %}
+    <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+    {% if success %}
+    <div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> {{ success }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title"><i class="fa fa-pencil"></i> {{ text_edit }}</h3>
+      </div>
+      <div class="panel-body">
+        <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-welcome" class="form-horizontal">
+          <div class="form-group">
+            <label class="col-sm-2 control-label" for="input-status">{{ entry_status }}</label>
+            <div class="col-sm-10">
+              <select name="welcome_status" id="input-status" class="form-control">
+                <option value="1"{% if welcome_status %} selected="selected"{% endif %}>{{ text_enabled }}</option>
+                <option value="0"{% if not welcome_status %} selected="selected"{% endif %}>{{ text_disabled }}</option>
+              </select>
+              <div class="help-block">{{ help_status }}</div>
+            </div>
+          </div>
+          {# frequency: how many times a month, with what probability and how often #}
+          <div class="form-group">
+            <label class="col-sm-2 control-label" for="input-shows">{{ entry_shows }}</label>
+            <div class="col-sm-10">
+              <input type="number" name="welcome_shows" value="{{ welcome_shows }}" min="1" max="20" id="input-shows" class="form-control" />
+              <div class="help-block">{{ help_shows }}</div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="col-sm-2 control-label" for="input-chance">{{ entry_chance }}</label>
+            <div class="col-sm-10">
+              <input type="number" name="welcome_chance" value="{{ welcome_chance }}" min="1" max="100" id="input-chance" class="form-control" />
+              <div class="help-block">{{ help_chance }}</div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="col-sm-2 control-label" for="input-interval">{{ entry_interval }}</label>
+            <div class="col-sm-10">
+              <input type="number" name="welcome_interval" value="{{ welcome_interval }}" min="0" max="168" id="input-interval" class="form-control" />
+              <div class="help-block">{{ help_interval }}</div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="col-sm-2 control-label" for="input-video">{{ entry_video }}</label>
+            <div class="col-sm-10">
+              <a href="" id="thumb-video" data-toggle="image" class="img-thumbnail" style="width:84px;height:84px;display:inline-flex;align-items:center;justify-content:center"><img src="{{ thumb_video }}" alt="" title="" data-placeholder="{{ placeholder }}" style="max-width:100%;max-height:100%" /></a>
+              <input type="hidden" name="welcome_video" value="{{ welcome_video }}" id="input-video" />
+              <div class="help-block">{{ help_video }}</div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="col-sm-2 control-label" for="input-video-mobile">{{ entry_video_mobile }}</label>
+            <div class="col-sm-10">
+              <a href="" id="thumb-video-mobile" data-toggle="image" class="img-thumbnail" style="width:84px;height:84px;display:inline-flex;align-items:center;justify-content:center"><img src="{{ thumb_video_mobile }}" alt="" title="" data-placeholder="{{ placeholder }}" style="max-width:100%;max-height:100%" /></a>
+              <input type="hidden" name="welcome_video_mobile" value="{{ welcome_video_mobile }}" id="input-video-mobile" />
+              <div class="help-block">{{ help_video_mobile }}</div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="col-sm-2 control-label" for="input-poster">{{ entry_poster }}</label>
+            <div class="col-sm-10">
+              <a href="" id="thumb-poster" data-toggle="image" class="img-thumbnail" style="width:84px;height:84px;display:inline-flex;align-items:center;justify-content:center"><img src="{{ thumb_poster }}" alt="" title="" data-placeholder="{{ placeholder }}" style="max-width:100%;max-height:100%" /></a>
+              <input type="hidden" name="welcome_poster" value="{{ welcome_poster }}" id="input-poster" />
+              <div class="help-block">{{ help_poster }}</div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="col-sm-2 control-label" for="input-logo">{{ entry_logo }}</label>
+            <div class="col-sm-10">
+              <a href="" id="thumb-logo" data-toggle="image" class="img-thumbnail" style="width:84px;height:84px;display:inline-flex;align-items:center;justify-content:center"><img src="{{ thumb_logo }}" alt="" title="" data-placeholder="{{ placeholder }}" style="max-width:100%;max-height:100%" /></a>
+              <input type="hidden" name="welcome_logo" value="{{ welcome_logo }}" id="input-logo" />
+              <div class="help-block">{{ help_logo }}</div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{{ footer }}

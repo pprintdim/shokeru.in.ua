@@ -24,6 +24,17 @@ class ControllerStartupSeoUrl extends Controller {
 			}
 		}
 
+		// Знято зі сторінок: вхід і реєстрація — попап у шапці, тож старі слаги (і слаги з БД) 301 на головну,
+		// яка відкриває попап з ?auth= (js/features.js)
+		if (isset($this->request->get['_route_'])) {
+			$retired = array('login' => 'login', 'register' => 'register', 'forgot-password' => 'login', 'forgotten' => 'login', 'vhod' => 'login', 'registraciya' => 'register');
+			$slug = trim((string)$this->request->get['_route_'], '/');
+
+			if (isset($retired[$slug])) {
+				$this->response->redirect($this->url->link('common/home', 'auth=' . $retired[$slug]), 301);
+			}
+		}
+
 		// Decode URL
 		if (isset($this->request->get['_route_'])) {
 			$parts = explode('/', $this->request->get['_route_']);

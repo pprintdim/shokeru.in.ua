@@ -44,3 +44,9 @@ $_['error_checkout']         = 'Warning: This information page cannot be deleted
 $_['error_affiliate']        = 'Warning: This information page cannot be deleted as it is currently assigned as the store affiliate terms!';
 $_['error_return']           = 'Warning: This information page cannot be deleted as it is currently assigned as the store return terms!';
 $_['error_store']            = 'Warning: This information page cannot be deleted as it is currently used by %s stores!';
+
+// shokeru: прапорці шапки/підфутера
+$_['entry_top'] = 'Show in the header';
+$_['help_top'] = 'A link in the top menu of the site.';
+$_['entry_subfooter'] = 'Show in the sub-footer';
+$_['help_subfooter'] = 'A link in the bottom line of the site next to © (privacy policy, terms).';

@@ -8,7 +8,7 @@
             <form class="feedback__form" action="{{ action }}">
                 <input class="feedback__form-input" type="text" name="name" placeholder="{{ entry_name }}" required>
                 <input class="feedback__form-input" type="email" name="email" placeholder="{{ entry_email }}">
-                <input class="feedback__form-input" type="tel" name="telephone" placeholder="{{ entry_telephone }}" required>
+                <input class="feedback__form-input" type="tel" name="telephone" placeholder="{{ entry_telephone }}" required data-phone-input>
                 <textarea class="feedback__form-input" name="message" placeholder="{{ entry_message }}" required></textarea>
                 <button class="feedback__form-btn btn" type="submit">{{ button_submit }}</button>
             </form>

@@ -400,6 +400,14 @@ document.addEventListener("DOMContentLoaded", function () {
                     1280: { spaceBetween: 24, slidesPerView: 4 },
                 };
 
+            // крапки під слайдером — лише на телефоні (на ПК — прямокутні стрілки), CSS у features.css
+            var dots = scope.querySelector(".productSlider__dots");
+            if (!dots) {
+                dots = document.createElement("div");
+                dots.className = "productSlider__dots";
+                sliderEl.insertAdjacentElement("afterend", dots);
+            }
+
             new Swiper(sliderEl, {
                 // loop лише коли слайдів більше за максимум на екран (інакше swiper ламається)
                 loop: slideCount > maxPerView,
@@ -412,6 +420,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     nextEl: scope.querySelector(".productSlider-next"),
                     prevEl: scope.querySelector(".productSlider-prev"),
                 },
+                pagination: { el: dots, clickable: true },
                 mousewheel: { forceToAxis: true, releaseOnEdges: true },
                 breakpoints: breakpoints,
             });
@@ -532,7 +541,7 @@ document.querySelectorAll('.faq__item-title').forEach(title => {
     }
 
     function bind(input) {
-        if (input.dataset.uaPhone) return;
+        if (input.dataset.uaPhone || input.hasAttribute('data-phone-input')) return;
         input.dataset.uaPhone = '1';
         input.setAttribute('inputmode', 'tel');
         if (!input.getAttribute('placeholder')) input.setAttribute('placeholder', '+38 (0__) ___-__-__');

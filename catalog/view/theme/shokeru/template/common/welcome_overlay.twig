@@ -1,0 +1,39 @@
+{# Вітальний тизер поверх головної (як у hydrophob; логіка — js/features.js initWelcome, стилі — css/features.css .welcome-*).
+   Життя накладки — чотири стани:
+     1. завантаження — прелоадер із лого вантажить ролик у кеш (смужка й відсотки);
+     2. очікування   — ролик одразу йде приглушеним і розмитим, друкується лід; зʼявляється справжній cookie-банер сайту;
+     3. перегляд     — відповідь на банер (прийняти / лише необхідні) = дозвіл на звук: ролик грає з початку до кінця зі звуком,
+                       без розмиття; «Пропустити» по центру внизу;
+     4. вихід        — ролик догрався (або «Пропустити») — накладка їде вниз і відкриває головну.
+   Показ: ControllerCommonHome::shouldShowWelcome() — перший візит завжди, далі кілька разів на місяць, ?welcome=1 примусово, ботам ніколи.
+   Налаштування: Дизайн → Вітальний екран (welcome_*). #}
+<div class="welcome-overlay" id="welcome-overlay" data-welcome role="dialog" aria-modal="true" aria-label="{{ text_aria }}">
+  <div class="welcome-preloader" data-welcome-preloader aria-hidden="true">
+    <div class="welcome-preloader__inner">
+      {% if logo %}<img class="welcome-preloader__logo" src="{{ logo }}" alt="" width="280" height="58">{% else %}<strong class="welcome-preloader__name">{{ heading_title }}</strong>{% endif %}
+      <div class="welcome-preloader__bar"><i data-welcome-progress></i></div>
+      <div class="welcome-preloader__pct" data-welcome-pct>0%</div>
+    </div>
+  </div>
+
+  <div class="welcome-intro is-blurred" data-welcome-intro>
+    <div class="welcome-intro__video">
+      <video class="welcome-video" data-welcome-video src="{{ video }}"{% if video_mobile %} data-src-mobile="{{ video_mobile }}"{% endif %} data-prefetch="{{ prefetch|json_encode|e('html_attr') }}"{% if has_audio %} data-has-audio="1"{% endif %}{% if has_audio_mobile %} data-has-audio-mobile="1"{% endif %}{% if poster %} poster="{{ poster }}"{% endif %} preload="auto" muted loop playsinline aria-label="{{ heading_title }}"></video>
+    </div>
+    <div class="welcome-intro__shade" aria-hidden="true"></div>
+    <div class="welcome-intro__content">
+      <p class="welcome-intro__eyebrow">{{ text_eyebrow }}</p>
+      <p class="welcome-intro__title">{{ heading_title }}</p>
+      <p class="welcome-intro__descr" data-welcome-type>{{ text_lead }}</p>
+    </div>
+
+    <button type="button" class="welcome-sound" data-welcome-sound data-label-on="{{ text_sound_on }}" data-label-off="{{ text_sound_off }}" aria-pressed="false" aria-label="{{ text_sound_off }}" title="{{ text_sound_off }}">
+      <svg class="welcome-sound__muted" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z"/><line x1="22" x2="16" y1="9" y2="15"/><line x1="16" x2="22" y1="9" y2="15"/></svg>
+      <svg class="welcome-sound__loud" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z"/><path d="M16 9a5 5 0 0 1 0 6"/><path d="M19.364 18.364a9 9 0 0 0 0-12.728"/></svg>
+    </button>
+    <button type="button" class="welcome-skip" data-welcome-skip aria-label="{{ text_skip_aria }}">
+      <span class="welcome-skip__track" aria-hidden="true"><span class="welcome-skip__line"></span></span>
+      <span class="welcome-skip__text">{{ text_skip }}</span>
+    </button>
+  </div>
+</div>

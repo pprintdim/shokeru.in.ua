@@ -19,6 +19,13 @@
 <script>
 window.dataLayer = window.dataLayer || [];
 window.ShokeruGA4Purchase = {{ ga4_purchase|raw }};
+/* gtag (no GTM): send purchase directly, once per order; ga4.js covers dataLayer/GTM */
+(function (order) {
+    if (typeof window.gtag !== 'function' || !order || !order.transaction_id) return;
+    var key = 'shokeru_gtag_purchase_' + order.transaction_id;
+    try { if (sessionStorage.getItem(key)) return; sessionStorage.setItem(key, '1'); } catch (e) {}
+    window.gtag('event', 'purchase', order);
+})(window.ShokeruGA4Purchase);
 </script>
 {% endif %}
 {{ footer }}

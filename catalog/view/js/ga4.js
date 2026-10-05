@@ -1,7 +1,8 @@
 (function(window, document) {
     'use strict';
 
-    var currency = 'UAH';
+    // валюта сторінки (ISO) — з <body data-currency>; ціни парсяться з DOM саме в ній
+    var currency = (document.body && document.body.getAttribute('data-currency')) || 'UAH';
     var logPrefix = '[Shokeru GA4]';
 
     window.dataLayer = window.dataLayer || [];
@@ -155,6 +156,11 @@
             event: eventName,
             ecommerce: ecommerce
         });
+
+        // прямий gtag (config_ga4_id заданий): той самий e-commerce подією GA4; без ID — лише dataLayer (GTM)
+        if (window.shokeruGa4Id && typeof window.gtag === 'function') {
+            window.gtag('event', eventName, ecommerce);
+        }
 
         log(eventName, ecommerce);
     }

@@ -364,6 +364,16 @@ class ControllerCatalogInformation extends Controller {
 			$data['bottom'] = 0;
 		}
 
+		foreach (array('top', 'subfooter') as $flag) {
+			if (isset($this->request->post[$flag])) {
+				$data[$flag] = $this->request->post[$flag];
+			} elseif (!empty($information_info) && isset($information_info[$flag])) {
+				$data[$flag] = $information_info[$flag];
+			} else {
+				$data[$flag] = 0;
+			}
+		}
+
 		if (isset($this->request->post['status'])) {
 			$data['status'] = $this->request->post['status'];
 		} elseif (!empty($information_info)) {

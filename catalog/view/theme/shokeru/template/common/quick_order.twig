@@ -1,0 +1,35 @@
+{# «Купити в один клік» — попап (common/quick_order): один на сторінку, рендериться з common/footer для всіх.
+   Відкривається з будь-якого [data-quick-order="<product_id>"] (необовʼязково data-quick-quantity / data-quick-name /
+   data-quick-price) або window.shokeruQuickOrder.open(productId, qty) — js/quick.js. Замовлення в oc_order НЕ створюється:
+   форма шле на common/quick_order/order, що листом повідомляє менеджера (Brevo), далі екран «дякуємо». #}
+<div class="qo-modal" id="quick-modal" data-quick-modal hidden>
+  <div class="qo-modal__backdrop" data-quick-close></div>
+  <div class="qo-modal__panel" role="dialog" aria-modal="true" aria-labelledby="quick-modal-title" tabindex="-1">
+    <button type="button" class="qo-modal__close" data-quick-close aria-label="{{ text_close }}"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
+    <p class="qo-modal__eyebrow">{{ text_eyebrow }}</p>
+    <h2 class="qo-modal__title" id="quick-modal-title">{{ heading_title }}</h2>
+    <form class="qo-modal__form" method="post" action="{{ order_url }}" data-quick-form data-error-name="{{ error_name }}" data-error-phone="{{ error_phone }}" data-error-network="{{ error_network }}" data-quantity-template="{{ text_quantity }}" novalidate>
+      <input type="hidden" name="product_id" value="" data-quick-input="product_id">
+      <input type="hidden" name="quantity" value="1" data-quick-input="quantity">
+      <input type="hidden" name="page" value="" data-quick-input="page">
+      <div class="qo-modal__step" data-quick-step="form">
+        <p class="qo-modal__lead">{{ text_lead }}</p>
+        <div class="qo-modal__product" data-quick-product hidden>
+          <span class="qo-modal__product-name" data-quick-product-name></span>
+          <span class="qo-modal__product-meta"><strong data-quick-product-price></strong><span data-quick-product-qty></span></span>
+        </div>
+        <label class="qo-modal__field"><span class="qo-modal__label">{{ entry_name }}</span><input type="text" name="name" value="{{ customer_name }}" maxlength="64" autocomplete="name" placeholder="{{ placeholder_name }}" data-quick-input="name"><span class="qo-modal__field-error" data-quick-field-error="name" hidden></span></label>
+        <label class="qo-modal__field"><span class="qo-modal__label">{{ entry_phone }}</span><input type="tel" name="phone" value="{{ customer_phone }}" maxlength="32" autocomplete="tel" inputmode="tel" placeholder="{{ placeholder_phone }}" data-quick-input="phone" data-phone-input><span class="qo-modal__field-error" data-quick-field-error="phone" hidden></span></label>
+        <p class="qo-modal__error" data-quick-error role="alert" hidden></p>
+        <button type="submit" class="qo-modal__submit" data-quick-submit><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg>{{ button_submit }}</button>
+        <p class="qo-modal__note">{{ text_note }}</p>
+      </div>
+      <div class="qo-modal__step qo-modal__done" data-quick-step="done" hidden>
+        <span class="qo-modal__done-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+        <p class="qo-modal__done-title" role="status">{{ text_done_title }}</p>
+        <p class="qo-modal__lead">{{ text_done }}</p>
+        <button type="button" class="qo-modal__submit" data-quick-close>{{ button_done }}</button>
+      </div>
+    </form>
+  </div>
+</div>

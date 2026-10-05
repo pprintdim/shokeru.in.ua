@@ -1,0 +1,542 @@
+/* Shokeru — UI-функції групи: тости, cookie-банер, плаваючі кнопки, вітальний екран, «купити в один клік»,
+   телефонні поля (intl-tel-input), перемикач валют, підказки пошуку, кнопка звуку hero.
+   Палітра теми: графіт #202222, акцент #C5FF24. Фон попапів: rgba(8,8,8,.72) + blur(10px).
+   z-index: шапка 100, userPopup 200, welcome 500, cookie 550, quick-order 400, тости 1200. */
+
+/* ------------------------------------------------------------------ тости */
+.sk-toaster {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    z-index: 1200;
+    width: calc(100% - 32px);
+    max-width: 420px;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+}
+.sk-toast {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px 52px 16px 18px;
+    background: #202222;
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, .16);
+    border-left: 4px solid #C5FF24;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, .45);
+    font-family: 'Montserrat', sans-serif;
+    pointer-events: auto;
+    animation: sk-toast-in .25s ease-out;
+    transition: opacity .25s ease, transform .25s ease;
+}
+.sk-toast--danger { border-left-color: #ff5b5b; }
+.sk-toast--info { border-left-color: #8a909b; }
+.sk-toast.is-out { opacity: 0; transform: translateY(8px); }
+.sk-toast__icon { flex: 0 0 22px; width: 22px; height: 22px; color: #C5FF24; }
+.sk-toast--danger .sk-toast__icon { color: #ff5b5b; }
+.sk-toast--info .sk-toast__icon { color: #d2d2d2; }
+.sk-toast__icon svg { display: block; width: 22px; height: 22px; }
+.sk-toast__body { min-width: 0; }
+.sk-toast__text { margin: 0; font-size: 15px; font-weight: 600; line-height: 1.4; }
+.sk-toast__desc { margin: 4px 0 0; font-size: 13px; line-height: 1.4; color: #d2d2d2; }
+.sk-toast__close {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    color: #d2d2d2;
+}
+.sk-toast__close:hover { color: #C5FF24; }
+.sk-toast__close svg { width: 18px; height: 18px; }
+@keyframes sk-toast-in { from { opacity: 0; transform: translateY(16px) scale(.98); } to { opacity: 1; transform: none; } }
+
+/* ------------------------------------------------------------------ cookie-банер: прямокутна смуга внизу по центру (як у hydrophob) */
+.cookie-banner {
+    position: fixed;
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    z-index: 550;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 14px 18px;
+    background: #202222;
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, .16);
+    border-top: 3px solid #C5FF24;
+    border-radius: 0;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, .35);
+    font-family: 'Montserrat', sans-serif;
+    opacity: 0;
+    transform: translateY(12px);
+    transition: opacity .28s ease, transform .28s ease;
+}
+.cookie-banner[hidden] { display: none; }
+.cookie-banner.is-visible { opacity: 1; transform: none; }
+body.welcome-loading .cookie-banner { opacity: 0; pointer-events: none; }
+.cookie-banner__text { margin: 0; font-size: 14px; line-height: 1.5; color: #d2d2d2; }
+.cookie-banner__link { color: #C5FF24; text-decoration: underline; text-underline-offset: 3px; }
+.cookie-banner__actions { display: flex; gap: 8px; flex: 0 0 auto; }
+.cookie-banner__btn {
+    min-height: 44px;
+    padding: 0 18px;
+    border: 1px solid rgba(255, 255, 255, .3);
+    border-radius: 0;
+    color: #fff;
+    font-size: 13px;
+    letter-spacing: .06em;
+    white-space: nowrap;
+}
+.cookie-banner__btn:hover { border-color: #C5FF24; color: #C5FF24; }
+.cookie-banner__btn--accept { background: #C5FF24; border-color: #C5FF24; color: #202222; }
+.cookie-banner__btn--accept:hover { background: #fff; border-color: #fff; color: #202222; }
+@media (max-width: 767px) {
+    .cookie-banner { flex-direction: column; align-items: stretch; gap: 12px; padding: 14px; }
+    .cookie-banner__btn { flex: 1; }
+}
+
+/* ------------------------------------------------------------------ плаваючі кнопки (одна колонка справа внизу) */
+.sk-fab {
+    position: fixed;
+    right: 20px;
+    bottom: calc(20px + var(--fab-lift, 0px) + env(safe-area-inset-bottom, 0px));
+    z-index: 90;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transition: bottom .25s ease;
+}
+.sk-fab__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    padding: 0;
+    border-radius: 50%;
+    border: 1px solid #C5FF24;
+    background: #202222;
+    color: #C5FF24;
+    cursor: pointer;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .35);
+    transition: background .2s, color .2s;
+}
+.sk-fab__btn svg { width: 24px; height: 24px; }
+.sk-fab__btn:hover, .sk-fab__btn:focus-visible { background: #C5FF24; color: #202222; outline: 0; }
+.sk-fab__call { background: #C5FF24; color: #202222; }
+.sk-fab__call:hover, .sk-fab__call:focus-visible { background: #202222; color: #C5FF24; }
+.sk-fab__top { display: none; }
+.sk-fab__top.is-shown { display: inline-flex; }
+@media (max-width: 767px) {
+    .sk-fab { right: 14px; gap: 8px; bottom: calc(16px + var(--fab-lift, 0px) + env(safe-area-inset-bottom, 0px)); }
+    .sk-fab__btn { width: 52px; height: 52px; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .sk-fab, .cookie-banner, .sk-toast { transition: none; animation: none; }
+}
+
+/* ------------------------------------------------------------------ вітальний тизер (welcome, як у hydrophob)
+   Стани виставляє js/features.js: .welcome-preloader.is-hidden, .welcome-intro.is-blurred/.is-ready/.is-cta/.is-playing,
+   .welcome-sound.is-ready/.is-muted, .welcome-overlay.is-leaving; html.welcome-lock, body.welcome-behind/--out/welcome-loading. */
+html.welcome-lock, html.welcome-lock body { overflow: hidden !important; overscroll-behavior: none; }
+.welcome-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 500;
+    background: #202222;
+    color: #fff;
+    font-family: 'Montserrat', sans-serif;
+    transform: translateY(0);
+    transition: transform 1.6s cubic-bezier(.76, 0, .24, 1), opacity 1.6s ease;
+    will-change: transform;
+}
+.welcome-overlay.is-leaving { transform: translateY(100%); opacity: .96; pointer-events: none; }
+
+/* 1. прелоадер: лого + смужка */
+.welcome-preloader {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #202222;
+    transition: transform .8s cubic-bezier(.16, 1, .3, 1);
+}
+.welcome-preloader.is-hidden { transform: translateY(-100%); }
+.welcome-preloader__inner { display: flex; flex-direction: column; align-items: center; gap: 20px; opacity: 0; transform: scale(.92); animation: welcome-pre-in .6s ease-out .1s forwards; }
+.welcome-preloader__logo { display: block; width: min(52vw, 260px); height: auto; animation: welcome-pre-pulse 1.4s ease-in-out infinite; }
+.welcome-preloader__name { font-size: 28px; font-weight: 800; letter-spacing: .2em; color: #C5FF24; }
+.welcome-preloader__bar { width: 200px; max-width: 52vw; height: 2px; overflow: hidden; background: rgba(255, 255, 255, .16); }
+.welcome-preloader__bar i { display: block; width: 0; height: 100%; background: #C5FF24; box-shadow: 0 0 12px #C5FF24; transition: width .25s ease; }
+.welcome-preloader__pct { font-size: 12px; font-weight: 600; letter-spacing: .28em; color: #d2d2d2; font-variant-numeric: tabular-nums; }
+
+/* 2-3. тизер: відео на весь екран, текст по центру */
+.welcome-intro { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #202222; }
+.welcome-intro__video { position: absolute; inset: 0; }
+.welcome-video { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center; transition: filter 1.5s cubic-bezier(.22, .61, .36, 1), transform 1.5s cubic-bezier(.22, .61, .36, 1); }
+.welcome-intro.is-blurred .welcome-video { filter: blur(9px) brightness(.72); transform: scale(1.04); }
+.welcome-intro.is-blurred.is-ready .welcome-video { filter: blur(24px) brightness(.55); transform: scale(1.08); }
+.welcome-intro__shade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0, 0, 0, .35) 0%, rgba(0, 0, 0, .12) 45%, rgba(0, 0, 0, .55) 100%); pointer-events: none; }
+.welcome-intro__content { position: relative; z-index: 2; padding: 0 20px; text-align: center; color: #fff; transition: opacity .6s ease, transform .6s ease; }
+.welcome-intro.is-playing .welcome-intro__content { opacity: 0; transform: translateY(-12px); pointer-events: none; }
+.welcome-intro__eyebrow, .welcome-intro__title, .welcome-intro__descr { opacity: 0; transform: translateY(28px); transition: opacity .8s cubic-bezier(.16, 1, .3, 1), transform .8s cubic-bezier(.16, 1, .3, 1); }
+.welcome-intro.is-ready .welcome-intro__eyebrow { opacity: 1; transform: none; transition-delay: .15s; }
+.welcome-intro.is-ready .welcome-intro__title { opacity: 1; transform: none; transition-delay: .28s; }
+.welcome-intro.is-ready .welcome-intro__descr { opacity: 1; transform: none; transition-delay: .5s; }
+.welcome-intro__eyebrow { margin: 0 0 22px; font-size: 13px; font-weight: 700; letter-spacing: .32em; text-transform: uppercase; color: #C5FF24; }
+.welcome-intro__title { margin: 0; font-size: clamp(52px, 11vw, 136px); font-weight: 800; letter-spacing: .06em; line-height: .95; color: #fff; }
+.welcome-intro__descr { margin: 24px auto 0; max-width: 540px; min-height: 1.6em; font-size: clamp(14px, 1.5vw, 17px); line-height: 1.6; color: rgba(255, 255, 255, .85); }
+.welcome-intro.is-ready:not(.is-cta) .welcome-intro__descr[data-typed]::after {
+    content: "";
+    display: inline-block;
+    width: 2px;
+    height: 1.1em;
+    margin-left: 3px;
+    vertical-align: -.15em;
+    background: #C5FF24;
+    animation: welcome-caret .8s steps(1) infinite;
+}
+
+/* «Пропустити» — по центру внизу (з'являється, коли ролик готовий) */
+.welcome-skip {
+    position: absolute;
+    left: 50%;
+    bottom: 120px;
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0 12px;
+    color: #fff;
+    background: none;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(-50%) translateY(10px);
+    transition: opacity .6s ease, transform .6s ease, color .2s ease;
+}
+.welcome-intro.is-ready .welcome-skip { opacity: 1; pointer-events: auto; transform: translateX(-50%); transition-delay: .9s; }
+.welcome-skip:hover { color: #C5FF24; }
+.welcome-skip__track { display: block; width: 1px; height: 40px; overflow: hidden; background: rgba(255, 255, 255, .25); }
+.welcome-skip__line { display: block; width: 100%; height: 100%; background: #C5FF24; transform: translateY(-100%); animation: welcome-skip-line 1.8s cubic-bezier(.16, 1, .3, 1) infinite; }
+.welcome-skip__text { font-size: 13px; font-weight: 700; letter-spacing: .24em; text-transform: uppercase; }
+
+/* звук: кругла кнопка справа внизу; доступна, коли ролик грає зі звуком */
+.welcome-sound {
+    position: absolute;
+    right: 28px;
+    bottom: 28px;
+    z-index: 3;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    padding: 0;
+    border: 1px solid rgba(255, 255, 255, .4);
+    border-radius: 50%;
+    background: rgba(0, 0, 0, .35);
+    color: #fff;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .4s ease, visibility 0s linear .4s, background .2s, border-color .2s;
+}
+.welcome-sound.is-ready { opacity: 1; visibility: visible; transition: opacity .4s ease, background .2s, border-color .2s; }
+.welcome-sound:hover { background: rgba(0, 0, 0, .6); border-color: #C5FF24; }
+.welcome-sound__loud, .welcome-sound.is-muted .welcome-sound__muted { display: block; }
+.welcome-sound__muted, .welcome-sound.is-muted .welcome-sound__loud { display: none; }
+.welcome-sound.is-muted .welcome-sound__muted { display: block; }
+
+/* сторінка під тизером: розмита, поки він на екрані. <main> відкриває шапка, тому накладка лежить усередині нього —
+   фільтр вішаємо на сусідів накладки, а не на сам <main> (інакше fixed-накладка стала б відносною до нього).
+   Шапку, футер, кошик і попап входу на час тизера ховаємо. */
+body.welcome-behind main > :not([data-welcome]) { filter: blur(16px) brightness(.8); transition: filter 1.5s cubic-bezier(.76, 0, .24, 1); }
+body.welcome-behind--out main > :not([data-welcome]) { filter: none; }
+body.welcome-behind > header, body.welcome-behind > footer, body.welcome-behind .busket, body.welcome-behind .userPopup { visibility: hidden; }
+body.welcome-behind--out > header, body.welcome-behind--out > footer { visibility: visible; transition: visibility 0s linear .2s; }
+body.welcome-behind .sk-fab { display: none; }
+/* поки прелоадер — cookie-банер чекає; після нього він лежить над тизером */
+body.welcome-loading .cookie-banner { opacity: 0; pointer-events: none; }
+@media (max-width: 767px) {
+    .welcome-sound { right: 16px; bottom: 24px; width: 44px; height: 44px; }
+    .welcome-skip { bottom: 190px; }
+    .welcome-intro__descr { padding: 0 8px; }
+}
+@keyframes welcome-pre-in { to { opacity: 1; transform: none; } }
+@keyframes welcome-pre-pulse { 0%, 100% { opacity: .45; transform: scale(.98); } 50% { opacity: 1; transform: scale(1); } }
+@keyframes welcome-skip-line { 0% { transform: translateY(-100%); } 55% { transform: translateY(0); } 100% { transform: translateY(100%); } }
+@keyframes welcome-caret { 50% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+    .welcome-overlay, .welcome-preloader, .welcome-preloader__inner, .welcome-video, .welcome-skip, .welcome-sound { transition: none !important; animation: none !important; }
+    .welcome-preloader__inner { opacity: 1; transform: none; }
+    .welcome-preloader__logo, .welcome-skip__line { animation: none !important; }
+    .welcome-intro__eyebrow, .welcome-intro__title, .welcome-intro__descr { transition: none; }
+    body.welcome-behind main > :not([data-welcome]) { filter: none; transition: none; }
+}
+
+/* ------------------------------------------------------------------ мова + валюта в шапці й мобільному меню */
+.header__switch { display: flex; align-items: center; gap: 18px; }
+.header__lang-selected { min-height: 24px; }
+.header__lang-selected[role="button"] { cursor: pointer; white-space: nowrap; }
+.header__lang-content button.header__currency-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    min-height: 32px;
+    padding: 0;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: normal;
+    letter-spacing: 0;
+    text-transform: none;
+    text-align: left;
+    white-space: nowrap;
+    color: #fff;
+}
+.header__currency .header__lang-content { min-width: 170px; left: auto; right: -10px; }
+.header__currency-item:hover, .header__currency-item.is-active { color: #C5FF24; }
+.header__currency-symbol { flex: 0 0 18px; text-align: center; font-size: 14px; }
+.header__currency-code { text-transform: uppercase; }
+.header__currency-title { font-weight: 400; color: #d2d2d2; }
+.header__currency-item:hover .header__currency-title { color: #C5FF24; }
+@media (max-width: 999px) {
+    .header__box .header__switch { display: none; }
+}
+/* мобільне меню: мова + валюта в одному рядку, списки відкриваються вгору */
+.header__menu-switch { grid-column: 1 / -1; }
+.header__menu-switch .header__switch { gap: 24px; }
+.header__menu-switch .header__lang-selected { min-height: 44px; font-size: 14px; }
+.header__menu-switch .header__lang-content { top: auto; bottom: 100%; left: 0; right: auto; margin-bottom: 4px; }
+.header__menu-switch .header__lang-content a { font-size: 14px; display: block; padding: 6px 0; }
+.header__menu-switch .header__currency .header__lang-content { left: 0; right: auto; }
+.header__menu-switch .header__lang-content button.header__currency-item { min-height: 40px; font-size: 14px; }
+
+/* ------------------------------------------------------------------ «Купити в один клік» (попап common/quick_order, js/quick.js) */
+html.quick-open { overflow: hidden; }
+.qo-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 400;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    opacity: 0;
+    transition: opacity .25s ease;
+}
+.qo-modal[hidden] { display: none; }
+.qo-modal.is-open { opacity: 1; }
+.qo-modal__backdrop { position: absolute; inset: 0; background: rgba(8, 8, 8, .72); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+.qo-modal__panel {
+    position: relative;
+    width: 100%;
+    max-width: 460px;
+    max-height: calc(100vh - 32px);
+    overflow-y: auto;
+    padding: 36px 32px 28px;
+    background: #202222;
+    color: #fff;
+    border-top: 3px solid #C5FF24;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, .55);
+    font-family: 'Montserrat', sans-serif;
+    transform: translateY(14px);
+    transition: transform .25s ease;
+}
+.qo-modal.is-open .qo-modal__panel { transform: none; }
+.qo-modal__close {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    color: #d2d2d2;
+}
+.qo-modal__close:hover { color: #C5FF24; }
+.qo-modal__eyebrow { margin: 0 0 8px; font-size: 12px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: #C5FF24; }
+.qo-modal__title { margin: 0 0 16px; font-size: 26px; font-weight: 800; line-height: 1.15; text-transform: uppercase; }
+.qo-modal__lead { margin: 0 0 18px; font-size: 14px; line-height: 1.6; color: #d2d2d2; }
+.qo-modal__form, .qo-modal__step { display: grid; gap: 14px; }
+.qo-modal__step[hidden] { display: none; }
+.qo-modal__product { display: grid; gap: 4px; padding: 14px 16px; border: 1px solid rgba(255, 255, 255, .16); background: rgba(255, 255, 255, .04); font-size: 14px; line-height: 1.4; }
+.qo-modal__product[hidden] { display: none; }
+.qo-modal__product-name { font-weight: 700; }
+.qo-modal__product-meta { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; color: #d2d2d2; }
+.qo-modal__product-meta strong { font-size: 20px; font-weight: 800; color: #C5FF24; }
+.qo-modal__product-meta strong:empty, .qo-modal__product-meta span:empty { display: none; }
+.qo-modal__field { display: grid; gap: 6px; }
+.qo-modal__label { font-size: 12px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #d2d2d2; }
+.qo-modal__field input {
+    width: 100%;
+    min-height: 48px;
+    padding: 0 14px;
+    border: 1px solid rgba(255, 255, 255, .3);
+    background: transparent;
+    color: #fff;
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 600;
+}
+.qo-modal__field input::placeholder { color: #8a909b; font-weight: 400; }
+.qo-modal__field input:focus { outline: 0; border-color: #C5FF24; }
+.qo-modal__field.has-error input { border-color: #ff5b5b; }
+.qo-modal__field-error, .qo-modal__error { margin: 0; font-size: 13px; line-height: 1.4; color: #ff8d8d; }
+.qo-modal__field-error[hidden], .qo-modal__error[hidden] { display: none; }
+.qo-modal__submit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 50px;
+    padding: 0 24px;
+    background: #C5FF24;
+    border: 1px solid #C5FF24;
+    color: #202222;
+    font-size: 14px;
+    letter-spacing: .06em;
+}
+.qo-modal__submit:hover { background: #fff; border-color: #fff; color: #202222; }
+.qo-modal__submit:disabled { opacity: .6; cursor: default; }
+.qo-modal__note { margin: 0; text-align: center; font-size: 12px; line-height: 1.5; color: #8a909b; }
+.qo-modal__done { justify-items: center; text-align: center; padding-top: 8px; }
+.qo-modal__done-icon { display: grid; place-items: center; width: 56px; height: 56px; border-radius: 50%; background: rgba(197, 255, 36, .16); color: #C5FF24; }
+.qo-modal__done-title { margin: 0; font-size: 26px; font-weight: 800; text-transform: uppercase; }
+.qo-modal__done .qo-modal__lead { margin: 0; }
+.qo-modal.is-busy .qo-modal__submit { opacity: .6; }
+@media (max-width: 479px) {
+    .qo-modal__panel { padding: 32px 18px 22px; }
+    .qo-modal__title { font-size: 22px; }
+}
+
+/* кнопка «Купити в один клік» на картці та сторінці товару */
+.quick-btn { gap: 8px; }
+.quick-btn svg { flex: 0 0 auto; color: #C5FF24; }
+.product__item-btn.quick-btn { width: 100%; }
+.prod__buttons .quick-btn { width: 100%; }
+
+/* ------------------------------------------------------------------ телефонні поля (intl-tel-input, vendor/intlTelInput.css)
+   Бібліотека загортає <input data-phone-input> у .iti й додає вибір країни зліва (прапорець + код), тому ширину тримає
+   обгортка, а сам input лишається зі своїми класами форми. Колір коду країни успадковується від поля. */
+.iti { display: block; width: 100%; }
+.iti__tel-input { width: 100%; }
+.iti__country-container { padding: 0; }
+.iti--separate-dial-code .iti__selected-country { background: transparent; color: inherit; }
+.iti--separate-dial-code .iti__selected-country:hover, .iti--separate-dial-code .iti__selected-country:focus-visible { background: rgba(127, 127, 127, .14); }
+.iti__selected-dial-code { color: inherit; font-size: inherit; font-weight: inherit; }
+.iti__arrow { border-top-color: currentColor; opacity: .6; }
+.iti__arrow--up { border-bottom-color: currentColor; }
+.iti__dropdown-content {
+    width: 176px;
+    margin-top: 6px;
+    border: 1px solid rgba(255, 255, 255, .16);
+    background: #202222;
+    color: #fff;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, .6);
+    z-index: 1300;
+}
+.iti--container { z-index: 1300; }
+.iti__country-list { max-height: 260px; padding: 4px; }
+.iti__country-name { display: none; }
+.iti__country { display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 8px 10px; font-size: 14px; font-weight: 600; text-transform: none; }
+.iti__country .iti__dial-code { color: #fff; font-weight: 700; font-size: 14px; }
+.iti__country[aria-selected="true"] .iti__dial-code { color: #C5FF24; }
+.iti__country.iti__highlight { background: rgba(197, 255, 36, .14); }
+.iti__divider { border-bottom-color: rgba(255, 255, 255, .16); }
+.iti__flag { border-radius: 2px; box-shadow: 0 0 0 1px rgba(255, 255, 255, .12); }
+.iti__search-input { width: 100%; min-height: 44px; padding: 0 12px; font: inherit; font-size: 14px; border: 0; border-bottom: 1px solid rgba(255, 255, 255, .16); background: transparent; color: #fff; outline: 0; }
+.iti__search-input::placeholder { color: #8a909b; }
+.qo-modal .iti__tel-input { padding-left: 14px; }
+
+/* кнопка-блискавка на картці товару («Купити в один клік»): праворуч угорі, показується разом з «в обране» */
+.product__item-quick {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    background: #C5FF24;
+    color: #202222;
+    border-radius: 50%;
+    transition: background .2s, color .2s;
+}
+.product__item-quick:hover { background: #202222; color: #C5FF24; }
+.product__item:not(:hover) .product__item-quick { opacity: 0; pointer-events: none; }
+@media (max-width: 1279px) {
+    .product__item-quick { top: 4px; right: 4px; opacity: 1 !important; pointer-events: all !important; }
+}
+@media (hover: none) {
+    .product__item-quick { opacity: 1 !important; pointer-events: all !important; }
+}
+.prod__quick { margin-top: 16px; width: 100%; max-width: 402px; }
+.profile__products-block .product__item-quick { top: 4px; right: 32px; }
+
+/* ------------------------------------------------------------------ hero: кнопка «Звук» (js/features.js initHeroSound) */
+.hero__sound {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    align-self: center;
+    width: 48px;
+    height: 48px;
+    padding: 0;
+    border: 1px solid rgba(255, 255, 255, .5);
+    border-radius: 50%;
+    background: rgba(32, 34, 34, .55);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+    color: #fff;
+    transition: background .2s, color .2s, border-color .2s;
+}
+.hero__sound[hidden] { display: none; }
+.hero__sound:hover { border-color: #C5FF24; color: #C5FF24; }
+.hero__sound.is-on { background: #C5FF24; border-color: #C5FF24; color: #202222; }
+.hero__sound .hero__sound-on, .hero__sound.is-on .hero__sound-off { display: none; }
+.hero__sound.is-on .hero__sound-on, .hero__sound .hero__sound-off { display: block; }
+
+/* ------------------------------------------------------------------ підказки пошуку: фон + клавіатурна навігація */
+body.search-open::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    background: rgba(8, 8, 8, .72);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+}
+.smart-search__list a.is-active, .ss-prod.is-active, .smart-search__all.is-active { background: #434343; outline: 1px solid #C5FF24; }
+.ss-prod__man { font-size: 12px; }
+.smart-search__list a { min-height: 36px; display: flex; align-items: center; }
+
+/* ------------------------------------------------------------------ підфутер: юридичні посилання («Показувати в підфутері») */
+.footer__legal { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 24px; }
+.footer__legal a { display: inline-flex; align-items: center; min-height: 36px; font-size: 14px; color: #d2d2d2; text-decoration: none; transition: color .2s; }
+.footer__legal a:hover { color: #C5FF24; }
+
+/* ------------------------------------------------------------------ слайдери товарів: крапки лише на телефоні (на ПК — прямокутні стрілки) */
+.productSlider__dots { display: none; }
+@media (max-width: 767px) {
+    .productSlider__dots { display: flex; justify-content: center; align-items: center; gap: 8px; min-height: 28px; margin-top: 12px; }
+    .productSlider__dots .swiper-pagination-bullet { flex: 0 0 auto; width: 10px; height: 10px; margin: 0; border: 1px solid #202222; background: transparent; opacity: 1; }
+    .productSlider__dots .swiper-pagination-bullet-active { background: #202222; }
+}

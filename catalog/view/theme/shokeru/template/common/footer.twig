@@ -1,6 +1,7 @@
 {{ cart }}
 
 {{ user_popup }}
+{{ quick_order }}
 </main>
 <footer class="footer">
         <div class="container">
@@ -91,6 +92,11 @@
             <div class="container">
                 <div class="footer__bottom-inner">
                     <p class="footer__bottom-copy"></p>
+                    {% if legal %}
+                    <nav class="footer__legal" aria-label="{{ text_legal }}">
+                        {% for link in legal %}<a href="{{ link.href }}">{{ link.title }}</a>{% endfor %}
+                    </nav>
+                    {% endif %}
                     <div class="footer__bottom-icons">
                         <div class="footer__bottom-icon">
                             <svg xmlns="http://www.w3.org/2000/svg" width="48" height="32" viewBox="0 0 48 32" fill="none">
@@ -107,9 +113,19 @@
             </div>
         </div>
     </footer>
+    {# Плаваючі кнопки: «Нагору» над «Подзвонити», одна колонка справа внизу (js/features.js, --fab-lift піднімає над cookie-банером) #}
+    <div class="sk-fab" data-fab>
+        <button type="button" class="sk-fab__btn sk-fab__top" data-scroll-top aria-label="{{ text_fab_top }}" title="{{ text_fab_top }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m18 15-6-6-6 6"/></svg></button>
+        {% if phones %}<a class="sk-fab__btn sk-fab__call" href="{{ phones[0].href }}" aria-label="{{ text_fab_call }}: {{ phones[0].label }}" title="{{ text_fab_call }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2Z"/></svg></a>{% endif %}
+    </div>
+    {{ cookie }}
+    <script src="catalog/view/theme/shokeru/vendor/intlTelInput.min.js?v=20261005"></script>
+    <script src="catalog/view/theme/shokeru/js/phone.js?v=20261005"></script>
+    <script src="catalog/view/js/features.js?v=20261005"></script>
+    <script src="catalog/view/js/quick.js?v=20261005"></script>
     <script src="catalog/view/js/profile.js?v=20260422"></script>
-    <script src="catalog/view/js/ga4.js?v=20260626a"></script>
-    <script src="catalog/view/js/script.js?v=20261003"></script>
+    <script src="catalog/view/js/ga4.js?v=20261005"></script>
+    <script src="catalog/view/js/script.js?v=20261005"></script>
     <script src="catalog/view/js/animations.js?v=20260703"></script>
     {% for script in custom_scripts %}
         {{ script.code|raw }}

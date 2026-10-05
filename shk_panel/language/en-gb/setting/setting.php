@@ -220,3 +220,9 @@ $_['entry_facebook'] = 'Facebook';
 $_['entry_telegram'] = 'Telegram';
 $_['entry_tiktok'] = 'TikTok';
 $_['entry_youtube'] = 'YouTube';
+
+// shokeru: GA4 і «Купити в один клік»
+$_['entry_ga4_id'] = 'Google Analytics 4 (Measurement ID)';
+$_['help_ga4_id'] = 'GA4 stream id like G-XXXXXXXXXX. Leave empty to output no analytics tag on the storefront; the cookie consent drives Consent Mode.';
+$_['entry_quick_order_email'] = 'E-Mail for one-click orders';
+$_['help_quick_order_email'] = 'Where to send requests from the "Buy in one click" popup. Empty — the store e-mail is used.';

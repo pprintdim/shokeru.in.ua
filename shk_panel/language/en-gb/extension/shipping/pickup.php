@@ -1,16 +1,9 @@
 <?php
-// Heading
-$_['heading_title']    = 'Pickup From Store';
-
-// Text
-$_['text_extension']   = 'Extensions';
-$_['text_success']     = 'Success: You have modified pickup from store!';
-$_['text_edit']        = 'Edit Pickup From Store Shipping';
-
-// Entry
-$_['entry_geo_zone']   = 'Geo Zone';
-$_['entry_status']     = 'Status';
-$_['entry_sort_order'] = 'Sort Order';
-
-// Error
-$_['error_permission'] = 'Warning: You do not have permission to modify pickup from store!';
+$_['heading_title'] = 'Доставка — Самовивіз';
+$_['text_extension'] = 'Розширення';
+$_['text_success'] = 'Налаштування збережено!';
+$_['text_edit'] = 'Налаштування';
+$_['entry_enabled'] = 'Увімкнено в чекауті';
+$_['entry_cost'] = 'Вартість, грн (0 — за тарифами перевізника)';
+$_['button_sync'] = 'Оновити довідник відділень';
+$_['error_permission'] = 'У вас немає прав змінювати цей модуль!';

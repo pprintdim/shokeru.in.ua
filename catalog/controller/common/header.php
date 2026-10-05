@@ -155,7 +155,24 @@ class ControllerCommonHeader extends Controller {
 		// CSS/JS: мініфікація з авто-перегенерацією за mtime (зміниш файл — перемініфікується сам)
 		$data['css_main']  = $this->assetMin('catalog/view/css/style.css', 'css', '20261004');
 		$data['css_anim']  = $this->assetMin('catalog/view/css/animations.css', 'css', '20260626b');
+		$data['css_features'] = $this->assetMin('catalog/view/css/features.css', 'css', '20261005');
 		$data['js_common'] = $this->assetMin('catalog/view/js/common.js', 'js', '20260630');
+		// «Показувати в шапці» (info_flags.sql): сторінки інформації в верхньому меню
+		$this->load->model('catalog/information');
+
+		$data['informations_top'] = array();
+
+		foreach ($this->model_catalog_information->getInformations() as $information) {
+			if (!empty($information['top'])) {
+				$data['informations_top'][] = array(
+					'title' => $information['title'],
+					'href'  => $this->url->link('information/information', 'information_id=' . $information['information_id'])
+				);
+			}
+		}
+
+		$data['currency_code'] = isset($this->session->data['currency']) ? $this->session->data['currency'] : $this->config->get('config_currency');
+		$data['ga4_id'] = preg_match('~^G-[A-Z0-9]{6,}$~', (string)$this->config->get('config_ga4_id')) ? $this->config->get('config_ga4_id') : '';
 
 		return $this->load->view('common/header', $data);
 	}

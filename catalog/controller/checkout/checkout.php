@@ -1,13 +1,20 @@
 <?php
+// Single-page checkout — the same flow as the other stores of the group (shoker.in.ua / secured.in.ua):
+// the page only collects the data; catalog/view/js/checkout.js drives the stock endpoints
+// (guest/save or payment_address/save + shipping_address/save -> GET shipping_method ->
+// shipping_method/save -> GET payment_method -> payment_method/save -> GET confirm ->
+// POST extension/payment/<code>/confirm -> success; WayForPay -> extension/payment/wayforpay/pay).
+// Delivery = shipping extension `delivery` (novaposhta / ukrposhta / meest / courier / pickup).
 class ControllerCheckoutCheckout extends Controller {
-	private function isValidPhone($value) {
-		$digits = preg_replace('/\D+/', '', (string)$value);
-
-		return utf8_strlen($digits) >= 10 && utf8_strlen($digits) <= 15;
-	}
+	// Which "receive as" options each carrier offers (one <option> per carrier x destination).
+	private $carrier_destinations = array(
+		'novaposhta' => array('branch', 'postomat', 'courier'),
+		'ukrposhta'  => array('branch', 'courier'),
+		'meest'      => array('branch', 'postomat', 'courier')
+	);
 
 	public function index() {
-		// Validate cart has products and has stock.
+		// Nothing to order yet: the cart page shows its own empty state.
 		if ((!$this->cart->hasProducts() && empty($this->session->data['vouchers'])) || (!$this->cart->hasStock() && !$this->config->get('config_stock_checkout'))) {
 			$this->response->redirect($this->url->link('checkout/cart'));
 		}
@@ -29,19 +36,15 @@ class ControllerCheckoutCheckout extends Controller {
 			}
 		}
 
+		// Leftovers of the previous multi-step checkout must not leak into the new order.
+		unset($this->session->data['np_delivery'], $this->session->data['recipient_data']);
+
 		$this->load->language('checkout/checkout');
 
 		$this->document->setTitle($this->language->get('heading_title'));
 
-		$this->document->addScript('catalog/view/javascript/jquery/datetimepicker/moment/moment.min.js');
-		$this->document->addScript('catalog/view/javascript/jquery/datetimepicker/moment/moment-with-locales.min.js');
-		$this->document->addScript('catalog/view/javascript/jquery/datetimepicker/bootstrap-datetimepicker.min.js');
-		$this->document->addStyle('catalog/view/javascript/jquery/datetimepicker/bootstrap-datetimepicker.min.css');
-
-		// Required by klarna
-		if ($this->config->get('payment_klarna_account') || $this->config->get('payment_klarna_invoice')) {
-			$this->document->addScript('http://cdn.klarna.com/public/kitt/toc/v1.0/js/klarna.terms.min.js');
-		}
+		$this->document->addStyle('catalog/view/css/checkout.css?v=' . filemtime(DIR_APPLICATION . 'view/css/checkout.css'));
+		$this->document->addScript('catalog/view/js/checkout.js?v=' . filemtime(DIR_APPLICATION . 'view/js/checkout.js'));
 
 		$data['breadcrumbs'] = array();
 
@@ -60,13 +63,25 @@ class ControllerCheckoutCheckout extends Controller {
 			'href' => $this->url->link('checkout/checkout', '', true)
 		);
 
-		$data['text_checkout_option'] = 'Інформація про замовлення';
-		$data['text_checkout_account'] = 'Інформація про замовлення';
-		$data['text_checkout_payment_address'] = 'Інформація про замовлення';
-		$data['text_checkout_shipping_address'] = 'Інформація про замовлення';
-		$data['text_checkout_shipping_method'] = 'Інформація про замовлення';
-		$data['text_checkout_payment_method'] = 'Спосіб оплати';
-		$data['text_checkout_confirm'] = 'Контактні дані отримувача замовлення';
+		$data['heading_title'] = $this->language->get('heading_title');
+
+		// Own keys of the single-page checkout are prefixed co_ (stock entry_city / error_city /
+		// text_payment_method are taken by the step templates).
+		$keys = array(
+			'co_text_eyebrow', 'co_text_lead', 'co_text_your_order', 'co_text_total',
+			'co_text_step', 'co_text_contacts', 'co_text_delivery', 'co_text_payment',
+			'co_entry_firstname', 'co_entry_lastname', 'co_entry_telephone', 'co_entry_email',
+			'co_entry_shipping', 'co_entry_payment', 'co_entry_city', 'co_entry_branch', 'co_entry_postomat', 'co_entry_address', 'co_entry_comment',
+			'co_text_pickup_info', 'co_text_pickup_prefix', 'co_text_pickup_city',
+			'co_text_login_hint', 'co_text_login_link', 'co_text_logged_as', 'co_text_no_shipping', 'co_text_no_payment',
+			'co_button_place_order', 'co_text_consent', 'co_text_back_to_cart', 'co_text_sending',
+			'co_error_city', 'co_text_city_first', 'co_text_not_found', 'co_error_branch', 'co_error_postomat', 'co_error_address', 'co_error_firstname',
+			'co_error_lastname', 'co_error_telephone', 'co_error_email', 'co_error_shipping', 'co_error_payment', 'co_error_failed'
+		);
+
+		foreach ($keys as $key) {
+			$data[$key] = $this->language->get($key);
+		}
 
 		if (isset($this->session->data['error'])) {
 			$data['error_warning'] = $this->session->data['error'];
@@ -77,202 +92,53 @@ class ControllerCheckoutCheckout extends Controller {
 
 		$data['logged'] = $this->customer->isLogged();
 
-		if (isset($this->session->data['account'])) {
-			$data['account'] = $this->session->data['account'];
-		} else {
-			$data['account'] = '';
-		}
+		$data['cart'] = $this->url->link('checkout/cart');
+		$data['login'] = $this->url->link('account/login', '', true);
 
-		$data['shipping_required'] = $this->cart->hasShipping();
+		$data['customer_firstname'] = $this->customer->getFirstName() ?: '';
+		$data['customer_lastname'] = $this->customer->getLastName() ?: '';
+		$data['customer_email'] = $this->customer->getEmail() ?: '';
+		$data['customer_telephone'] = $this->customer->getTelephone() ?: '';
 
-		// Order summary for themed checkout layout
-		$this->load->model('setting/extension');
-		$this->load->model('tool/image');
+		// The stock address validators need a country/zone; the store defaults are used for every order.
+		$data['country_id'] = (int)$this->config->get('config_country_id');
+		$data['zone_id'] = (int)$this->config->get('config_zone_id');
 
-		$totals = array();
-		$taxes = $this->cart->getTaxes();
-		$total = 0;
+		// A signed-in customer starts from their default address.
+		$data['default_city'] = '';
+		$data['default_address'] = '';
 
-		$total_data = array(
-			'totals' => &$totals,
-			'taxes'  => &$taxes,
-			'total'  => &$total
-		);
+		if ($this->customer->isLogged()) {
+			$this->load->model('account/address');
 
-		if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {
-			$sort_order = array();
-			$results = $this->model_setting_extension->getExtensions('total');
+			$address = $this->model_account_address->getAddress($this->customer->getAddressId());
 
-			foreach ($results as $key => $value) {
-				$sort_order[$key] = $this->config->get('total_' . $value['code'] . '_sort_order');
-			}
+			if (!$address) {
+				$addresses = $this->model_account_address->getAddresses();
 
-			array_multisort($sort_order, SORT_ASC, $results);
-
-			foreach ($results as $result) {
-				if ($this->config->get('total_' . $result['code'] . '_status')) {
-					$this->load->model('extension/total/' . $result['code']);
-					$this->{'model_extension_total_' . $result['code']}->getTotal($total_data);
+				if ($addresses) {
+					$address = reset($addresses);
 				}
 			}
 
-			$sort_order = array();
-
-			foreach ($totals as $key => $value) {
-				$sort_order[$key] = $value['sort_order'];
-			}
-
-			array_multisort($sort_order, SORT_ASC, $totals);
-		}
-
-		$data['checkout_products'] = array();
-		$data['checkout_total_quantity'] = 0;
-		$data['ga4_checkout_items_data'] = array();
-
-		foreach ($products as $product) {
-			$data['checkout_total_quantity'] += (int)$product['quantity'];
-
-			if ($product['image']) {
-				$image = $this->model_tool_image->resize($product['image'], 96, 96);
-			} else {
-				$image = $this->model_tool_image->resize('placeholder.png', 96, 96);
-			}
-
-			if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {
-				$unit_price = $this->tax->calculate($product['price'], $product['tax_class_id'], $this->config->get('config_tax'));
-				$price = $this->currency->format($unit_price, $this->session->data['currency']);
-				$product_total = $this->currency->format($unit_price * $product['quantity'], $this->session->data['currency']);
-				$ga4_price = $this->currency->format($unit_price, $this->session->data['currency'], '', false);
-			} else {
-				$price = false;
-				$product_total = false;
-				$ga4_price = 0;
-			}
-
-			$data['checkout_products'][] = array(
-				'product_id' => $product['product_id'],
-				'name'       => $product['name'],
-				'thumb'      => $image,
-				'quantity'   => $product['quantity'],
-				'price'      => $price,
-				'total'      => $product_total,
-				'href'       => $this->url->link('product/product', 'product_id=' . $product['product_id'])
-			);
-
-			$data['ga4_checkout_items_data'][] = array(
-				'item_id'   => (string)$product['product_id'],
-				'item_name' => $product['name'],
-				'price'     => (float)$ga4_price,
-				'quantity'  => (int)$product['quantity']
-			);
-		}
-
-		$data['checkout_totals'] = array();
-		$data['checkout_total'] = '';
-		$data['ga4_checkout_total'] = 0;
-
-		foreach ($totals as $index => $total_row) {
-			$formatted_total = $this->currency->format($total_row['value'], $this->session->data['currency']);
-
-			$data['checkout_totals'][] = array(
-				'title' => $total_row['title'],
-				'text'  => $formatted_total
-			);
-
-			if ($index === count($totals) - 1) {
-				$data['checkout_total'] = $formatted_total;
-				$data['ga4_checkout_total'] = $this->currency->format($total_row['value'], $this->session->data['currency'], '', false);
+			if ($address) {
+				$data['default_city'] = isset($address['city']) ? $address['city'] : '';
+				$data['default_address'] = isset($address['address_1']) ? $address['address_1'] : '';
 			}
 		}
 
-		$data['ga4_checkout_items'] = json_encode($data['ga4_checkout_items_data'], JSON_UNESCAPED_UNICODE);
+		$this->summary($data);
+		$this->shipping($data);
+		$total = $data['summary_total_value'];
+		$this->payment($data, $total);
 
-		$data['text_order_details'] = 'Інформація про замовлення';
-		$data['text_checkout_submit'] = 'Оформити замовлення';
-		$data['text_checkout_go_confirm'] = 'Перейти до підтвердження';
-		$data['cart_link'] = $this->url->link('checkout/cart');
-		$data['delivery_summary'] = '';
-		$data['recipient_data'] = isset($this->session->data['recipient_data']) ? $this->session->data['recipient_data'] : array(
-			'type' => 'me',
-			'firstname' => '',
-			'lastname' => '',
-			'patronymic' => '',
-			'telephone' => ''
-		);
-		$data['checkout_option_html'] = '';
-		$data['payment_address_html'] = '';
-		$data['shipping_address_html'] = '';
-		$data['shipping_method_html'] = '';
-		$data['payment_method_html'] = '';
-		$data['checkout_confirm_html'] = '';
-		$data['shipping_method_pending_html'] = '<div class="checkout-step-placeholder"><p class="checkout-pane__descr">Заповніть адресу доставки, щоб побачити доступні способи доставки.</p></div>';
-		$data['payment_method_pending_html'] = '<div class="checkout-step-placeholder"><p class="checkout-pane__descr">Заповніть контактні дані та доставку, щоб побачити доступні способи оплати.</p></div>';
+		$data['success'] = $this->url->link('checkout/success');
 
-		if (!$data['logged'] && empty($data['account'])) {
-			$data['account'] = 'register';
-			$this->session->data['account'] = 'register';
-		}
-
-		if (!$data['logged']) {
-			$data['checkout_option_html'] = $this->load->controller('checkout/login');
-			$data['payment_address_html'] = $this->load->controller($data['account'] == 'guest' ? 'checkout/guest' : 'checkout/register');
+		// Absolute base for checkout.js (SEO URLs make relative index.php?route= links unreliable).
+		if ($this->request->server['HTTPS']) {
+			$data['base'] = $this->config->get('config_ssl');
 		} else {
-			$this->load->model('account/address');
-
-			if (!isset($this->session->data['payment_address']) && $this->customer->getAddressId()) {
-				$this->session->data['payment_address'] = $this->model_account_address->getAddress($this->customer->getAddressId());
-			}
-
-			if ($data['shipping_required'] && !isset($this->session->data['shipping_address']) && $this->customer->getAddressId()) {
-				$this->session->data['shipping_address'] = $this->model_account_address->getAddress($this->customer->getAddressId());
-			}
-
-			$data['payment_address_html'] = $this->load->controller('checkout/payment_address');
-		}
-
-		if ($data['shipping_required']) {
-			if (!$data['logged'] && $data['account'] == 'guest') {
-				$data['shipping_address_html'] = $this->load->controller('checkout/guest_shipping');
-			} else {
-				$data['shipping_address_html'] = $this->load->controller('checkout/shipping_address');
-			}
-
-			$data['shipping_method_html'] = $this->load->controller('checkout/shipping_method');
-		}
-
-		$data['payment_method_html'] = $this->load->controller('checkout/payment_method');
-
-		// checkout/confirm loads via AJAX on submit only (prevents duplicate orders on page refresh)
-
-		if (!empty($this->session->data['np_delivery'])) {
-			$np = $this->session->data['np_delivery'];
-			$labels = array(
-				'np_branch'     => 'Самовивіз з відділення Нової Пошти',
-				'np_courier'    => 'Кур\'єром Нової Пошти',
-				'store_courier' => 'Кур\'єром магазину',
-				'other'         => 'Інша служба доставки'
-			);
-			$parts = array();
-			$parts[] = isset($labels[$np['type']]) ? $labels[$np['type']] : '';
-			if (!empty($np['city_name'])) {
-				$parts[] = $np['city_name'];
-			}
-			if (!empty($np['warehouse_name'])) {
-				$parts[] = $np['warehouse_name'];
-			}
-			if (!empty($np['courier_city_name'])) {
-				$parts[] = $np['courier_city_name'];
-			}
-			if (!empty($np['street'])) {
-				$parts[] = trim($np['street'] . (!empty($np['house']) ? ', ' . $np['house'] : ''));
-			}
-			if (!empty($np['sc_city'])) {
-				$parts[] = $np['sc_city'];
-			}
-			if (!empty($np['sc_address'])) {
-				$parts[] = $np['sc_address'];
-			}
-			$data['delivery_summary'] = implode(' - ', array_filter($parts));
+			$data['base'] = $this->config->get('config_url');
 		}
 
 		$data['column_left'] = $this->load->controller('common/column_left');
@@ -283,6 +149,213 @@ class ControllerCheckoutCheckout extends Controller {
 		$data['header'] = $this->load->controller('common/header');
 
 		$this->response->setOutput($this->load->view('checkout/checkout', $data));
+	}
+
+	// Order summary (right column) + GA4 begin_checkout payload.
+	private function summary(&$data) {
+		$this->load->model('tool/image');
+
+		$data['summary_products'] = array();
+		$ga4_items = array();
+
+		foreach ($this->cart->getProducts() as $product) {
+			$options = array();
+
+			foreach ($product['option'] as $option) {
+				$options[] = $option['name'] . ': ' . (utf8_strlen($option['value']) > 20 ? utf8_substr($option['value'], 0, 20) . '..' : $option['value']);
+			}
+
+			$unit = $this->tax->calculate($product['price'], $product['tax_class_id'], $this->config->get('config_tax'));
+
+			$data['summary_products'][] = array(
+				'name'     => $product['name'],
+				'thumb'    => $this->model_tool_image->resize($product['image'] ? $product['image'] : 'placeholder.png', 96, 96),
+				'href'     => $this->url->link('product/product', 'product_id=' . $product['product_id']),
+				'options'  => $options,
+				'quantity' => $product['quantity'],
+				'price'    => $this->currency->format($unit, $this->session->data['currency']),
+				'total'    => $this->currency->format($unit * $product['quantity'], $this->session->data['currency'])
+			);
+
+			$ga4_items[] = array(
+				'item_id'   => (string)$product['product_id'],
+				'item_name' => $product['name'],
+				'price'     => (float)$this->currency->format($unit, $this->session->data['currency'], '', false),
+				'quantity'  => (int)$product['quantity']
+			);
+		}
+
+		$data['summary_vouchers'] = array();
+
+		if (!empty($this->session->data['vouchers'])) {
+			foreach ($this->session->data['vouchers'] as $voucher) {
+				$data['summary_vouchers'][] = array(
+					'description' => $voucher['description'],
+					'amount'      => $this->currency->format($voucher['amount'], $this->session->data['currency'])
+				);
+			}
+		}
+
+		$totals = array();
+		$taxes = $this->cart->getTaxes();
+		$total = 0;
+
+		// __call can not keep references, so the totals travel in an array.
+		$total_data = array('totals' => &$totals, 'taxes' => &$taxes, 'total' => &$total);
+
+		$this->load->model('setting/extension');
+
+		$sort_order = array();
+		$results = $this->model_setting_extension->getExtensions('total');
+
+		foreach ($results as $key => $value) {
+			$sort_order[$key] = $this->config->get('total_' . $value['code'] . '_sort_order');
+		}
+
+		array_multisort($sort_order, SORT_ASC, $results);
+
+		foreach ($results as $result) {
+			if ($this->config->get('total_' . $result['code'] . '_status')) {
+				$this->load->model('extension/total/' . $result['code']);
+
+				$this->{'model_extension_total_' . $result['code']}->getTotal($total_data);
+			}
+		}
+
+		$sort_order = array();
+
+		foreach ($totals as $key => $value) {
+			$sort_order[$key] = $value['sort_order'];
+		}
+
+		array_multisort($sort_order, SORT_ASC, $totals);
+
+		$data['summary_totals'] = array();
+
+		foreach ($totals as $item) {
+			$data['summary_totals'][] = array(
+				'code'  => $item['code'],
+				'title' => $item['title'],
+				'text'  => $this->currency->format($item['value'], $this->session->data['currency'])
+			);
+		}
+
+		$data['summary_total_value'] = $total;
+
+		// GA4: picked up by catalog/view/js/ga4.js (dataLayer) and by gtag directly when it is present.
+		$data['ga4_checkout'] = json_encode(array(
+			'currency' => $this->session->data['currency'],
+			'value'    => (float)$this->currency->format($total, $this->session->data['currency'], '', false),
+			'items'    => $ga4_items
+		), JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP);
+	}
+
+	// Shipping: the delivery extension gives one quote per carrier (delivery.<code>); the layout has a
+	// single <select>, so every carrier x "receive as" pair becomes one option.
+	private function shipping(&$data) {
+		$this->load->language('extension/shipping/delivery');
+
+		$data['shipping_options'] = array();
+		$data['shipping_required'] = $this->cart->hasShipping();
+
+		if ($data['shipping_required'] && $this->config->get('shipping_delivery_status')) {
+			$carriers = array('novaposhta', 'ukrposhta', 'meest', 'courier', 'pickup');
+
+			// free delivery overrides the tariffs once the cart reaches the threshold of the shipping `free` module
+			$free_active = $this->config->get('shipping_free_status') && $this->cart->getSubTotal() >= (float)$this->config->get('shipping_free_total');
+
+			foreach ($carriers as $code) {
+				// a carrier is switched off in its own card (Extensions -> Shipping)
+				if ($this->config->get('shipping_delivery_' . $code . '_enabled') === '0') {
+					continue;
+				}
+
+				$cost = $free_active ? 0 : (float)$this->config->get('shipping_delivery_' . $code . '_cost');
+
+				if ($cost > 0) {
+					$cost_text = $this->currency->format($this->tax->calculate($cost, $this->config->get('shipping_delivery_tax_class_id'), $this->config->get('config_tax')), $this->session->data['currency']);
+				} elseif ($code == 'pickup') {
+					$cost_text = $this->language->get('co_text_free');
+				} else {
+					$cost_text = $this->language->get('co_text_carrier_tariff');
+				}
+
+				if (isset($this->carrier_destinations[$code])) {
+					foreach ($this->carrier_destinations[$code] as $destination) {
+						$data['shipping_options'][] = array(
+							'code'    => 'delivery.' . $code,
+							'receive' => $destination,
+							'title'   => $this->language->get('text_' . $code) . ' — ' . $this->language->get('co_text_opt_' . $destination),
+							'cost'    => $cost_text,
+							'label'   => $this->language->get('co_text_dest_' . $destination)
+						);
+					}
+				} elseif ($code == 'courier') {
+					$data['shipping_options'][] = array(
+						'code'    => 'delivery.courier',
+						'receive' => 'courier',
+						'title'   => $this->language->get('co_text_courier_title'),
+						'cost'    => $cost_text,
+						'label'   => $this->language->get('co_text_dest_courier')
+					);
+				} else {
+					$data['shipping_options'][] = array(
+						'code'    => 'delivery.pickup',
+						'receive' => 'pickup',
+						'title'   => $this->language->get('co_text_pickup_title'),
+						'cost'    => $cost_text,
+						'label'   => ''
+					);
+				}
+			}
+		}
+
+		// Label / error of the single destination field per "receive as" type (used by checkout.js).
+		$data['destination_types'] = json_encode(array(
+			'branch'   => array('label' => $this->language->get('co_entry_branch'), 'error' => $this->language->get('co_error_branch')),
+			'postomat' => array('label' => $this->language->get('co_entry_postomat'), 'error' => $this->language->get('co_error_postomat')),
+			'courier'  => array('label' => $this->language->get('co_entry_address'), 'error' => $this->language->get('co_error_address'))
+		), JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP);
+
+		// Pickup point = the store address from the settings.
+		$data['pickup_address'] = nl2br($this->config->get('config_address'));
+		$data['pickup_address_line'] = trim(preg_replace('/\s*[\r\n]+\s*/', ', ', (string)$this->config->get('config_address')));
+		$data['pickup_hours'] = $this->config->get('config_open') ? nl2br($this->config->get('config_open')) : '';
+	}
+
+	// Payment: WayForPay (card) + cod / bank_transfer for paid carts, free_checkout for a zero total.
+	// Each language file shares the text_title key, so the title is read right after loading it.
+	private function payment(&$data, $total) {
+		$data['payment_methods'] = array();
+
+		if ($total > 0) {
+			foreach (array('cod', 'bank_transfer') as $code) {
+				if ($this->config->get('payment_' . $code . '_status')) {
+					$minimum = (float)$this->config->get('payment_' . $code . '_total');
+
+					if ($minimum > 0 && $minimum > $total) {
+						continue;
+					}
+
+					$this->load->language('extension/payment/' . $code);
+
+					$data['payment_methods'][] = array('code' => $code, 'title' => $this->language->get('text_title'));
+				}
+			}
+
+			// card: after the order is created checkout.js hands the browser over to the payment page
+			if ($this->config->get('payment_wayforpay_status') && $this->config->get('payment_wayforpay_merchant')) {
+				$this->load->language('extension/payment/wayforpay');
+
+				$title = $this->config->get('payment_wayforpay_title' . (int)$this->config->get('config_language_id'));
+
+				array_unshift($data['payment_methods'], array('code' => 'wayforpay', 'title' => $title ?: $this->language->get('text_title')));
+			}
+		} elseif ($this->config->get('payment_free_checkout_status')) {
+			$this->load->language('extension/payment/free_checkout');
+
+			$data['payment_methods'][] = array('code' => 'free_checkout', 'title' => $this->language->get('text_title'));
+		}
 	}
 
 	public function country() {
@@ -335,40 +408,5 @@ class ControllerCheckoutCheckout extends Controller {
 		$this->response->addHeader('Content-Type: application/json');
 		$this->response->setOutput(json_encode($json));
 	}
-
-	public function saveRecipient() {
-		$this->load->language('checkout/checkout');
-
-		$json = array();
-		$type = isset($this->request->post['recipient_type']) ? $this->request->post['recipient_type'] : 'me';
-
-		$data = array(
-			'type' => $type === 'me' ? 'me' : 'other',
-			'firstname' => isset($this->request->post['recipient_firstname']) ? trim($this->request->post['recipient_firstname']) : '',
-			'lastname' => isset($this->request->post['recipient_lastname']) ? trim($this->request->post['recipient_lastname']) : '',
-			'patronymic' => isset($this->request->post['recipient_patronymic']) ? trim($this->request->post['recipient_patronymic']) : '',
-			'telephone' => isset($this->request->post['recipient_telephone']) ? trim($this->request->post['recipient_telephone']) : ''
-		);
-
-		if ($data['type'] === 'other') {
-			if (utf8_strlen($data['firstname']) < 1 || utf8_strlen($data['firstname']) > 32) {
-				$json['error']['recipient_firstname'] = 'Вкажіть ім\'я отримувача.';
-			}
-
-			if (utf8_strlen($data['lastname']) < 1 || utf8_strlen($data['lastname']) > 32) {
-				$json['error']['recipient_lastname'] = 'Вкажіть прізвище отримувача.';
-			}
-
-			if (!$this->isValidPhone($data['telephone'])) {
-				$json['error']['recipient_telephone'] = 'Вкажіть телефон отримувача.';
-			}
-		}
-
-		if (!$json) {
-			$this->session->data['recipient_data'] = $data;
-		}
-
-		$this->response->addHeader('Content-Type: application/json');
-		$this->response->setOutput(json_encode($json));
-	}
 }
+

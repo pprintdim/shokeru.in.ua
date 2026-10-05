@@ -16,3 +16,8 @@ $_['text_wishlist']     = 'Wish List';
 $_['text_newsletter']   = 'Newsletter';
 $_['text_powered']      = 'Powered By <a href="http://www.opencart.com">OpenCart</a><br /> %s &copy; %s';
 $_['text_customers'] = 'Customer Information';
+
+$_['text_fab_top'] = 'Back to top';
+$_['text_fab_call'] = 'Call us';
+
+$_['text_legal'] = 'Legal information';

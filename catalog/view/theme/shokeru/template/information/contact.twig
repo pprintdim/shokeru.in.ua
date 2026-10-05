@@ -16,10 +16,7 @@
   </section>
 
   {% if success %}
-    <div class="kk-toast is-show" role="status" aria-live="polite">
-      <span class="kk-toast__dot"></span>
-      <span>{{ success }}</span>
-    </div>
+    <div data-toast="success" hidden>{{ success }}</div>
   {% endif %}
 
   <section class="kk-quick">
@@ -86,7 +83,7 @@
 
             <div class="kk-form__group">
               <label class="kk-form__label" for="kkPhone">{{ entry_telephone }}</label>
-              <input class="kk-form__input{% if error_telephone %} is-error{% endif %}" id="kkPhone" name="telephone" type="tel" value="{{ telephone }}" required autocomplete="tel">
+              <input class="kk-form__input{% if error_telephone %} is-error{% endif %}" id="kkPhone" name="telephone" type="tel" value="{{ telephone }}" required autocomplete="tel" data-phone-input>
               {% if error_telephone %}<span class="kk-form__hint is-error">{{ error_telephone }}</span>{% endif %}
             </div>
 

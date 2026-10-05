@@ -1159,6 +1159,12 @@
                   </div>
                 </div>
                 <div class="form-group">
+                  <label class="col-sm-2 control-label" for="input-quick-order-email"><span data-toggle="tooltip" title="{{ help_quick_order_email }}">{{ entry_quick_order_email }}</span></label>
+                  <div class="col-sm-10">
+                    <input type="text" name="config_quick_order_email" value="{{ config_quick_order_email }}" placeholder="{{ config_email }}" id="input-quick-order-email" class="form-control" />
+                  </div>
+                </div>
+                <div class="form-group">
                   <label class="col-sm-2 control-label" for="input-mail-smtp-hostname"><span data-toggle="tooltip" title="{{ help_mail_smtp_hostname }}">{{ entry_mail_smtp_hostname }}</span></label>
                   <div class="col-sm-10">
                     <input type="text" name="config_mail_smtp_hostname" value="{{ config_mail_smtp_hostname }}" placeholder="{{ entry_mail_smtp_hostname }}" id="input-mail-smtp-hostname" class="form-control" />
@@ -1218,6 +1224,12 @@
             <div class="tab-pane" id="tab-server">
               <fieldset>
                 <legend>{{ text_general }}</legend>
+                <div class="form-group">
+                  <label class="col-sm-2 control-label" for="input-ga4-id"><span data-toggle="tooltip" title="{{ help_ga4_id }}">{{ entry_ga4_id }}</span></label>
+                  <div class="col-sm-10">
+                    <input type="text" name="config_ga4_id" value="{{ config_ga4_id }}" placeholder="G-XXXXXXXXXX" id="input-ga4-id" class="form-control" />
+                  </div>
+                </div>
                 <div class="form-group">
                   <label class="col-sm-2 control-label"><span data-toggle="tooltip" title="{{ help_maintenance }}">{{ entry_maintenance }}</span></label>
                   <div class="col-sm-10">

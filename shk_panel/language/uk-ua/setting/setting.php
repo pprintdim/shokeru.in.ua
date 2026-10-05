@@ -165,3 +165,9 @@ $_['entry_facebook'] = 'Facebook';
 $_['entry_telegram'] = 'Telegram';
 $_['entry_tiktok'] = 'TikTok';
 $_['entry_youtube'] = 'YouTube';
+
+// shokeru: GA4 і «Купити в один клік»
+$_['entry_ga4_id'] = 'Google Analytics 4 (Measurement ID)';
+$_['help_ga4_id'] = 'Ідентифікатор потоку GA4 виду G-XXXXXXXXXX. Порожнє поле — тег аналітики на сайт не виводиться; згода на cookie керує Consent Mode.';
+$_['entry_quick_order_email'] = 'Email для заявок «в один клік»';
+$_['help_quick_order_email'] = 'Куди надсилати заявки з попапа «Купити в один клік». Порожнє поле — лист іде на e-mail магазину.';

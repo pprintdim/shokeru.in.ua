@@ -1,26 +1,14 @@
+{# Перемикач валют поруч із мовою: той самий випадаючий блок (.header__lang — відкриття по кліку в script.js).
+   Кнопка показує символ і код поточної валюти, список — символ + код + назва. Рендериться лише коли валют більше однієї. #}
 {% if currencies|length > 1 %}
-<div class="pull-left">
-  <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-currency">
-    <div class="btn-group">
-      <button class="btn btn-link dropdown-toggle" data-toggle="dropdown">{% for currency in currencies %}
-      {% if currency.symbol_left and currency.code == code %} <strong>{{ currency.symbol_left }}</strong> {% elseif currency.symbol_right and currency.code == code %} <strong>{{ currency.symbol_right }}</strong> {% endif %}
-      {% endfor %} <span class="hidden-xs hidden-sm hidden-md">{{ text_currency }}</span>&nbsp;<i class="fa fa-caret-down"></i></button>
-      <ul class="dropdown-menu">
-        {% for currency in currencies %}
-        {% if currency.symbol_left %}
-        <li>
-          <button class="currency-select btn btn-link btn-block" type="button" name="{{ currency.code }}">{{ currency.symbol_left }} {{ currency.title }}</button>
-        </li>
-        {% else %}
-        <li>
-          <button class="currency-select btn btn-link btn-block" type="button" name="{{ currency.code }}">{{ currency.symbol_right }} {{ currency.title }}</button>
-        </li>
-        {% endif %}
-        {% endfor %}
-      </ul>
-    </div>
-    <input type="hidden" name="code" value="" />
-    <input type="hidden" name="redirect" value="{{ redirect }}" />
-  </form>
-</div>
-{% endif %} 
+{% set current = null %}{% for item in currencies %}{% if item.code == code %}{% set current = item %}{% endif %}{% endfor %}
+<form action="{{ action }}" method="post" class="header__lang header__currency" aria-label="{{ text_currency }}" data-currency-form>
+  <div class="header__lang-selected" role="button" tabindex="0" aria-haspopup="true" title="{{ current ? current.title : text_currency }}">{{ current ? ((current.symbol_left ?: current.symbol_right)|trim) : '¤' }} {{ code }}</div>
+  <div class="header__lang-content">
+    {% for item in currencies %}
+    <button type="submit" name="code" value="{{ item.code }}" class="header__currency-item{{ item.code == code ? ' is-active' : '' }}"{% if item.code == code %} aria-current="true"{% endif %}><span class="header__currency-symbol" aria-hidden="true">{{ (item.symbol_left ?: item.symbol_right)|trim }}</span><span class="header__currency-code">{{ item.code }}</span><span class="header__currency-title">{{ item.title }}</span></button>
+    {% endfor %}
+  </div>
+  <input type="hidden" name="redirect" value="{{ redirect }}" />
+</form>
+{% endif %}

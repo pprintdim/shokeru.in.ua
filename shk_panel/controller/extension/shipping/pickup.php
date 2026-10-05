@@ -1,4 +1,7 @@
 <?php
+// Окрема картка перевізника в списку розширень. Двигун доставки спільний
+// (model extension/shipping/delivery) — тут лише статус і вартість «Самовивіз»,
+// які зберігаються в загальні налаштування shipping_delivery.
 class ControllerExtensionShippingPickup extends Controller {
 	private $error = array();
 
@@ -10,67 +13,46 @@ class ControllerExtensionShippingPickup extends Controller {
 		$this->load->model('setting/setting');
 
 		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validate()) {
-			$this->model_setting_setting->editSetting('shipping_pickup', $this->request->post);
+			$settings = $this->model_setting_setting->getSetting('shipping_delivery');
+
+			$settings['shipping_delivery_pickup_cost'] = $this->request->post['shipping_delivery_pickup_cost'];
+			$settings['shipping_delivery_pickup_enabled'] = $this->request->post['shipping_delivery_pickup_enabled'];
+			$settings['shipping_delivery_status'] = isset($settings['shipping_delivery_status']) ? $settings['shipping_delivery_status'] : 1;
+
+			$this->model_setting_setting->editSetting('shipping_delivery', $settings);
 
 			$this->session->data['success'] = $this->language->get('text_success');
 
 			$this->response->redirect($this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=shipping', true));
 		}
 
-		if (isset($this->error['warning'])) {
-			$data['error_warning'] = $this->error['warning'];
-		} else {
-			$data['error_warning'] = '';
-		}
+		$data['error_warning'] = isset($this->error['warning']) ? $this->error['warning'] : '';
 
-		$data['breadcrumbs'] = array();
-
-		$data['breadcrumbs'][] = array(
-			'text' => $this->language->get('text_home'),
-			'href' => $this->url->link('common/dashboard', 'user_token=' . $this->session->data['user_token'], true)
-		);
-
-		$data['breadcrumbs'][] = array(
-			'text' => $this->language->get('text_extension'),
-			'href' => $this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=shipping', true)
-		);
-
-		$data['breadcrumbs'][] = array(
-			'text' => $this->language->get('heading_title'),
-			'href' => $this->url->link('extension/shipping/pickup', 'user_token=' . $this->session->data['user_token'], true)
+		$data['breadcrumbs'] = array(
+			array('text' => $this->language->get('text_home'), 'href' => $this->url->link('common/dashboard', 'user_token=' . $this->session->data['user_token'], true)),
+			array('text' => $this->language->get('text_extension'), 'href' => $this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=shipping', true)),
+			array('text' => $this->language->get('heading_title'), 'href' => $this->url->link('extension/shipping/pickup', 'user_token=' . $this->session->data['user_token'], true))
 		);
 
 		$data['action'] = $this->url->link('extension/shipping/pickup', 'user_token=' . $this->session->data['user_token'], true);
-
 		$data['cancel'] = $this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=shipping', true);
 
-		if (isset($this->request->post['shipping_pickup_geo_zone_id'])) {
-			$data['shipping_pickup_geo_zone_id'] = $this->request->post['shipping_pickup_geo_zone_id'];
-		} else {
-			$data['shipping_pickup_geo_zone_id'] = $this->config->get('shipping_pickup_geo_zone_id');
-		}
+		$cost_key = 'shipping_delivery_pickup_cost';
+		$enabled_key = 'shipping_delivery_pickup_enabled';
 
-		$this->load->model('localisation/geo_zone');
+		$data['cost'] = isset($this->request->post[$cost_key]) ? $this->request->post[$cost_key] : $this->config->get($cost_key);
+		$enabled = isset($this->request->post[$enabled_key]) ? $this->request->post[$enabled_key] : $this->config->get($enabled_key);
+		$data['enabled'] = ($enabled === null || $enabled === '') ? 1 : (int)$enabled;
 
-		$data['geo_zones'] = $this->model_localisation_geo_zone->getGeoZones();
-
-		if (isset($this->request->post['shipping_pickup_status'])) {
-			$data['shipping_pickup_status'] = $this->request->post['shipping_pickup_status'];
-		} else {
-			$data['shipping_pickup_status'] = $this->config->get('shipping_pickup_status');
-		}
-
-		if (isset($this->request->post['shipping_pickup_sort_order'])) {
-			$data['shipping_pickup_sort_order'] = $this->request->post['shipping_pickup_sort_order'];
-		} else {
-			$data['shipping_pickup_sort_order'] = $this->config->get('shipping_pickup_sort_order');
-		}
+		$data['cost_key'] = $cost_key;
+		$data['enabled_key'] = $enabled_key;
+		$data['sync_url'] = '';
 
 		$data['header'] = $this->load->controller('common/header');
 		$data['column_left'] = $this->load->controller('common/column_left');
 		$data['footer'] = $this->load->controller('common/footer');
 
-		$this->response->setOutput($this->load->view('extension/shipping/pickup', $data));
+		$this->response->setOutput($this->load->view('extension/shipping/hp_carrier', $data));
 	}
 
 	protected function validate() {

@@ -1,0 +1,10 @@
+{# Cookie-банер: прямокутна смуга внизу по центру (як у hydrophob), логіка — js/features.js ([data-cookie-banner]),
+   стилі — css/features.css .cookie-banner. Поки на головній іде прелоадер welcome, банер прозорий (body.welcome-loading);
+   під час тизера це той самий справжній банер згоди (Consent Mode GA4), відповідь на нього запускає ролик зі звуком. #}
+<div class="cookie-banner" data-cookie-banner hidden role="region" aria-label="{{ text_title }}">
+  <p class="cookie-banner__text">{{ text_message }}{% if privacy_href %} <a class="cookie-banner__link" href="{{ privacy_href }}">{{ text_more }}</a>{% endif %}</p>
+  <div class="cookie-banner__actions">
+    <button type="button" class="cookie-banner__btn" data-cookie="necessary">{{ button_necessary }}</button>
+    <button type="button" class="cookie-banner__btn cookie-banner__btn--accept" data-cookie="accept">{{ button_accept }}</button>
+  </div>
+</div>

@@ -382,4 +382,52 @@ class ModelCheckoutOrder extends Model {
 			$this->cache->delete('product');
 		}
 	}
+
+	// WayForPay payment flag (pattern well / group stores): extension/payment/wayforpay and
+	// checkout/payment_retry check whether an order is already paid. Table is created lazily.
+	private function ensurePaymentStatusTable() {
+		$this->db->query("CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "order_payment_status` (
+			`order_id` int(11) NOT NULL,
+			`payment_code` varchar(64) NOT NULL DEFAULT '',
+			`paid` tinyint(1) NOT NULL DEFAULT '0',
+			`provider` varchar(64) NOT NULL DEFAULT '',
+			`provider_status` varchar(128) NOT NULL DEFAULT '',
+			`provider_response` mediumtext,
+			`date_paid` datetime DEFAULT NULL,
+			`date_modified` datetime NOT NULL,
+			PRIMARY KEY (`order_id`),
+			KEY `paid` (`paid`),
+			KEY `payment_code` (`payment_code`)
+		) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+	}
+
+	public function markPaymentPaid($order_id, $provider = '', $provider_status = '', $provider_response = '') {
+		$order_info = $this->getOrder($order_id);
+
+		if (!$order_info) {
+			return false;
+		}
+
+		$this->ensurePaymentStatusTable();
+
+		$this->db->query("REPLACE INTO `" . DB_PREFIX . "order_payment_status` SET
+			order_id = '" . (int)$order_id . "',
+			payment_code = '" . $this->db->escape((string)$order_info['payment_code']) . "',
+			paid = '1',
+			provider = '" . $this->db->escape((string)$provider) . "',
+			provider_status = '" . $this->db->escape((string)$provider_status) . "',
+			provider_response = '" . $this->db->escape((string)$provider_response) . "',
+			date_paid = NOW(),
+			date_modified = NOW()");
+
+		return true;
+	}
+
+	public function isPaymentPaid($order_id) {
+		$this->ensurePaymentStatusTable();
+
+		$query = $this->db->query("SELECT paid FROM `" . DB_PREFIX . "order_payment_status` WHERE order_id = '" . (int)$order_id . "' AND paid = '1' LIMIT 1");
+
+		return (bool)$query->num_rows;
+	}
 }

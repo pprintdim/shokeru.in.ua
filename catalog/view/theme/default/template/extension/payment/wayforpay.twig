@@ -1,0 +1,14 @@
+<form id="wayforpay_submit" name="wayforpay_submit" action="{{ action }}" method="POST">
+    {% for key, value in fields %}
+        <input type="hidden" name="{{ key }}" value="{{ value }}"/>
+    {% endfor %}
+    {% for value in prod_name %}
+        <input type="hidden" name="productName[]" value="{{ value }}"/>
+    {% endfor %}
+    {% for value in prod_price %}
+        <input type="hidden" name="productPrice[]" value="{{ value }}"/>
+    {% endfor %}
+    {% for value in prod_count %}
+        <input type="hidden" name="productCount[]" value="{{ value }}"/>
+    {% endfor %}
+</form>

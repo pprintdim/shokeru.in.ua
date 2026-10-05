@@ -16,3 +16,7 @@ $_['text_wishlist'] = 'Закладки';
 $_['text_newsletter'] = 'Розсилка';
 $_['text_customers'] = 'Інформація клієнтам';
 $_['text_powered'] = '© %s, %s  |  Всі права захищено';
+$_['text_fab_top'] = 'Нагору';
+$_['text_fab_call'] = 'Подзвонити';
+
+$_['text_legal'] = 'Юридична інформація';

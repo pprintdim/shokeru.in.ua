@@ -307,7 +307,8 @@ function formatInternationalPhone(value) {
 }
 
 function applyInternationalPhoneMask(input) {
-    if (!input) {
+    // поля з [data-phone-input] ведуть intl-tel-input (theme/shokeru/js/phone.js) — стара маска їх не чіпає
+    if (!input || input.hasAttribute('data-phone-input')) {
         return;
     }
 
@@ -336,7 +337,7 @@ document.addEventListener('focusin', function(event) {
 });
 
 document.addEventListener('input', function(event) {
-    if (event.target.matches('input[type="tel"], input[name="telephone"], input[name="recipient_telephone"]')) {
+    if (event.target.matches('input[type="tel"], input[name="telephone"], input[name="recipient_telephone"]') && !event.target.hasAttribute('data-phone-input')) {
         event.target.value = formatInternationalPhone(event.target.value);
         event.target.setSelectionRange(event.target.value.length, event.target.value.length);
     }
@@ -358,6 +359,48 @@ $('#search-form').on('submit', function(e) {
     window.location.href = url;
 });
 
+
+/* Єдині тости (window.shokeruToast, js/features.js): кошик, обране, порівняння, помилки ajax */
+function themeToast(message, type) {
+    if (message && typeof window.shokeruToast === 'function') {
+        window.shokeruToast(message, type);
+    }
+}
+
+function themeFirstError(error) {
+    if (!error) {
+        return '';
+    }
+
+    if (typeof error === 'string') {
+        return error;
+    }
+
+    var first = '';
+
+    Object.keys(error).some(function(key) {
+        var value = error[key];
+
+        if (value && typeof value === 'object') {
+            value = themeFirstError(value);
+        }
+
+        first = value ? String(value) : '';
+
+        return !!first;
+    });
+
+    return first;
+}
+
+function themeAjaxError(xhr, thrownError) {
+    themeToast(thrownError || (xhr && xhr.statusText) || '', 'danger');
+
+    if (window.console && xhr) {
+        console.error(thrownError, xhr.status, xhr.responseText);
+    }
+}
+
 // Cart add remove functions
 var cart = {
     'add': function(product_id, quantity, callback) {
@@ -372,9 +415,14 @@ var cart = {
                     location = json['redirect'];
                 }
 
+                if (json['error']) {
+                    themeToast(themeFirstError(json['error']), 'danger');
+                }
+
                 if (json['success']) {
                     $('.header__cart span').text(json['total']);
                     reloadThemeCart();
+                    themeToast(json['success'], 'success');
 
                     if (typeof callback === 'function') {
                         callback(json);
@@ -382,7 +430,7 @@ var cart = {
                 }
             },
             error: function(xhr, ajaxOptions, thrownError) {
-                alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+                themeAjaxError(xhr, thrownError);
             }
         });
     },
@@ -403,7 +451,7 @@ var cart = {
                 }
             },
             error: function(xhr, ajaxOptions, thrownError) {
-                alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+                themeAjaxError(xhr, thrownError);
             }
         });
     },
@@ -435,7 +483,7 @@ var cart = {
                 }
             },
             error: function(xhr, ajaxOptions, thrownError) {
-                alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+                themeAjaxError(xhr, thrownError);
             }
         });
     }
@@ -467,7 +515,7 @@ var voucher = {
                 }
             },
             error: function(xhr, ajaxOptions, thrownError) {
-                alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+                themeAjaxError(xhr, thrownError);
             }
         });
     }
@@ -490,12 +538,16 @@ var wishlist = {
                     updateThemeWishlistState(json['product_ids'], parseInt(json['total_count'], 10) || json['product_ids'].length);
                 }
 
+                if (json['success']) {
+                    themeToast(json['success'], 'success');
+                }
+
                 if (typeof callback === 'function') {
                     callback(json);
                 }
             },
             error: function(xhr, ajaxOptions, thrownError) {
-                alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+                themeAjaxError(xhr, thrownError);
             }
         });
     },
@@ -587,11 +639,11 @@ var compare = {
 
                     $('#compare-total').html(json['total']);
 
-                    $('html, body').animate({ scrollTop: 0 }, 'slow');
+                    themeToast(json['success'], 'success');
                 }
             },
             error: function(xhr, ajaxOptions, thrownError) {
-                alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+                themeAjaxError(xhr, thrownError);
             }
         });
     },
@@ -643,14 +695,19 @@ window.ShokeruOtp = (function () {
         var successEl  = form.querySelector('.otp-success');
         var agree      = form.querySelector('input[name="agree"]');
 
-        var LBL_GET    = submitBtn ? submitBtn.textContent.trim() : 'Отримати код';
-        var LBL_VERIFY = txt(form, 'verify-label', 'Підтвердити');
+        var LBL_GET    = submitBtn ? submitBtn.textContent.trim() : '';
+        var LBL_VERIFY = txt(form, 'verify-label', '');
+        var SEND_URL   = txt(form, 'send-url', 'index.php?route=common/user_popup/sendCode').replace(/&amp;/g, '&');
+        var VERIFY_URL = txt(form, 'verify-url', 'index.php?route=common/user_popup/verifyCode').replace(/&amp;/g, '&');
+        var ERR_NET    = txt(form, 'error-network', '');
+        var ERR_CODE   = txt(form, 'code-required', '');
+        var ERR_AGREE  = txt(form, 'error-agree', '');
         var stage = 'send';
         var timerId = null;
 
         function err(msg) { if (cb && cb.showError) cb.showError(msg); }
         function clr() { if (cb && cb.clearError) cb.clearError(); }
-        function errText(e) { return (typeof e === 'object' && e) ? Object.keys(e).map(function (k) { return e[k]; }).join(' ') : (e || 'Помилка'); }
+        function errText(e) { return (typeof e === 'object' && e) ? Object.keys(e).map(function (k) { return e[k]; }).join(' ') : (e || ERR_NET); }
 
         function startTimer() {
             var left = 60;
@@ -681,35 +738,36 @@ window.ShokeruOtp = (function () {
             if (emailCheck) emailCheck.classList.add('is-on');
             if (submitBtn) submitBtn.style.display = 'none';
             if (agree) { var row = agree.closest('.otp-agree-row'); if (row) row.style.display = 'none'; }
-            if (successEl) { successEl.hidden = false; successEl.textContent = j.message || 'Успішно!'; }
+            if (successEl) { successEl.hidden = false; successEl.textContent = j.message || ''; }
+            if (j.message && typeof window.shokeruToast === 'function') window.shokeruToast(j.message, 'success');
             clr();
-            setTimeout(function () { window.location.href = j.redirect || 'index.php?route=account/account'; }, 3500);
+            setTimeout(function () { window.location.href = j.redirect || 'index.php?route=account/account'; }, 1500);
         }
 
         function send() {
             clr();
-            if (stage === 'send' && agree && !agree.checked) { err(cb && cb.agreeError ? cb.agreeError : 'Підтвердіть згоду'); return; }
+            if (stage === 'send' && agree && agree.type === 'checkbox' && !agree.checked) { err(cb && cb.agreeError ? cb.agreeError : ERR_AGREE); return; }
             var data = new FormData(form);
             data.append('type', type);
             if (submitBtn) submitBtn.disabled = true;
-            fetch('index.php?route=common/user_popup/sendCode', { method: 'POST', body: data, credentials: 'same-origin' })
+            fetch(SEND_URL, { method: 'POST', body: data, credentials: 'same-origin' })
                 .then(function (r) { return r.json(); })
                 .then(function (j) {
                     if (submitBtn) submitBtn.disabled = false;
                     if (j.success) { stage = 'verify'; showCodeStep(); }
                     else err(errText(j.error));
                 })
-                .catch(function () { if (submitBtn) submitBtn.disabled = false; err('Сталася помилка, спробуйте ще раз'); });
+                .catch(function () { if (submitBtn) submitBtn.disabled = false; err(ERR_NET); });
         }
 
         function verify() {
             clr();
             var code = codeInput ? codeInput.value.trim() : '';
-            if (!code) { err(txt(form, 'code-required', 'Введіть код')); return; }
+            if (!code) { err(ERR_CODE); return; }
             if (submitBtn) submitBtn.disabled = true;
-            fetch('index.php?route=common/user_popup/verifyCode', {
+            fetch(VERIFY_URL, {
                 method: 'POST',
-                body: new URLSearchParams({ email: emailInput.value.trim(), code: code }),
+                body: new URLSearchParams({ email: emailInput.value.trim(), code: code, redirect: (form.querySelector('[data-popup-redirect]') || {}).value || '' }),
                 credentials: 'same-origin'
             })
                 .then(function (r) { return r.json(); })
@@ -718,13 +776,29 @@ window.ShokeruOtp = (function () {
                     if (j.success) onSuccess(j);
                     else err(errText(j.error));
                 })
-                .catch(function () { if (submitBtn) submitBtn.disabled = false; err('Сталася помилка, спробуйте ще раз'); });
+                .catch(function () { if (submitBtn) submitBtn.disabled = false; err(ERR_NET); });
         }
 
         form.addEventListener('submit', function (e) { e.preventDefault(); (stage === 'send') ? send() : verify(); });
         if (resendBtn) resendBtn.addEventListener('click', function () { if (!resendBtn.disabled) send(); });
         if (emailInput) emailInput.addEventListener('input', function () { if (stage === 'verify') { stage = 'send'; if (codeStep) codeStep.hidden = true; if (fieldsWrap) fieldsWrap.hidden = false; if (submitBtn) submitBtn.textContent = LBL_GET; } });
     }
+
+    // автопідключення всіх OTP-форм попапа: помилки — у .otp-error форми і тостом
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.otp-form').forEach(function (form) {
+            var box = form.querySelector('.otp-error');
+
+            init(form, {
+                showError: function (msg) {
+                    if (box) { box.textContent = msg; box.style.display = 'block'; }
+                    if (msg && typeof window.shokeruToast === 'function') window.shokeruToast(msg, 'danger');
+                },
+                clearError: function () { if (box) { box.textContent = ''; box.style.display = 'none'; } },
+                agreeError: form.getAttribute('data-error-agree') || ''
+            });
+        });
+    });
 
     return { init: init };
 })();

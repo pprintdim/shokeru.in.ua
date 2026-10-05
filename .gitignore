@@ -34,3 +34,6 @@ tmp_*.php
 # знімок стану сесії (може містити доступи)
 handoff.md
 backups/
+
+# runtime cache
+storage/cache/
