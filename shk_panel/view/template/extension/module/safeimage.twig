@@ -1,0 +1,152 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="pull-right">
+        <button type="submit" form="form-module" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-save"></i></button>
+        <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a>
+      </div>
+      <h1>{{ heading_title }}</h1>
+      <ul class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+          <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  <div class="container-fluid">
+    {% if error_warning %}
+      <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}<button type="button" class="close" data-dismiss="alert">&times;</button></div>
+    {% endif %}
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title"><i class="fa fa-pencil"></i> {{ text_edit }}</h3>
+      </div>
+      <div class="panel-body">
+        <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-module" class="form-horizontal">
+
+          <div class="form-group">
+            <label class="col-sm-2 control-label">{{ entry_status }}</label>
+            <div class="col-sm-10">
+              <select name="module_safeimage[status]" class="form-control">
+                <option value="1" {{ module_safeimage.status ? 'selected' : '' }}>{{ text_enabled }}</option>
+                <option value="0" {{ not module_safeimage.status ? 'selected' : '' }}>{{ text_disabled }}</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="col-sm-2 control-label">{{ entry_strip_status }}</label>
+            <div class="col-sm-10">
+              <select name="module_safeimage[strip_status]" class="form-control">
+                <option value="1" {{ module_safeimage.strip_status ? 'selected' : '' }}>{{ text_enabled }}</option>
+                <option value="0" {{ not module_safeimage.strip_status ? 'selected' : '' }}>{{ text_disabled }}</option>
+              </select>
+            </div>
+          </div>
+
+          <hr>
+
+          <ul class="nav nav-tabs safeimage-lang-tabs">
+            {% for language in languages %}
+              <li class="{{ loop.first ? 'active' : '' }}">
+                <a href="#tab-lang-{{ language.language_id }}" data-toggle="tab">
+                  <img src="language/{{ language.code }}/{{ language.code }}.png"> {{ language.name }}
+                </a>
+              </li>
+            {% endfor %}
+          </ul>
+
+          <div class="tab-content" style="margin-top:15px;">
+            {% for language in languages %}
+              {% set lid = language.language_id %}
+              <div class="tab-pane {{ loop.first ? 'active' : '' }}" id="tab-lang-{{ lid }}">
+
+                <div class="form-group">
+                  <label class="col-sm-2 control-label">{{ entry_name }}</label>
+                  <div class="col-sm-10">
+                    <input type="text" name="module_safeimage[content][{{ lid }}][name]" value="{{ module_safeimage.content[lid].name }}" class="form-control">
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="col-sm-2 control-label">{{ entry_title_accent }}</label>
+                  <div class="col-sm-10">
+                    <input type="text" name="module_safeimage[content][{{ lid }}][title_accent]" value="{{ module_safeimage.content[lid].title_accent }}" class="form-control">
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="col-sm-2 control-label">{{ entry_description }}</label>
+                  <div class="col-sm-10">
+                    <input type="text" name="module_safeimage[content][{{ lid }}][description]" value="{{ module_safeimage.content[lid].description }}" class="form-control">
+                  </div>
+                </div>
+
+
+              </div>
+            {% endfor %}
+          </div>
+
+          <hr>
+          <div class="clearfix" style="margin-bottom:10px;">
+            <h4 class="pull-left">{{ text_images }}</h4>
+            <button type="button" class="btn btn-primary pull-right" id="btn-add-image"><i class="fa fa-plus-circle"></i> {{ button_add }}</button>
+          </div>
+
+          <div id="safeimage-images">
+            {% for row in image_rows %}
+              {% set idx = loop.index0 %}
+              <div class="form-group safeimage-image-item">
+                <label class="col-sm-2 control-label">{{ entry_image }}</label>
+                <div class="col-sm-10">
+                  <a href="" id="thumb-safeimage-{{ idx }}" data-toggle="image" class="img-thumbnail">
+                    <img src="{{ row.thumb }}" id="safeimage-{{ idx }}" alt="" />
+                  </a>
+                  <input type="hidden" name="module_safeimage[images][]" value="{{ row.path }}" id="input-safeimage-{{ idx }}" />
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.safeimage-lang-tabs { border-bottom:0; display:flex; flex-wrap:wrap; gap:6px; margin:0 0 14px; }
+.safeimage-lang-tabs > li { float:none; margin:0; }
+.safeimage-lang-tabs > li > a { border:1px solid #d9e1e8; border-radius:4px; color:#4d5b67; margin:0; padding:7px 11px; }
+.safeimage-lang-tabs > li.active > a { background:#1e91cf; border-color:#1e91cf; color:#fff; }
+</style>
+<script>
+var safeimageIdx = {{ image_rows|length }};
+
+$('#btn-add-image').on('click', function() {
+  var idx = safeimageIdx++;
+  $('#safeimage-images').append(
+    '<div class="form-group safeimage-image-item">' +
+    '<label class="col-sm-2 control-label">{{ entry_image|e('js') }}</label>' +
+    '<div class="col-sm-10">' +
+    '<a href="" id="thumb-safeimage-' + idx + '" data-toggle="image" class="img-thumbnail">' +
+    '<img src="{{ no_image }}" id="safeimage-' + idx + '" alt="" /></a>' +
+    '<input type="hidden" name="module_safeimage[images][]" value="" id="input-safeimage-' + idx + '" />' +
+    '</div></div>'
+  );
+});
+
+$(document).on('click', '[data-toggle="image"]', function(e) {
+  e.preventDefault();
+  var id = $(this).attr('id').replace('thumb-', '');
+  window.setImageData = function(path, thumb) {
+    $('#' + id).attr('src', thumb);
+    $('#input-' + id).val(path);
+    $('#modal-image').modal('hide');
+  };
+});
+
+</script>
+
+{{ footer }}

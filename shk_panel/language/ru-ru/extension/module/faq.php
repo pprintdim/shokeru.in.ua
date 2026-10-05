@@ -1,0 +1,22 @@
+<?php
+$_['heading_title']    = 'FAQ';
+$_['text_home']        = 'Главная';
+$_['text_extension']   = 'Расширения';
+$_['text_success']     = 'Настройки модуля сохранены!';
+$_['text_edit']        = 'Редактирование модуля FAQ';
+$_['text_enabled']     = 'Включено';
+$_['text_disabled']    = 'Отключено';
+$_['entry_name']       = 'Название модуля';
+$_['entry_status']     = 'Статус';
+$_['entry_heading']    = 'Заголовок';
+$_['entry_heading_accent'] = 'Акцент в заголовке';
+$_['entry_question']   = 'Вопрос';
+$_['entry_content']    = 'Контент ответа';
+$_['entry_sort_order'] = 'Сортировка';
+$_['entry_meta']       = 'Метаданные';
+$_['button_save']       = 'Сохранить';
+$_['button_cancel']     = 'Отмена';
+$_['button_add']       = 'Добавить пункт';
+$_['button_remove']    = 'Удалить';
+$_['error_permission'] = 'У вас нет прав для редактирования модуля!';
+$_['error_name']       = 'Название модуля должно быть от 3 до 64 символов!';

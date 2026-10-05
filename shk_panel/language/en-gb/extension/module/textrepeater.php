@@ -1,0 +1,25 @@
+<?php
+$_['heading_title']    = 'Text Repeater';
+$_['text_home']        = 'Home';
+$_['text_extension']   = 'Extensions';
+$_['text_success']     = 'Module settings have been saved!';
+$_['text_edit']        = 'Edit Text Repeater Module';
+$_['text_enabled']     = 'Enabled';
+$_['text_disabled']    = 'Disabled';
+$_['text_items']       = 'Repeater';
+$_['text_item_content'] = 'Item Content';
+$_['entry_name']       = 'Module Name';
+$_['entry_status']     = 'Status';
+$_['entry_html']       = 'HTML Block';
+$_['entry_title']      = 'Title';
+$_['entry_text']       = 'Text';
+$_['entry_btn_text']   = 'Button Text';
+$_['entry_btn_link']   = 'Button Link';
+$_['entry_meta']       = 'Meta';
+$_['entry_sort_order'] = 'Sort Order';
+$_['button_save']      = 'Save';
+$_['button_cancel']    = 'Cancel';
+$_['button_add']       = 'Add Item';
+$_['button_remove']    = 'Remove';
+$_['error_permission'] = 'You do not have permission to edit this module!';
+$_['error_name']       = 'Module name must be between 3 and 64 characters!';

@@ -1,0 +1,25 @@
+<?php
+$_['heading_title']    = 'Text Repeater';
+$_['text_home']        = 'Головна';
+$_['text_extension']   = 'Розширення';
+$_['text_success']     = 'Налаштування модуля збережено!';
+$_['text_edit']        = 'Редагування модуля Text Repeater';
+$_['text_enabled']     = 'Увімкнено';
+$_['text_disabled']    = 'Вимкнено';
+$_['text_items']       = 'Повторювач';
+$_['text_item_content'] = 'Контент пункту';
+$_['entry_name']       = 'Назва модуля';
+$_['entry_status']     = 'Статус';
+$_['entry_html']       = 'HTML-блок';
+$_['entry_title']      = 'Назва';
+$_['entry_text']       = 'Текст';
+$_['entry_btn_text']   = 'Текст кнопки';
+$_['entry_btn_link']   = 'Посилання кнопки';
+$_['entry_meta']       = 'Метадані';
+$_['entry_sort_order'] = 'Сортування';
+$_['button_save']      = 'Зберегти';
+$_['button_cancel']    = 'Скасувати';
+$_['button_add']       = 'Додати пункт';
+$_['button_remove']    = 'Видалити';
+$_['error_permission'] = 'У вас немає прав для редагування модуля!';
+$_['error_name']       = 'Назва модуля має бути від 3 до 64 символів!';

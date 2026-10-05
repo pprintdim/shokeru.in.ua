@@ -1,0 +1,371 @@
+{{ header }}{{ column_left }}
+
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="pull-right">
+        <button type="submit" form="form-module" class="btn btn-primary"><i class="fa fa-save"></i></button>
+        <a href="{{ cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a>
+      </div>
+      <h1>{{ heading_title }}</h1>
+    </div>
+  </div>
+
+  <div class="container-fluid">
+    {% if error_warning %}
+      <div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}</div>
+    {% endif %}
+    {% if success %}
+      <div class="alert alert-success"><i class="fa fa-check-circle"></i> {{ success }}</div>
+    {% endif %}
+
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title"><i class="fa fa-pencil"></i> {{ text_edit }}</h3>
+      </div>
+
+      <div class="panel-body">
+        <form action="{{ action }}" method="post" id="form-module" class="form-horizontal">
+
+          <div class="form-group">
+            <label class="col-sm-2 control-label">{{ entry_name }}</label>
+            <div class="col-sm-10">
+              <input type="text" name="name" value="{{ name }}" class="form-control">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="col-sm-2 control-label">{{ entry_status }}</label>
+            <div class="col-sm-10">
+              <select name="status" class="form-control">
+                <option value="1" {{ status ? 'selected' : '' }}>Enabled</option>
+                <option value="0" {{ not status ? 'selected' : '' }}>Disabled</option>
+              </select>
+            </div>
+          </div>
+
+          <hr>
+
+          <div class="pull-right" style="margin-bottom:10px;">
+            <button type="button" class="btn btn-primary" id="btn-add-item">
+              <i class="fa fa-plus-circle"></i> {{ button_add }}
+            </button>
+          </div>
+
+          <table class="table table-bordered table-hover" id="repeater-table">
+            <thead>
+              <tr>
+                <th style="width:35px;"></th>
+                <th>Text (Multilanguage)</th>
+                <th class="text-center" style="width:230px;">Images</th>
+                <th style="width:210px;">Meta</th>
+              </tr>
+            </thead>
+
+            <tbody id="repeater-body">
+              {% set idx = 0 %}
+              {% for item_id, item in items %}
+              <tr class="repeater-row" data-item-id="{{ item_id }}">
+                <td class="text-center drag-handle" style="cursor:move;">
+                  <i class="fa fa-bars"></i>
+                  <input type="hidden" name="item[{{ item_id }}][meta][item_id]" value="{{ item_id }}">
+                </td>
+
+                <td>
+                  <ul class="nav nav-tabs">
+                    {% for language in languages %}
+                      <li class="{{ loop.first ? 'active' : '' }}">
+                        <a href="#tab-{{ item_id }}-{{ language.language_id }}" data-toggle="tab">
+                          <img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}"> {{ language.name }}
+                        </a>
+                      </li>
+                    {% endfor %}
+                  </ul>
+
+                  <div class="tab-content" style="margin-top:10px;">
+                    {% for language in languages %}
+                      <div class="tab-pane {{ loop.first ? 'active' : '' }}" id="tab-{{ item_id }}-{{ language.language_id }}">
+
+                        <div style="margin-bottom:8px;">
+                          <input type="text"
+                            name="item[{{ item_id }}][lang][{{ language.language_id }}][title]"
+                            value="{{ item.lang[language.language_id].title ?? '' }}"
+                            class="form-control"
+                            placeholder="Title">
+                        </div>
+
+                        <textarea
+                          class="form-control summernote"
+                          name="item[{{ item_id }}][lang][{{ language.language_id }}][content]">{{ item.lang[language.language_id].content ?? '' }}</textarea>
+
+                      </div>
+                    {% endfor %}
+                  </div>
+                </td>
+
+                <td class="text-center">
+                  <div class="banner-images-wrap">
+
+                    <div class="banner-image-item">
+                      <div class="banner-image-label">Desktop</div>
+
+                      <a href=""
+                         id="thumb-image{{ item_id }}"
+                         data-toggle="image"
+                         data-target="input-image{{ item_id }}"
+                         data-thumb="thumb-image{{ item_id }}"
+                         class="img-thumbnail">
+                        <img src="{{ item.meta.thumb ?: placeholder }}" alt="">
+                      </a>
+
+                      <input type="hidden"
+                        id="input-image{{ item_id }}"
+                        name="item[{{ item_id }}][meta][image]"
+                        value="{{ item.meta.image }}">
+                    </div>
+
+                    <div class="banner-image-item">
+                      <div class="banner-image-label">Mobile</div>
+
+                      <a href=""
+                         id="thumb-mob{{ item_id }}"
+                         data-toggle="image"
+                         data-target="input-mob{{ item_id }}"
+                         data-thumb="thumb-mob{{ item_id }}"
+                         class="img-thumbnail">
+                        <img src="{{ item.meta.mob_thumb ?: placeholder }}" alt="">
+                      </a>
+
+                      <input type="hidden"
+                        id="input-mob{{ item_id }}"
+                        name="item[{{ item_id }}][meta][mob_image]"
+                        value="{{ item.meta.mob_image }}">
+                    </div>
+
+                  </div>
+                </td>
+
+                <td>
+                  <div style="margin-bottom:8px;">
+                    <label style="font-weight:600;margin-bottom:4px;display:block;">Посилання</label>
+                    <input type="text" name="item[{{ item_id }}][meta][link]" value="{{ item.meta.link ?? '' }}" class="form-control" placeholder="path=4 або https://...">
+                    <small style="color:#777;">шлях категорії (напр. <b>4</b> чи <b>20_4</b>) або повний URL</small>
+                  </div>
+
+                  <div style="margin-bottom:8px;">
+                    <label style="font-weight:600;margin-bottom:4px;display:block;">Sort order</label>
+                    <input type="text" name="item[{{ item_id }}][meta][sort_order]" value="{{ item.meta.sort_order }}" class="form-control sort-order">
+                  </div>
+
+                  <div style="margin-bottom:10px;">
+                    <label style="font-weight:600;margin-bottom:4px;display:block;">Status</label>
+                    <select name="item[{{ item_id }}][meta][status]" class="form-control">
+                      <option value="1" {{ item.meta.status ? 'selected' : '' }}>Enabled</option>
+                      <option value="0" {{ not item.meta.status ? 'selected' : '' }}>Disabled</option>
+                    </select>
+                  </div>
+
+                  <button type="button" class="btn btn-danger btn-remove-item" style="width:100%;">
+                    <i class="fa fa-minus-circle"></i> {{ button_remove }}
+                  </button>
+                </td>
+              </tr>
+              {% set idx = idx + 1 %}
+              {% endfor %}
+            </tbody>
+          </table>
+
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.banner-images-wrap{display:flex;gap:10px;justify-content:center}
+.banner-image-item{width:100px}
+.banner-image-label{font-size:11px;color:#777;margin-bottom:4px}
+.banner-image-item img{max-width:100%}
+</style>
+<script type="text/javascript" src="view/javascript/summernote/summernote.min.js"></script>
+<link href="view/javascript/summernote/summernote.min.css" rel="stylesheet" />
+<link href="view/javascript/jquery/jquery-ui/jquery-ui.min.css" rel="stylesheet" />
+<script type="text/javascript" src="view/javascript/summernote/summernote-image-attributes.js"></script>
+<script type="text/javascript" src="view/javascript/summernote/opencart.js"></script>
+<script type="text/javascript" src="view/javascript/jquery/jquery-ui/jquery-ui.min.js"></script>
+
+<script>
+// Summernote init (existing)
+$('.summernote').summernote({height: 160});
+
+// sortable (drag&drop)
+$('#repeater-body').sortable({
+  handle: '.drag-handle',
+  helper: function(e, ui) {
+    ui.children().each(function () {
+      $(this).width($(this).width());
+    });
+    return ui;
+  },
+
+  update: function () {
+    updateSortOrder();
+  }
+});
+function updateSortOrder() {
+  $('#repeater-body .repeater-row').each(function(index){
+    $(this)
+      .find('input.sort-order')
+      .val(index);
+  });
+}
+
+
+function nextItemId() {
+  // find max existing item_id in DOM and +1
+  let max = 0;
+  $('#repeater-body .repeater-row').each(function(){
+    const id = parseInt($(this).attr('data-item-id'), 10) || 0;
+    if (id > max) max = id;
+  });
+  return max + 1;
+}
+
+function buildRowHtml(itemId, languages, placeholder) {
+
+  let tabs = '';
+  let panes = '';
+
+  for (let i=0; i<languages.length; i++) {
+    const lang = languages[i];
+    const active = i === 0 ? 'active' : '';
+    tabs += `
+      <li class="${active}">
+        <a href="#tab-${itemId}-${lang.language_id}" data-toggle="tab">
+          <img src="language/${lang.code}/${lang.code}.png" title="${lang.name}"> ${lang.name}
+        </a>
+      </li>
+    `;
+
+    panes += `
+      <div class="tab-pane ${active}" id="tab-${itemId}-${lang.language_id}">
+        <div style="margin-bottom:8px;">
+          <input type="text"
+            name="item[${itemId}][lang][${lang.language_id}][title]"
+            value=""
+            class="form-control"
+            placeholder="Title">
+        </div>
+        <textarea class="form-control summernote"
+          name="item[${itemId}][lang][${lang.language_id}][content]"></textarea>
+      </div>
+    `;
+  }
+
+  return `
+    <tr class="repeater-row" data-item-id="${itemId}">
+      <td class="text-center drag-handle" style="cursor:move;">
+        <i class="fa fa-bars"></i>
+        <input type="hidden" name="item[${itemId}][meta][item_id]" value="${itemId}">
+      </td>
+
+      <td>
+        <ul class="nav nav-tabs">${tabs}</ul>
+        <div class="tab-content" style="margin-top:10px;">${panes}</div>
+      </td>
+
+      <td class="text-center">
+        <div class="banner-images-wrap">
+
+          <div class="banner-image-item">
+            <div class="banner-image-label">Desktop</div>
+            <a href=""
+              id="thumb-image${itemId}"
+              data-toggle="image"
+              data-target="input-image${itemId}"
+              data-thumb="thumb-image${itemId}"
+              class="img-thumbnail">
+              <img src="${placeholder}" alt="">
+            </a>
+            <input type="hidden"
+              id="input-image${itemId}"
+              name="item[${itemId}][meta][image]"
+              value="">
+          </div>
+
+          <div class="banner-image-item">
+            <div class="banner-image-label">Mobile</div>
+            <a href=""
+              id="thumb-mob${itemId}"
+              data-toggle="image"
+              data-target="input-mob${itemId}"
+              data-thumb="thumb-mob${itemId}"
+              class="img-thumbnail">
+              <img src="${placeholder}" alt="">
+            </a>
+            <input type="hidden"
+              id="input-mob${itemId}"
+              name="item[${itemId}][meta][mob_image]"
+              value="">
+          </div>
+
+        </div>
+      </td>
+
+      <td>
+        <div style="margin-bottom:8px;">
+          <label style="font-weight:600;margin-bottom:4px;display:block;">Посилання</label>
+          <input type="text" name="item[${itemId}][meta][link]" value="" class="form-control" placeholder="4 або https://...">
+        </div>
+
+        <div style="margin-bottom:8px;">
+          <label style="font-weight:600;margin-bottom:4px;display:block;">Sort order</label>
+          <input type="text" name="item[${itemId}][meta][sort_order]" value="0" class="form-control sort-order">
+        </div>
+
+        <div style="margin-bottom:10px;">
+          <label style="font-weight:600;margin-bottom:4px;display:block;">Status</label>
+          <select name="item[${itemId}][meta][status]" class="form-control">
+            <option value="1" selected>Enabled</option>
+            <option value="0">Disabled</option>
+          </select>
+        </div>
+
+        <button type="button" class="btn btn-danger btn-remove-item" style="width:100%;">
+          <i class="fa fa-minus-circle"></i> {{ button_remove }}
+        </button>
+      </td>
+    </tr>
+  `;
+}
+
+// languages data for JS
+const languages = [
+  {% for language in languages %}
+  { language_id: {{ language.language_id }}, code: "{{ language.code }}", name: "{{ language.name|e('js') }}" }{{ not loop.last ? ',' : '' }}
+  {% endfor %}
+];
+
+$('#btn-add-item').on('click', function(){
+  const itemId = nextItemId();
+  const html = buildRowHtml(itemId, languages, "{{ placeholder }}");
+  $('#repeater-body').append(html);
+
+  // init summernote only for newly added in this row
+  $('#repeater-body tr[data-item-id="'+itemId+'"] .summernote').summernote({height:160});
+
+  // show first lang tab
+  $('#repeater-body tr[data-item-id="'+itemId+'"] .nav-tabs a:first').tab('show');
+});
+
+$(document).on('click', '.btn-remove-item', function(){
+  $(this).closest('tr').remove();
+});
+
+// show first language tab in each item row
+$('#repeater-body .repeater-row').each(function(){
+  $(this).find('.nav-tabs a:first').tab('show');
+});
+</script>
+
+{{ footer }}

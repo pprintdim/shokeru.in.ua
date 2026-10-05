@@ -1,0 +1,24 @@
+<?php
+$_['heading_title']    = 'About Us';
+$_['text_home']        = 'Главная';
+$_['text_extension']   = 'Расширения';
+$_['text_success']     = 'Настройки модуля сохранены!';
+$_['text_edit']        = 'Редактирование модуля About Us';
+$_['text_enabled']     = 'Включено';
+$_['text_disabled']    = 'Отключено';
+$_['text_stats']       = 'Статистика';
+$_['text_stat']        = 'Пункт';
+$_['text_cards']       = 'Рейтинговые карточки';
+$_['text_card']        = 'Карточка';
+$_['entry_status']     = 'Статус';
+$_['entry_content']    = 'Контент блока';
+$_['entry_stat_value'] = 'Значение';
+$_['entry_stat_suffix'] = 'Суффикс';
+$_['entry_stat_label'] = 'Подпись';
+$_['entry_card_title'] = 'Название карточки';
+$_['entry_card_accent'] = 'Акцент';
+$_['entry_card_link']  = 'Ссылка';
+$_['button_save']      = 'Сохранить';
+$_['button_cancel']    = 'Отмена';
+$_['error_permission'] = 'У вас нет прав для редактирования модуля!';
+$_['error_heading']    = 'Заполните контент блока для этого языка!';

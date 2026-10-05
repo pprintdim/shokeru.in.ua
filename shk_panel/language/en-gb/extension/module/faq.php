@@ -1,0 +1,22 @@
+<?php
+$_['heading_title']    = 'FAQ';
+$_['text_home']        = 'Home';
+$_['text_extension']   = 'Extensions';
+$_['text_success']     = 'Success: You have modified the module!';
+$_['text_edit']        = 'Edit FAQ Module';
+$_['text_enabled']     = 'Enabled';
+$_['text_disabled']    = 'Disabled';
+$_['entry_name']       = 'Module Name';
+$_['entry_status']     = 'Status';
+$_['entry_heading']    = 'Heading';
+$_['entry_heading_accent'] = 'Heading Accent';
+$_['entry_question']   = 'Question';
+$_['entry_content']    = 'Answer Content';
+$_['entry_sort_order'] = 'Sort Order';
+$_['entry_meta']       = 'Meta';
+$_['button_save']       = 'Save';
+$_['button_cancel']     = 'Cancel';
+$_['button_add']       = 'Add Item';
+$_['button_remove']    = 'Remove';
+$_['error_permission'] = 'Warning: You do not have permission to modify the module!';
+$_['error_name']       = 'Module name must be between 3 and 64 characters!';

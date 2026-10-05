@@ -1,0 +1,88 @@
+{{ header }}{{ column_left }}
+
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="pull-right">
+        <button type="submit" form="form-stat" class="btn btn-primary">
+          <i class="fa fa-save"></i>
+        </button>
+        <a href="{{ cancel }}" class="btn btn-default">
+          <i class="fa fa-reply"></i>
+        </a>
+      </div>
+      <h1>{{ heading_title }}</h1>
+    </div>
+  </div>
+
+  <div class="container-fluid">
+    <form id="form-stat" action="{{ action }}" method="post" class="form-horizontal">
+
+      <div class="form-group">
+        <label class="col-sm-2 control-label">Name</label>
+        <div class="col-sm-10">
+          <input type="text" name="name" value="{{ name }}" class="form-control">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="col-sm-2 control-label">HTML block</label>
+        <div class="col-sm-10">
+          <select name="html_id" class="form-control">
+            <option value="">— select —</option>
+            {% for m in html_modules %}
+              <option value="{{ m.module_id }}"
+                {{ m.module_id == html_id ? 'selected' : '' }}>
+                {{ m.name }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="col-sm-2 control-label">Status</label>
+        <div class="col-sm-10">
+          <select name="status" class="form-control">
+            <option value="1" {{ status ? 'selected' : '' }}>Enabled</option>
+            <option value="0" {{ not status ? 'selected' : '' }}>Disabled</option>
+          </select>
+        </div>
+      </div>
+
+      <hr>
+
+      {% for i in 1..4 %}
+      <fieldset>
+        <legend>Block {{ i }}</legend>
+
+        <ul class="nav nav-tabs">
+          {% for language in languages %}
+            <li class="{{ loop.first ? 'active' : '' }}">
+              <a href="#block{{ i }}-{{ language.language_id }}" data-toggle="tab">
+                <img src="language/{{ language.code }}/{{ language.code }}.png">
+                {{ language.name }}
+              </a>
+            </li>
+          {% endfor %}
+        </ul>
+
+        <div class="tab-content" style="margin-top:10px;">
+          {% for language in languages %}
+            <div class="tab-pane {{ loop.first ? 'active' : '' }}"
+                 id="block{{ i }}-{{ language.language_id }}">
+              <textarea
+                name="blocks[{{ i }}][{{ language.language_id }}]"
+                rows="3"
+                class="form-control">{{ blocks[i][language.language_id] ?? '' }}</textarea>
+            </div>
+          {% endfor %}
+        </div>
+      </fieldset>
+      {% endfor %}
+
+
+    </form>
+  </div>
+</div>
+
+{{ footer }}

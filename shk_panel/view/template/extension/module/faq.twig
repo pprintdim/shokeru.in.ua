@@ -1,0 +1,245 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="pull-right">
+        <button type="submit" form="form-module" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-save"></i></button>
+        <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a>
+      </div>
+      <h1>{{ heading_title }}</h1>
+      <ul class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+          <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  <div class="container-fluid">
+    {% if error_warning %}
+      <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}<button type="button" class="close" data-dismiss="alert">&times;</button></div>
+    {% endif %}
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title"><i class="fa fa-pencil"></i> {{ text_edit }}</h3>
+      </div>
+      <div class="panel-body">
+        <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-module" class="form-horizontal">
+          <div class="form-group">
+            <label class="col-sm-2 control-label" for="input-name">{{ entry_name }}</label>
+            <div class="col-sm-10">
+              <input type="text" name="name" value="{{ name }}" placeholder="{{ entry_name }}" id="input-name" class="form-control">
+              {% if error_name %}
+                <div class="text-danger">{{ error_name }}</div>
+              {% endif %}
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="col-sm-2 control-label" for="input-status">{{ entry_status }}</label>
+            <div class="col-sm-10">
+              <select name="status" id="input-status" class="form-control">
+                <option value="1" {{ status ? 'selected' : '' }}>{{ text_enabled }}</option>
+                <option value="0" {{ not status ? 'selected' : '' }}>{{ text_disabled }}</option>
+              </select>
+            </div>
+          </div>
+
+          <ul class="nav nav-tabs">
+            {% for language in languages %}
+              <li class="{{ loop.first ? 'active' : '' }}"><a href="#tab-heading-{{ language.language_id }}" data-toggle="tab"><img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}"> {{ language.name }}</a></li>
+            {% endfor %}
+          </ul>
+
+          <div class="tab-content" style="margin-top: 15px;">
+            {% for language in languages %}
+              <div class="tab-pane {{ loop.first ? 'active' : '' }}" id="tab-heading-{{ language.language_id }}">
+                <div class="form-group">
+                  <label class="col-sm-2 control-label">{{ entry_heading }}</label>
+                  <div class="col-sm-10">
+                    <input type="text" name="heading[{{ language.language_id }}]" value="{{ heading[language.language_id] ?? '' }}" class="form-control">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="col-sm-2 control-label">{{ entry_heading_accent }}</label>
+                  <div class="col-sm-10">
+                    <input type="text" name="heading_accent[{{ language.language_id }}]" value="{{ heading_accent[language.language_id] ?? '' }}" class="form-control">
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+
+          <hr>
+          <div class="pull-right" style="margin-bottom:10px;">
+            <button type="button" class="btn btn-primary" id="btn-add-item"><i class="fa fa-plus-circle"></i> {{ button_add }}</button>
+          </div>
+
+          <table class="table table-bordered table-hover" id="faq-table">
+            <thead>
+              <tr>
+                <th style="width:35px;"></th>
+                <th>{{ entry_question }}</th>
+                <th>{{ entry_content }}</th>
+                <th style="width:180px;">{{ entry_meta }}</th>
+              </tr>
+            </thead>
+            <tbody id="faq-body">
+              {% for item in items %}
+                {% set item_index = loop.index0 %}
+                <tr class="faq-row">
+                  <td class="text-center drag-handle" style="cursor:move;"><i class="fa fa-bars"></i></td>
+                  <td>
+                    <ul class="nav nav-tabs">
+                      {% for language in languages %}
+                        <li class="{{ loop.first ? 'active' : '' }}"><a href="#tab-question-{{ item_index }}-{{ language.language_id }}" data-toggle="tab"><img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}"> {{ language.name }}</a></li>
+                      {% endfor %}
+                    </ul>
+                    <div class="tab-content" style="margin-top:10px;">
+                      {% for language in languages %}
+                        <div class="tab-pane {{ loop.first ? 'active' : '' }}" id="tab-question-{{ item_index }}-{{ language.language_id }}">
+                          <input type="text" name="items[{{ item_index }}][question][{{ language.language_id }}]" value="{{ item.question[language.language_id] ?? '' }}" class="form-control" placeholder="{{ entry_question }}">
+                        </div>
+                      {% endfor %}
+                    </div>
+                  </td>
+                  <td>
+                    <ul class="nav nav-tabs">
+                      {% for language in languages %}
+                        <li class="{{ loop.first ? 'active' : '' }}"><a href="#tab-content-{{ item_index }}-{{ language.language_id }}" data-toggle="tab"><img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}"> {{ language.name }}</a></li>
+                      {% endfor %}
+                    </ul>
+                    <div class="tab-content" style="margin-top:10px;">
+                      {% for language in languages %}
+                        <div class="tab-pane {{ loop.first ? 'active' : '' }}" id="tab-content-{{ item_index }}-{{ language.language_id }}">
+                          <textarea class="form-control summernote" name="items[{{ item_index }}][content][{{ language.language_id }}]">{{ item.content[language.language_id] ?? '' }}</textarea>
+                        </div>
+                      {% endfor %}
+                    </div>
+                  </td>
+                  <td>
+                    <div class="form-group" style="margin-left:0;margin-right:0;">
+                      <label>{{ entry_sort_order }}</label>
+                      <input type="text" name="items[{{ loop.index0 }}][sort_order]" value="{{ item.sort_order ?? loop.index0 }}" class="form-control sort-order">
+                    </div>
+                    <div class="form-group" style="margin-left:0;margin-right:0;">
+                      <label>{{ entry_status }}</label>
+                      <select name="items[{{ loop.index0 }}][status]" class="form-control">
+                        <option value="1" {{ (item.status is not defined or item.status) ? 'selected' : '' }}>{{ text_enabled }}</option>
+                        <option value="0" {{ (item.status is defined and not item.status) ? 'selected' : '' }}>{{ text_disabled }}</option>
+                      </select>
+                    </div>
+                    <button type="button" class="btn btn-danger btn-remove-item" style="width:100%;"><i class="fa fa-minus-circle"></i> {{ button_remove }}</button>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<link href="view/javascript/jquery/jquery-ui/jquery-ui.min.css" rel="stylesheet" />
+<script type="text/javascript" src="view/javascript/jquery/jquery-ui/jquery-ui.min.js"></script>
+<script type="text/javascript">
+var faqLanguages = Object.values({{ languages|json_encode|raw }});
+
+function initFaqSummernote(scope) {
+  $(scope).find('.summernote').summernote({height: 160});
+}
+
+function updateFaqSort() {
+  $('#faq-body .faq-row').each(function(index) {
+    $(this).find('.sort-order').val(index);
+    $(this).find('input, textarea, select, a[data-toggle="tab"]').each(function() {
+      ['name', 'id', 'href'].forEach(function(attr) {
+        var value = $(this).attr(attr);
+        if (!value) {
+          return;
+        }
+      }, this);
+    });
+  });
+}
+
+function rebuildFaqIndexes() {
+  $('#faq-body .faq-row').each(function(index) {
+    $(this).find('[name]').each(function() {
+      $(this).attr('name', $(this).attr('name').replace(/items\[\d+\]/g, 'items[' + index + ']'));
+    });
+
+    $(this).find('[id]').each(function() {
+      $(this).attr('id', $(this).attr('id').replace(/-(\d+)-/g, '-' + index + '-'));
+    });
+
+    $(this).find('a[data-toggle="tab"]').each(function() {
+      var href = $(this).attr('href');
+
+      if (href) {
+        $(this).attr('href', href.replace(/-(\d+)-/g, '-' + index + '-'));
+      }
+    });
+
+    $(this).find('.tab-pane').each(function() {
+      var id = $(this).attr('id');
+
+      if (id) {
+        $(this).attr('id', id.replace(/-(\d+)-/g, '-' + index + '-'));
+      }
+    });
+  });
+
+  updateFaqSort();
+}
+
+function buildFaqRow(index) {
+  var tabsQuestion = '';
+  var panesQuestion = '';
+  var tabsContent = '';
+  var panesContent = '';
+
+  faqLanguages.forEach(function(language, languageIndex) {
+    var active = languageIndex === 0 ? 'active' : '';
+
+    tabsQuestion += '<li class="' + active + '"><a href="#tab-question-' + index + '-' + language.language_id + '" data-toggle="tab"><img src="language/' + language.code + '/' + language.code + '.png" title="' + language.name + '"> ' + language.name + '</a></li>';
+    panesQuestion += '<div class="tab-pane ' + active + '" id="tab-question-' + index + '-' + language.language_id + '"><input type="text" name="items[' + index + '][question][' + language.language_id + ']" value="" class="form-control" placeholder="{{ entry_question }}"></div>';
+    tabsContent += '<li class="' + active + '"><a href="#tab-content-' + index + '-' + language.language_id + '" data-toggle="tab"><img src="language/' + language.code + '/' + language.code + '.png" title="' + language.name + '"> ' + language.name + '</a></li>';
+    panesContent += '<div class="tab-pane ' + active + '" id="tab-content-' + index + '-' + language.language_id + '"><textarea class="form-control summernote" name="items[' + index + '][content][' + language.language_id + ']"></textarea></div>';
+  });
+
+  return '<tr class="faq-row">' +
+    '<td class="text-center drag-handle" style="cursor:move;"><i class="fa fa-bars"></i></td>' +
+    '<td><ul class="nav nav-tabs">' + tabsQuestion + '</ul><div class="tab-content" style="margin-top:10px;">' + panesQuestion + '</div></td>' +
+    '<td><ul class="nav nav-tabs">' + tabsContent + '</ul><div class="tab-content" style="margin-top:10px;">' + panesContent + '</div></td>' +
+    '<td><div class="form-group" style="margin-left:0;margin-right:0;"><label>{{ entry_sort_order }}</label><input type="text" name="items[' + index + '][sort_order]" value="' + index + '" class="form-control sort-order"></div>' +
+    '<div class="form-group" style="margin-left:0;margin-right:0;"><label>{{ entry_status }}</label><select name="items[' + index + '][status]" class="form-control"><option value="1" selected>{{ text_enabled }}</option><option value="0">{{ text_disabled }}</option></select></div>' +
+    '<button type="button" class="btn btn-danger btn-remove-item" style="width:100%;"><i class="fa fa-minus-circle"></i> {{ button_remove }}</button></td></tr>';
+}
+
+initFaqSummernote(document);
+
+$('#faq-body').sortable({
+  handle: '.drag-handle',
+  helper: function(e, ui) {
+    ui.children().each(function() {
+      $(this).width($(this).width());
+    });
+    return ui;
+  },
+  update: rebuildFaqIndexes
+});
+
+$('#btn-add-item').on('click', function() {
+  var index = $('#faq-body .faq-row').length;
+  var rowHtml = buildFaqRow(index);
+  $('#faq-body').append(rowHtml);
+  initFaqSummernote($('#faq-body .faq-row').last());
+});
+
+$(document).on('click', '.btn-remove-item', function() {
+  $(this).closest('.faq-row').remove();
+  rebuildFaqIndexes();
+});
+
+rebuildFaqIndexes();
+</script>
+{{ footer }}

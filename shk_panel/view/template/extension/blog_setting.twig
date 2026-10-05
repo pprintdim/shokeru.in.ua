@@ -1,0 +1,677 @@
+{{ header }}
+<link href="view/javascript/blog/bootstrap-switch.css" rel="stylesheet">
+<script src="view/javascript/blog/bootstrap-switch.js"></script>
+{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="pull-right">
+        <button type="submit" form="form-account" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-save"></i></button>
+      </div>
+      <h1>{{ heading_title }}</h1>
+      <ul class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+        <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  <div class="container-fluid">
+   {% if error_warning %}
+    <div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+    {% if success %}
+    <div class="alert alert-success"><i class="fa fa-check-circle"></i> {{ success }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+   {% endif %}
+	{{ webxheader }}
+	
+	<form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-account" class="form-horizontal">
+		  <ul class="nav nav-tabs">
+			<li class="active"><a href="#tab-page" data-toggle="tab"><i class="fa fa-info"></i>{{ tab_page }}</a></li>
+			<li>
+				<a href="#tab-blog-listing" data-toggle="tab"><i class="fa fa-list"></i>{{ tab_blog_listing }}</a>
+			</li>
+			<li>
+				<a href="#tab-blog-post" data-toggle="tab"><i class="fa fa-newspaper-o"></i>{{ tab_blog_post }}</a>
+			</li>
+			<li>
+				<a href="#tab-related-post" data-toggle="tab"><i class="fa fa-thumbs-o-up"></i>{{ tab_related_post }}</a>
+			</li>
+			<li>
+				<a href="#tab-category-post" data-toggle="tab"><i class="fa fa-chain"></i>{{ tab_category_post }}</a>
+			</li>
+			<li>
+				<a href="#tab-search-post" data-toggle="tab"><i class="fa fa-search"></i>{{ tab_search_post }}</a>
+			</li>
+			<li>
+				<a href="#tab-languagetext" data-toggle="tab"><i class="fa fa-file-text-o" aria-hidden="true"></i>{{ tab_language }}</a>
+			</li>
+          </ul>
+		    <div class="tab-content webx_content">
+			
+			<div class="tab-pane active" id="tab-bloghome">
+				<div class="row">
+					<div class="col-sm-12">
+						<div class="tab-content">	
+							<div class="tab-pane active" id="tab-page">
+								<ul class="nav nav-tabs" id="language">
+								 {% for language in languages %}
+								<li><a href="#language{{ language.language_id }}" data-toggle="tab"><img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" /> {{ language.name }}</a></li>
+								{% endfor %}
+								</ul>
+								 <div class="tab-content">
+									  {% for language in languages %}
+										<div class="tab-pane" id="language{{ language.language_id }}">
+										  <div class="form-group required">
+											<label class="col-sm-2 control-label" for="input-name{{ language.language_id }}">{{ entry_name }}</label>
+											<div class="col-sm-10">
+											  <input type="text" name="blogsetting[description][{{ language.language_id }}][name]" value="{% if blogdescription[language.language_id] is not empty %}{{ blogdescription[language.language_id].name }}{% else %}Browse Our Blog {% endif %}" id="input-name{{ language.language_id }}" class="form-control" />
+											 {% if error_name[language.language_id] %}
+												 <div class="text-danger">{{ error_name[language.language_id] }}</div>
+											 {% endif %}
+											</div>
+										  </div>
+										  <div class="form-group">
+											<label class="col-sm-2 control-label" for="input-description{{ language.language_id }}">{{ entry_description }}</label>
+											<div class="col-sm-10">
+											  <textarea name="blogsetting[description][{{ language.language_id }}][description]" placeholder="{{ entry_description }}" id="input-description{{ language.language_id }}"data-toggle="summernote" data-lang="{{ summernote }}" class="form-control">{{ blogdescription[language.language_id] ? blogdescription[language.language_id].description }}</textarea>
+											</div>
+										  </div>
+										  <div class="form-group required">
+											<label class="col-sm-2 control-label" for="input-meta-title{{ language.language_id }}">{{ entry_meta_title }}</label>
+											<div class="col-sm-10">
+											  <input type="text" name="blogsetting[description][{{ language.language_id }}][meta_title]" value="{% if blogdescription[language.language_id] is not empty %}{{ blogdescription[language.language_id].meta_title }}{% else %}Blog News {% endif %}" placeholder="{{ entry_meta_title }}" id="input-meta-title{{ language.language_id }}" class="form-control" />
+											  {% if error_meta_title[language.language_id] %}
+												 <div class="text-danger">{{ error_meta_title[language.language_id] }}</div>
+											 {% endif %}
+											</div>
+										  </div>
+										  <div class="form-group">
+											<label class="col-sm-2 control-label" for="input-meta-description{{ language.language_id }}">{{ entry_meta_description }}</label>
+											<div class="col-sm-10">
+											  <textarea name="blogsetting[description][{{ language.language_id }}][meta_description]" rows="5" placeholder="{{ entry_meta_description }}" id="input-meta-description{{ language.language_id }}" class="form-control">{{ blogdescription[language.language_id] ? blogdescription[language.language_id].meta_description }}</textarea>
+											</div>
+										  </div>
+										  <!--<div class="form-group">
+											<label class="col-sm-2 control-label" for="input-meta-keyword{{ language.language_id }}">{{ entry_meta_keyword }}</label>
+											<div class="col-sm-10">
+											  <textarea name="blogsetting[description][{{ language.language_id }}][meta_keyword]" rows="5" placeholder="{{ entry_meta_keyword }}" id="input-meta-keyword{{ language.language_id }}" class="form-control">{{ blogdescription[language.language_id] ? blogdescription[language.language_id].meta_keyword }}</textarea>
+											</div>
+										  </div>-->
+										</div>
+										{% endfor %}
+									<div class="form-group">
+										<label class="col-sm-2 control-label" for="input-keyword"><span data-toggle="tooltip" title="{{ help_keyword }}">{{ entry_keyword }}</span></label>
+										<div class="col-sm-10">
+										  <input type="text" name="keyword" value="{{ keyword }}" placeholder="{{ entry_keyword }}" id="input-keyword" class="form-control" />
+										</div>
+									</div>
+								  </div>
+							</div>
+							<div class="tab-pane" id="tab-blog-listing">
+								<div class="form-group">
+									<label class="col-sm-2 control-label" for="input-layout">{{ entry_listing_layout }}</label>
+									<div class="col-sm-10">
+										<select name="blogsetting[listing][layout_id]" class="form-control">
+										{% for id,layout in layouts %}
+											{% if bloglisting.layout_id is not empty and id==bloglisting.layout_id %}
+												{% set check = "selected=selected" %}
+													{% else %}
+												{% set check = "" %}
+											{% endif %}
+											<option {{ check }} value="{{ id }}">{{ layout }}</option>
+										{% endfor %}
+										</select>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-sm-6">
+										<div class="form-group">
+											<label class="col-sm-4 control-label" for="input-blog_per_page">{{ entry_blog_per_page }}</label>
+											<div class="col-sm-8">
+												<input type="text" name="blogsetting[listing][limit]" class="form-control" value="{% if bloglisting.limit is not empty %}{{ bloglisting.limit }}{% else %}10 {% endif %}" />
+											</div>
+										</div>						
+									</div>
+									<div class="col-sm-6">
+										<div class="form-group">			
+											<label class="col-sm-4 control-label" for="input-blog_per_row">{{ entry_blog_per_row }}</label>
+											<div class="col-sm-8">
+												<select name="blogsetting[listing][limit_row]" class="form-control">
+													{% for i in [1, 2, 3, 4] %}
+														{% if bloglisting.limit_row is not empty and i==bloglisting.limit_row %}
+															{% set check = "selected=selected" %}
+															{% else %}
+															{% set check = "" %}
+														{% endif %}
+													<option {{ check }} value="{{ i }}">{{ i }}</option>
+													{% endfor %}
+												</select>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-sm-2 control-label" for="input-showtitle">{{ entry_showtitle }}</label>
+									<div class="col-sm-4">
+										<input {{ bloglisting.showtitle is not empty ? "checked=checked" }} type="checkbox" class="switcher" data-switch-value="mini" name="blogsetting[listing][showtitle]" value="1"/>
+									</div>
+									<label class="col-sm-2 control-label" for="input-showdescription">{{ entry_showdescription }}</label>
+									<div class="col-sm-4">
+										<input {{ bloglisting.showdescription is not empty ? "checked=checked" }} type="checkbox" class="switcher" name="blogsetting[listing][showdescription]" value="1"/>
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-sm-2 control-label" for="input-blog_per_page">{{ entry_thumb_size }}</label>
+									<div class="col-sm-5">
+										<input type="text" name="blogsetting[listing][thumbsize_w]" class="form-control" placeholder="Width" value="{% if bloglisting.thumbsize_w is not empty %}{{ bloglisting.thumbsize_w }}{% else %}350{% endif %}" />
+											{% if error_blog_thumb_w %}
+										<div style="color:red" class="danger">{{ error_blog_thumb_w }}</div>
+											{% endif %}
+									</div>
+									<div class="col-sm-5">
+										<input  type="text" name="blogsetting[listing][thumbsize_h]" class="form-control" placeholder="Height" value="{% if bloglisting.thumbsize_h is not empty %}{{ bloglisting.thumbsize_h }}{% else %}161{% endif %}" />
+										{% if error_blog_thumb_h %}
+										<div style="color:red" class="danger">{{ error_blog_thumb_h }}</div>
+											{% endif %}
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-sm-2 control-label" for="input-blog_thumb_image">{{ entry_blog_thumb_image }}</label>
+									<div class="col-sm-4">
+									  <input type="checkbox" {{ bloglisting.show_thumb is not empty ? "checked=checked" }} class="switcher" name="blogsetting[listing][show_thumb]" value="1"/>
+									</div>
+									<label class="col-sm-2 control-label" for="input-blog_per_page">{{ entry_blog_publish_date }}</label>
+									<div class="col-sm-4">
+									  <input type="checkbox" {{ bloglisting.show_publishdate is not empty ? "checked=checked" }} class="switcher" name="blogsetting[listing][show_publishdate]" value="1"/>
+									</div>
+								</div>
+								
+								<div class="form-group">
+									<label class="col-sm-2 control-label" for="input-show_totalview">{{ entry_blog_display_no_views }}</label>
+									<div class="col-sm-4">
+										<input type="checkbox" {{ bloglisting.show_totalview is not empty ? "checked=checked" }} class="switcher" name="blogsetting[listing][show_totalview]" value="1"/>
+									</div>
+									<label class="col-sm-2 control-label" for="input-show_author">{{ entry_blog_display_author }}</label>
+									<div class="col-sm-4">
+									  <input type="checkbox" {{ bloglisting.show_author is not empty ? "checked=checked" }} class="switcher" name="blogsetting[listing][show_author]" value="1"/>
+									</div>
+								</div>
+								
+								<div class="form-group">
+									<label class="col-sm-2 control-label" for="input-show_like">{{ entry_blog_display_likes }}</label>
+									<div class="col-sm-4">
+										<input {{ bloglisting.show_like is not empty ? "checked=checked" }} type="checkbox" class="switcher" name="blogsetting[listing][show_like]" value="1"/>
+									</div>
+									<label class="col-sm-2 control-label" for="input-blog_per_page">{{ entry_blog_display_no_comment }}</label>
+									<div class="col-sm-4">
+									  <input {{ bloglisting.comment is not empty ? "checked=checked" }} type="checkbox" class="switcher" name="blogsetting[listing][comment]" value="1"/>
+									</div>
+								</div>
+							</div>
+							<div class="tab-pane" id="tab-blog-post">
+							    <div class="form-group">
+								   <label class="col-sm-2 control-label" for="input-layout">{{ entry_listing_layout }}</label>
+									<div class="col-sm-10">
+										<select name="blogsetting[blog][layout_id]" class="form-control">
+										{% for id,layout in layouts %}
+											{% if blogpage.layout_id is not empty and blogpage.layout_id==id %}
+													{% set check = "selected=selected" %}
+														{% else %}
+													{% set check = "" %}
+											{% endif %}
+											<option {{ check }} value="{{ id }}">{{ layout }}</option>
+										 {% endfor %}
+										</select>
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-sm-2 control-label" for="input-blog_per_page">{{ entry_thumb_size }}</label>
+									<div class="col-sm-5">
+										<input  type="text" name="blogsetting[blog][thumbsize_w]" class="form-control" placeholder="Width" value="{% if blogpage.thumbsize_w is not empty %}{{ blogpage.thumbsize_w }}{% else %}1366{% endif %}"/>
+											{% if error_blogthumbsize_w %}
+											<div style="color:red" class="danger">{{ error_blogthumbsize_w }}</div>
+											{% endif %}
+									</div>
+									<div class="col-sm-5">
+										<input  type="text" name="blogsetting[blog][thumbsize_h]" class="form-control" placeholder="Height" value="{% if blogpage.thumbsize_h is not empty %}{{ blogpage.thumbsize_h }}{% else %}629{% endif %}" />
+										{% if error_blogthumbsize_h %}
+											<div style="color:red" class="danger">{{ error_blogthumbsize_h }}</div>
+										{% endif %}
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-sm-2 control-label" for="input-blog_per_page">{{ entry_blog_thumb_image }}</label>
+									<div class="col-sm-4">
+									  <input {{ blogpage.showthumb is not empty ? "checked=checked" }} type="checkbox" class="switcher" name="blogsetting[blog][showthumb]" value="1"/>
+									</div>
+									<label class="col-sm-2 control-label" for="input-blog_per_page">{{ entry_blog_publish_date }}</label>
+									<div class="col-sm-4">
+										<input {{ blogpage.show_publishdate is not empty ? "checked=checked" }} type="checkbox" class="switcher" name="blogsetting[blog][show_publishdate]" value="1"/>
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-sm-2 control-label" for="input-showtotalview">{{ entry_blog_display_no_views }}</label>
+									<div class="col-sm-4">
+									   <input {{ blogpage.show_totalview is not empty ? "checked=checked" }} type="checkbox" class="switcher" name="blogsetting[blog][show_totalview]" value="1"/>
+									</div>
+									<label class="col-sm-2 control-label" for="input-blog_per_page">{{ entry_blog_display_author }}</label>
+									<div class="col-sm-4">
+									  <input {{ blogpage.show_author is not empty ? "checked=checked" }} type="checkbox" class="switcher" name="blogsetting[blog][show_author]" value="1"/>
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-sm-2 control-label" for="input-show_like">{{ entry_blog_display_likes }}</label>
+									<div class="col-sm-4">
+										<input {{ blogpage.show_like is not empty ? "checked=checked" }} type="checkbox" class="switcher" name="blogsetting[blog][show_like]" value="1"/>
+									</div>
+									<label class="col-sm-2 control-label" for="input-show_social_share">{{ entry_blog_display_allowlikes }}</label>
+									<div class="col-sm-4">
+									  <input {{ blogpage.allowlike is not empty ? "checked=checked" }} type="checkbox" class="switcher" name="blogsetting[blog][allowlike]" value="1"/>
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-sm-2 control-label" for="input-show_social_share">{{ entry_blog_display_social_shares }}</label>
+									<div class="col-sm-4">
+									   <input {{ blogpage.show_social_share is not empty ? "checked=checked" }} type="checkbox" class="switcher" name="blogsetting[blog][show_social_share]" value="1"/>
+									</div>
+									<label class="col-sm-2 control-label" for="input-allowpostcomment">{{ entry_blog_display_comment }}</label>
+									<div class="col-sm-4">
+									  <input {{ blogpage.allow_postcomment is not empty ? "checked=checked" }} type="checkbox" class="switcher" name="blogsetting[blog][allow_postcomment]" value="1"/>
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-sm-2 control-label" for="input-guestcomment">{{ entry_guestcomment }}</label>
+									<div class="col-sm-4">
+									   <input {{ blogpage.allow_guestcomment is not empty ? "checked=checked" }} type="checkbox" class="switcher form-control" name="blogsetting[blog][allow_guestcomment]" value="1"/><br/>
+									</div>
+									<label class="col-sm-2 control-label" for="input-blog_display_no_comment">{{ entry_blog_display_no_comment }}</label>
+									<div class="col-sm-4">
+									  <input {{ blogpage.show_total_comment is not empty ? "checked=checked" }} type="checkbox" class="switcher" name="blogsetting[blog][show_total_comment]" value="1"/>
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-sm-2 control-label" for="input-display_comment">Display Comment</label>
+									<div class="col-sm-4">
+									   <input {{ blogpage.display_comment is not empty ? "checked=checked" }} type="checkbox" class="switcher form-control" name="blogsetting[blog][display_comment]" value="1"/><br/>
+									</div>
+									<label class="col-sm-2 control-label" for="input-snippet">Rich Snippet</label>
+									<div class="col-sm-4">
+									   <input {{ blogpage.snippet is not empty ? "checked=checked" }} type="checkbox" class="switcher form-control" name="blogsetting[blog][snippet]" value="1"/><br/>
+									  </div>
+								</div>
+								<div class="form-group">
+									<label class="col-sm-2 control-label" for="input-blog_per_page">{{ entry_blog_comment_per_page }}</label>
+									<div class="col-sm-8">
+										<input type="text" class="form-control" name="blogsetting[blog][comment_limit]" value="{% if blogpage.comment_limit is not empty %}{{ blogpage.comment_limit }}{% else %}10{% endif %}" />
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-sm-2 control-label" for="input-blog_per_page">{{ entry_blog_comment_permission }}</label>
+									<div class="col-sm-4">
+									   <input {{ blogpage.comment_permission is not empty ? "checked=checked" }} type="checkbox" class="switcher form-control" name="blogsetting[blog][comment_permission]" value="1"/><br/>
+									</div>
+									<label class="col-sm-2 control-label" for="input-blog_per_page">{{ entry_comment_notification }}</label>
+									<div class="col-sm-4">
+									  <input {{ blogpage.comment_notification is not empty ? "checked=checked" }} type="checkbox" class="switcher" name="blogsetting[blog][comment_notification]" value="1"/><br/>
+									</div>
+								</div>
+							</div>
+							<div class="tab-pane" id="tab-related-post">
+								<div class="form-group">
+									<label class="col-sm-2 control-label" for="input-layout">{{ entry_listing_layout }}</label>
+									<div class="col-sm-10">
+										<select name="blogsetting[related_listing][layout_id]" class="form-control">
+										{% for id,layout in layouts %}
+											{% if related_listing.layout_id and id==related_listing.layout_id %}
+												{% set check = "selected=selected" %}
+											{% else %}
+												{% set check = "" %}
+										{% endif %}
+											<option {{ check }} value="{{ id }}">{{ layout }}</option>
+										{% endfor %}
+										</select>
+									</div>
+								</div>
+								<div class="form-group">			
+									<label class="col-sm-2 control-label" for="input-blog_per_row">{{ entry_blog_per_row }}</label>
+									<div class="col-sm-10">
+										<select name="blogsetting[related_listing][limit_row]" class="form-control">
+										{% for i in [1, 2, 3, 4] %}
+											{% if related_listing.limit_row and i==related_listing.limit_row %}
+												{% set check = "selected=selected" %}
+											{% else %}
+												{% set check = "" %}
+										{% endif %}
+											<option {{ check }} value="{{ i }}">{{ i }}</option>
+											{% endfor %}
+										</select>
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-sm-2 control-label" for="input-showtitle">{{ entry_showtitle }}</label>
+									<div class="col-sm-4">
+										<input {{ related_listing.showtitle is not empty ? "checked=checked" }} type="checkbox" class="switcher" data-switch-value="mini" name="blogsetting[related_listing][showtitle]" value="1"/>
+									</div>
+									<label class="col-sm-2 control-label" for="input-showdescription">{{ entry_showdescription }}</label>
+									<div class="col-sm-4">
+										<input {{ related_listing.showdescription is not empty ? "checked=checked" }} type="checkbox" class="switcher" name="blogsetting[related_listing][showdescription]" value="1"/>
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-sm-2 control-label" for="input-blog_per_page">{{ entry_thumb_size }}</label>
+									<div class="col-sm-5">
+										<input type="text" name="blogsetting[related_listing][thumbsize_w]" class="form-control" placeholder="Width" value="{% if related_listing.thumbsize_w is not empty %}{{ related_listing.thumbsize_w }} {% else %} 350 {% endif %}" />
+											{% if error_relatedthumbsize_w %}
+											<div style="color:red"; class="error">{{ error_relatedthumbsize_w }}</div>
+											{% endif %}
+									</div>
+									<div class="col-sm-5">
+										<input  type="text" name="blogsetting[related_listing][thumbsize_h]" class="form-control" placeholder="Height" value="{% if related_listing.thumbsize_h is not empty %}{{ related_listing.thumbsize_h }} {% else %} 161 {% endif %}" />
+										{% if error_relatedthumbsize_h %}
+											<div style="color:red"; class="error">{{ error_relatedthumbsize_h }}</div>
+										{% endif %}
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-sm-2 control-label" for="input-blog_thumb_image">{{ entry_blog_thumb_image }}</label>
+									<div class="col-sm-4">
+									  <input type="checkbox" {{ related_listing.show_thumb is not empty ? "checked=checked" }} class="switcher" name="blogsetting[related_listing][show_thumb]" value="1"/>
+									</div>
+									<label class="col-sm-2 control-label" for="input-blog_per_page">{{ entry_blog_publish_date }}</label>
+									<div class="col-sm-4">
+									  <input type="checkbox" {{ related_listing.show_publishdate is not empty ? "checked=checked" }} class="switcher" name="blogsetting[related_listing][show_publishdate]" value="1"/>
+									</div>
+								</div>
+								
+								<div class="form-group">
+									<label class="col-sm-2 control-label" for="input-show_totalview">{{ entry_blog_display_no_views }}</label>
+									<div class="col-sm-4">
+										<input type="checkbox" {{ related_listing.show_totalview is not empty ? "checked=checked" }} class="switcher" name="blogsetting[related_listing][show_totalview]" value="1"/>
+									</div>
+									<label class="col-sm-2 control-label" for="input-show_author">{{ entry_blog_display_author }}</label>
+									<div class="col-sm-4">
+									  <input type="checkbox" {{ related_listing.show_author is not empty ? "checked=checked" }} class="switcher" name="blogsetting[related_listing][show_author]" value="1"/>
+									</div>
+								</div>
+								
+								<div class="form-group">
+									<label class="col-sm-2 control-label" for="input-show_like">{{ entry_blog_display_likes }}</label>
+									<div class="col-sm-4">
+										<input {{ related_listing.show_like is not empty ? "checked=checked" }} type="checkbox" class="switcher" name="blogsetting[related_listing][show_like]" value="1"/>
+									</div>
+									<label class="col-sm-2 control-label" for="input-blog_per_page">{{ entry_blog_display_no_comment }}</label>
+									<div class="col-sm-4">
+									  <input {{ related_listing.comment is not empty ? "checked=checked" }} type="checkbox" class="switcher" name="blogsetting[related_listing][comment]" value="1"/>
+									</div>
+								</div>
+							</div>
+		
+							<div class="tab-pane" id="tab-search-post">
+								<div class="form-group">
+									<label class="col-sm-2 control-label" for="input-layout">{{ entry_listing_layout }}</label>
+									<div class="col-sm-10">
+										<select name="blogsetting[search_listing][layout_id]" class="form-control">
+										{% for id,layout in layouts %}
+											{% if search_listing.layout_id and id==search_listing.layout_id %}
+												{% set check = "selected=selected" %}
+											{% else %}
+												{% set check = "" %}
+										{% endif %}
+											<option {{ check }} value="{{ id }}">{{ layout }}</option>
+										{% endfor %}
+										</select>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-sm-6">
+										<div class="form-group">
+											<label class="col-sm-4 control-label" for="input-blog_per_page">{{ entry_blog_per_page }}</label>
+											<div class="col-sm-8">
+												<input type="text" name="blogsetting[search_listing][limit]" class="form-control" value="{% if search_listing.limit is not empty %}{{ search_listing.limit }} {% else %} 10 {% endif %}" />
+											</div>
+										</div>						
+									</div>
+									<div class="col-sm-6">
+										<div class="form-group">			
+											<label class="col-sm-4 control-label" for="input-blog_per_row">{{ entry_blog_per_row }}</label>
+											<div class="col-sm-8">
+												<select name="blogsetting[search_listing][limit_row]" class="form-control">
+												{% for i in [1, 2, 3, 4] %}
+													{% if search_listing.limit_row and i==search_listing.limit_row %}
+														{% set check = "selected=selected" %}
+													{% else %}
+														{% set check = "" %}
+												{% endif %}
+													<option {{ check }} value="{{ i }}">{{ i }}</option>
+													{% endfor %}
+												</select>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-sm-2 control-label" for="input-showtitle">{{ entry_showtitle }}</label>
+									<div class="col-sm-4">
+										<input {{ search_listing.showtitle is not empty ? "checked=checked" }} type="checkbox" class="switcher" data-switch-value="mini" name="blogsetting[search_listing][showtitle]" value="1"/>
+									</div>
+									<label class="col-sm-2 control-label" for="input-showdescription">{{ entry_showdescription }}</label>
+									<div class="col-sm-4">
+										<input {{ search_listing.showdescription is not empty ? "checked=checked" }} type="checkbox" class="switcher" name="blogsetting[search_listing][showdescription]" value="1"/>
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-sm-2 control-label" for="input-blog_per_page">{{ entry_thumb_size }}</label>
+									<div class="col-sm-5">
+										<input type="text" name="blogsetting[search_listing][thumbsize_w]" class="form-control" placeholder="Width" value="{% if search_listing.thumbsize_w is not empty %}{{ search_listing.thumbsize_w }} {% else %} 350 {% endif %}" />
+											{% if searchthumbsize_w %}
+										  <div style="color:red"; class="danger">{{ searchthumbsize_w }}</div>
+											 {% endif %}
+									</div>
+									<div class="col-sm-5">
+										<input  type="text" name="blogsetting[search_listing][thumbsize_h]" class="form-control" placeholder="Height" value="{% if search_listing.thumbsize_h is not empty %}{{ search_listing.thumbsize_h }} {% else %} 161 {% endif %}" />
+										{% if searchthumbsize_h %}
+										  <div style="color:red"; class="danger">{{ searchthumbsize_h }}</div>
+										 {% endif %}
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-sm-2 control-label" for="input-blog_thumb_image">{{ entry_blog_thumb_image }}</label>
+									<div class="col-sm-4">
+									  <input type="checkbox" {{ search_listing.show_thumb is not empty ? "checked=checked" }} class="switcher" name="blogsetting[search_listing][show_thumb]" value="1"/>
+									</div>
+									<label class="col-sm-2 control-label" for="input-blog_per_page">{{ entry_blog_publish_date }}</label>
+									<div class="col-sm-4">
+									  <input type="checkbox" {{ search_listing.show_publishdate is not empty ? "checked=checked" }} class="switcher" name="blogsetting[search_listing][show_publishdate]" value="1"/>
+									</div>
+								</div>
+								
+								<div class="form-group">
+									<label class="col-sm-2 control-label" for="input-show_totalview">{{ entry_blog_display_no_views }}</label>
+									<div class="col-sm-4">
+										<input type="checkbox" {{ search_listing.show_totalview is not empty ? "checked=checked" }} class="switcher" name="blogsetting[search_listing][show_totalview]" value="1"/>
+									</div>
+									<label class="col-sm-2 control-label" for="input-show_author">{{ entry_blog_display_author }}</label>
+									<div class="col-sm-4">
+									  <input type="checkbox" {{ search_listing.show_author is not empty ? "checked=checked" }} class="switcher" name="blogsetting[search_listing][show_author]" value="1"/>
+									</div>
+								</div>
+								
+								<div class="form-group">
+									<label class="col-sm-2 control-label" for="input-show_like">{{ entry_blog_display_likes }}</label>
+									<div class="col-sm-4">
+										<input {{ search_listing.show_like is not empty ? "checked=checked" }} type="checkbox" class="switcher" name="blogsetting[search_listing][show_like]" value="1"/>
+									</div>
+									<label class="col-sm-2 control-label" for="input-blog_per_page">{{ entry_blog_display_no_comment }}</label>
+									<div class="col-sm-4">
+									  <input {{ search_listing.comment is not empty ? "checked=checked" }} type="checkbox" class="switcher" name="blogsetting[search_listing][comment]" value="1"/>
+									</div>
+								</div>
+							</div>
+							<div class="tab-pane" id="tab-category-post">
+								<div class="form-group">
+									<label class="col-sm-2 control-label" for="input-layout">{{ entry_listing_layout }}</label>
+									<div class="col-sm-10">
+										<select name="blogsetting[category_listing][layout_id]" class="form-control">
+										{% for id,layout in layouts %}
+											{% if category_listing.layout_id and id==category_listing.layout_id %}
+												{% set check = "selected=selected" %}
+											{% else %}
+												{% set check = "" %}
+										{% endif %}
+											<option {{ check }} value="{{ id }}">{{ layout }}</option>
+										{% endfor %}
+										</select>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-sm-6">
+										<div class="form-group">
+											<label class="col-sm-4 control-label" for="input-blog_per_page">{{ entry_blog_per_page }}</label>
+											<div class="col-sm-8">
+												<input type="text" name="blogsetting[category_listing][limit]" class="form-control" value="{% if category_listing.limit is not empty %}{{ category_listing.limit }} {% else %} 10 {% endif %}" />
+											</div>
+										</div>						
+									</div>
+									<div class="col-sm-6">
+										<div class="form-group">			
+											<label class="col-sm-4 control-label" for="input-blog_per_row">{{ entry_blog_per_row }}</label>
+											<div class="col-sm-8">
+												<select name="blogsetting[category_listing][limit_row]" class="form-control">
+												{% for i in [1, 2, 3, 4] %}
+													{% if category_listing.limit_row and i==category_listing.limit_row %}
+														{% set check = "selected=selected" %}
+													{% else %}
+														{% set check = "" %}
+												{% endif %}
+													<option {{ check }} value="{{ i }}">{{ i }}</option>
+													{% endfor %}
+												</select>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-sm-2 control-label" for="input-showtitle">{{ entry_showtitle }}</label>
+									<div class="col-sm-4">
+										<input {{ category_listing.showtitle is not empty ? "checked=checked" }} type="checkbox" class="switcher" data-switch-value="mini" name="blogsetting[category_listing][showtitle]" value="1"/>
+									</div>
+									<label class="col-sm-2 control-label" for="input-showdescription">{{ entry_showdescription }}</label>
+									<div class="col-sm-4">
+										<input {{ category_listing.showdescription is not empty ? "checked=checked" }} type="checkbox" class="switcher" name="blogsetting[category_listing][showdescription]" value="1"/>
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-sm-2 control-label" for="input-blog_per_page">{{ entry_thumb_size }}</label>
+									<div class="col-sm-5">
+										<input type="text" name="blogsetting[category_listing][thumbsize_w]" class="form-control" placeholder="Width" value="{% if category_listing.thumbsize_w is not empty %}{{ category_listing.thumbsize_w }} {% else %} 350 {% endif %}" />
+										{% if error_catethumbsize_w %}
+										  <div style="color:red"; class="danger">{{ error_catethumbsize_w }}</div>
+										{% endif %}
+									</div>
+									<div class="col-sm-5">
+										<input  type="text" name="blogsetting[category_listing][thumbsize_h]" class="form-control" placeholder="Height" value="{% if category_listing.thumbsize_h is not empty %}{{ category_listing.thumbsize_h }} {% else %} 161 {% endif %}" />
+										{% if error_catethumbsize_h %}
+										<div style="color:red;" class="danger">{{ error_catethumbsize_h }}</div>
+										{% endif %}
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-sm-2 control-label" for="input-blog_thumb_image">{{ entry_blog_thumb_image }}</label>
+									<div class="col-sm-4">
+									  <input type="checkbox" {{ category_listing.show_thumb is not empty ? "checked=checked" }} class="switcher" name="blogsetting[category_listing][show_thumb]" value="1"/>
+									</div>
+									<label class="col-sm-2 control-label" for="input-blog_per_page">{{ entry_blog_publish_date }}</label>
+									<div class="col-sm-4">
+									  <input type="checkbox" {{ category_listing.show_publishdate is not empty ? "checked=checked" }} class="switcher" name="blogsetting[category_listing][show_publishdate]" value="1"/>
+									</div>
+								</div>
+								
+								<div class="form-group">
+									<label class="col-sm-2 control-label" for="input-show_totalview">{{ entry_blog_display_no_views }}</label>
+									<div class="col-sm-4">
+										<input type="checkbox" {{ category_listing.show_totalview is not empty ? "checked=checked" }} class="switcher" name="blogsetting[category_listing][show_totalview]" value="1"/>
+									</div>
+									<label class="col-sm-2 control-label" for="input-show_author">{{ entry_blog_display_author }}</label>
+									<div class="col-sm-4">
+									  <input type="checkbox" {{ category_listing.show_author is not empty ? "checked=checked" }} class="switcher" name="blogsetting[category_listing][show_author]" value="1"/>
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-sm-2 control-label" for="input-show_like">{{ entry_blog_display_likes }}</label>
+									<div class="col-sm-4">
+										<input {{ category_listing.show_like is not empty ? "checked=checked" }} type="checkbox" class="switcher" name="blogsetting[category_listing][show_like]" value="1"/>
+									</div>
+								
+									<label class="col-sm-2 control-label" for="input-blog_per_page">{{ entry_blog_display_no_comment }}</label>
+									<div class="col-sm-4">
+									  <input {{ category_listing.comment is not empty ? "checked=checked" }} type="checkbox" class="switcher" name="blogsetting[category_listing][comment]" value="1"/>
+									</div>
+								</div>
+							</div>
+							<div class="tab-pane" id="tab-languagetext">
+							  <div class="form-group">
+								<label class="col-sm-2 control-label" for="input-menu">{{ entry_menu }}</label>
+									<div class="col-sm-10">
+									{% for language in languages %}
+									  <div class="input-group"><span class="input-group-addon">
+									  <img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" />
+									  </span><input type="text" class="form-control" name="blogsetting_menu{{ language.language_id }}" value="{{ blogsetting_menu[language.language_id] is not empty ? blogsetting_menu[language.language_id] }}"/></div>
+									{% endfor %}
+									</div>
+								</div>
+								<div class="form-group">
+								  <label class="col-sm-2 control-label" for="input-postby">{{ entry_postby }}</label>
+									<div class="col-sm-10">
+									{% for language in languages %}
+									  <div class="input-group"><span class="input-group-addon">
+									  <img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" />
+									  </span><input type="text" class="form-control" name="blogsetting_postby{{ language.language_id }}" value="{% if blogsetting_postby[language.language_id] is not empty %}{{ blogsetting_postby[language.language_id] }}{% else %} Post By{% endif %}"/></div>
+									{% endfor %}
+									</div>
+								</div>
+								<div class="form-group">
+								  <label class="col-sm-2 control-label" for="input-on">{{ entry_on }}</label>
+									<div class="col-sm-10">
+									{% for language in languages %}
+									  <div class="input-group"><span class="input-group-addon">
+									  <img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" />
+									  </span><input type="text" class="form-control" name="blogsetting_on{{ language.language_id }}" value="{% if blogsetting_on[language.language_id] is not empty %}{{ blogsetting_on[language.language_id] }}{% else %} On {% endif %}"/></div>
+									{% endfor %}
+									</div>
+								</div>
+								<div class="form-group">
+								  <label class="col-sm-2 control-label" for="input-readmore">{{ entry_readmore }}</label>
+									<div class="col-sm-10">
+									{% for language in languages %}
+									  <div class="input-group"><span class="input-group-addon">
+									  <img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" />
+									  </span><input type="text" class="form-control" name="blogsetting_readmore{{ language.language_id }}" value="{% if blogsetting_readmore[language.language_id] is not empty %}{{ blogsetting_readmore[language.language_id] }}{% else %} Read more {% endif %}"/></div>
+									{% endfor %}
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			 </div>
+		    </div>
+        </form>
+	</div>
+</div>
+<script type="text/javascript" src="view/javascript/summernote/summernote.js"></script>
+  <link href="view/javascript/summernote/summernote.css" rel="stylesheet" />
+  <script type="text/javascript" src="view/javascript/summernote/summernote-image-attributes.js"></script>
+  <script type="text/javascript" src="view/javascript/summernote/opencart.js"></script>
+<script type="text/javascript">
+$(".switcher").bootstrapSwitch();
+</script>
+<script type="text/javascript"><!--
+$('#language a:first').tab('show');
+//--></script>
+
+{{ footer }}

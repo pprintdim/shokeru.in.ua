@@ -1,0 +1,229 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="pull-right"><a href="{{ insert }}" data-toggle="tooltip" title="{{ button_insert }}" class="btn btn-primary"><i class="fa fa-plus"></i></a>
+        <button type="submit" form="form-post" formaction="{{ copy }}" data-toggle="tooltip" title="{{ button_copy }}" class="btn btn-default"><i class="fa fa-copy"></i></button>
+        <button type="button" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger" onclick="confirm('{{ text_confirm }}') ? $('#form-post').submit() : false;"><i class="fa fa-trash-o"></i></button>
+      </div>
+      <h1>{{ heading_title }}</h1>
+      <ul class="breadcrumb">
+       {% for breadcrumb in breadcrumbs %}
+        <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  <div class="container-fluid">
+    {% if error_warning %}
+    <div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+    {% if success %}
+    <div class="alert alert-success"><i class="fa fa-check-circle"></i> {{ success }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+   {% endif %}
+
+    
+	{{ webxheader }}
+	
+	<div class="webx_well">
+		<div class="well">
+          <div class="row">
+            <div class="col-sm-4">
+              <div class="form-group">
+                <label class="control-label" for="input-name">{{ entry_name }}</label>
+                <input type="text" name="filter_name" value="{{ filter_name }}" placeholder="{{ entry_name }}" id="input-name" class="form-control" />
+              </div>
+            </div>
+			<div class="col-sm-4">
+              <div class="form-group">
+                <label class="control-label" for="input-name">{{ entry_category }}</label>
+                 <select class="form-control" name="filter_category_id">
+					<option value="*"></option>
+					{% for category in categories %}
+						{% if filter_category_id %}
+							{% set select = 'selected=selected' %}
+						{% else %}
+							{% set select = '' %}
+						{% endif %}
+					<option {{ select }} value="{{ category.blog_category_id }}">{{ category.name }}</option>
+				{% endfor %}
+				 </select>
+              </div>
+            </div>
+			<div class="col-sm-4">
+              <div class="form-group">
+                <label class="control-label" for="input-status">{{ entry_status }}</label>
+                <select name="filter_status" id="input-status" class="form-control">
+                  <option value="*"></option>
+                  {% if filter_status == '1' %}
+                  <option value="1" selected="selected">{{ text_enabled }}</option>
+                  {% else %}
+                  <option value="1">{{ text_enabled }}</option>
+                  {% endif %}
+                  {% if filter_status == '0' %}
+                  <option value="0" selected="selected">{{ text_disabled }}</option>
+                  {% else %}
+                  <option value="0">{{ text_disabled }}</option>
+                  {% endif %}
+                </select>
+              </div>
+            </div>
+			<div class="clearfix"></div>
+			<br />
+			<div class="col-sm-4">
+              <div class="form-group">
+                <label class="control-label" for="input-date-added">{{ entry_to }}</label>
+                <div class="input-group date">
+                  <input type="text" name="filter_to_date_added" value="{{ filter_to_date_added }}" placeholder="{{ entry_to }}" data-format="YYYY-MM-DD" id="input-date-added" class="form-control" />
+                  <span class="input-group-btn">
+                  <button type="button" class="btn btn-default"><i class="fa fa-calendar"></i></button>
+                  </span></div>
+              </div>
+            </div>
+			<div class="col-sm-5">
+			  <div class="form-group">
+                <label class="control-label" for="input-date-modified">{{ entry_from }}</label>
+                <div class="input-group date">
+                  <input type="text" name="filter_from_date_added" value="{{ filter_from_date_added }}" placeholder="{{ entry_from }}" data-format="YYYY-MM-DD" id="input-date-modified" class="form-control" />
+                  <span class="input-group-btn">
+                  <button type="button" class="btn btn-default"><i class="fa fa-calendar"></i></button>
+                  </span>
+				  <button type="button" id="button-filter" class="btn btn-primary pull-right"><i class="fa fa-search"></i> {{ button_filter }}</button>
+				  </div>
+              </div>
+			</div>
+			<div class="col-sm-4">
+				 <div class="form-group">
+					 <label class="control-label" for="input-date-modified"></label>
+					
+				 </div>
+			</div>
+          </div>
+        </div>
+	</div>
+	
+	
+	<form action="{{ delete }}" method="post" enctype="multipart/form-data" id="form-post">
+          <div class="table-responsive">
+            <table class="table table-responsive table-striped table-hover webx_table">
+              <thead>
+                <tr>
+                  <td style="width: 1px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);" /></td>
+                  <td class="text-center"><a>{{ column_image }}</a></td>
+                  <td class="text-left">{% if sort == 'pd.name' %}
+                    <a href="{{ sort_name }}" class="{{ order|lower }}">{{ column_name }}</a>
+                    {% else %}
+                    <a href="{{ sort_name }}">{{ column_name }}</a>
+                    {% endif %}</td>
+				  <td><a>{{ column_model }}</a></td>
+                  <td class="text-left">{% if sort == 'p.status' %}
+                    <a href="{{ sort_status }}" class="{{ order|lower }}">{{ column_status }}</a>
+                    {% else %}
+                    <a href="{{ sort_status }}">{{ column_status }}</a>
+                    {% endif %}</td>
+                  <td class="text-right"><a>{{ column_action }}<a></td>
+                </tr>
+              </thead>
+              <tbody>
+			  {% if posts %}
+                {% for post in posts %}
+                <tr>
+                  <td class="text-center">{% if post.post_id in selected %}
+                    <input type="checkbox" name="selected[]" value="{{ post.post_id }}" checked="checked" />
+                    {% else %}
+                    <input type="checkbox" name="selected[]" value="{{ post.post_id }}" />
+                   {% endif %}</td>
+                  <td class="text-center">{% if post.image %}
+                    <img src="{{ post.image }}" alt="{{ post.name }}" class="img-thumbnail" />
+                    {% else %}
+                    <span class="img-thumbnail list"><i class="fa fa-camera fa-2x"></i></span>
+                    {% endif %}</td>
+                  <td class="text-left">{{ post.name }}</td>
+                  <td class="text-left">{{ post.username }}</td>
+                  <td class="text-left">{{ post.status }}</td>
+                  <td class="text-right"><a href="{{ post.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa fa-pencil"></i></a></td>
+                </tr>
+                {% endfor %}
+                {% else %}
+                <tr>
+                  <td class="text-center" colspan="8">{{ text_no_results }}</td>
+                </tr>
+                {% endif %}
+              </tbody>
+            </table>
+          </div>
+        </form>
+	
+	
+	
+	
+  </div>
+<script type="text/javascript"><!--
+$('#button-filter').on('click', function() {
+	var url = 'index.php?route=extension/post&user_token={{ user_token }}';
+
+	var filter_name = $('input[name=\'filter_name\']').val();
+
+	if (filter_name) {
+		url += '&filter_name=' + encodeURIComponent(filter_name);
+	}
+	
+	var filter_to_date_added = $('input[name=\'filter_to_date_added\']').val();
+	
+	if (filter_to_date_added){
+		url += '&filter_to_date_added=' + filter_to_date_added;
+	}
+	
+	var filter_from_date_added = $('input[name=\'filter_from_date_added\']').val();
+	
+	if (filter_from_date_added){
+		url += '&filter_from_date_added=' + filter_from_date_added;
+	}
+
+	var filter_category_id = $('select[name=\'filter_category_id\']').val();
+
+	if (filter_category_id != '*') {
+		url += '&filter_category_id=' + encodeURIComponent(filter_category_id);
+	}
+	
+	var filter_status = $('select[name=\'filter_status\']').val();
+
+	if (filter_status != '*') {
+		url += '&filter_status=' + encodeURIComponent(filter_status);
+	}
+
+	location = url;
+});
+//--></script> 
+<script type="text/javascript"><!--
+$('input[name=\'filter_name\']').autocomplete({
+	'source': function(request, response) {
+		$.ajax({
+			url: 'index.php?route=extension/post/autocomplete&user_token={{ user_token }}&filter_name=' +  encodeURIComponent(request),
+			dataType: 'json',
+			success: function(json) {
+				response($.map(json, function(item) {
+					return {
+						label: item['name'],
+						value: item['post_id']
+					}
+				}));
+			}
+		});
+	},
+	'select': function(item) {
+		$('input[name=\'filter_name\']').val(item['label']);
+	}
+});
+//--></script>
+<script type="text/javascript"><!--
+$('.date').datetimepicker({
+	pickTime: false
+});
+//--></script>
+</div>
+{{ footer }}

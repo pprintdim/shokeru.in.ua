@@ -1,0 +1,457 @@
+{{ header }}{{ column_left }}
+
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="pull-right">
+        <button type="submit" form="form-banner" class="btn btn-primary">
+          <i class="fa fa-save"></i>
+        </button>
+        <a href="{{ cancel }}" class="btn btn-default">
+          <i class="fa fa-reply"></i>
+        </a>
+      </div>
+      <h1>{{ heading_title }}</h1>
+      <ul class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+          <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <div class="container-fluid">
+    {% if error_warning %}
+      <div class="alert alert-danger">
+        <i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+      </div>
+    {% endif %}
+
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title"><i class="fa fa-pencil"></i> {{ text_form }}</h3>
+      </div>
+
+      <div class="panel-body">
+        <form id="form-banner" action="{{ action }}" method="post" class="form-horizontal">
+
+          <!-- NAME -->
+          <div class="form-group required">
+            <label class="col-sm-2 control-label">{{ entry_name }}</label>
+            <div class="col-sm-10">
+              <input type="text" name="name" value="{{ name }}" class="form-control">
+            </div>
+          </div>
+
+          <!-- STATUS -->
+          <div class="form-group">
+            <label class="col-sm-2 control-label">{{ entry_status }}</label>
+            <div class="col-sm-10">
+              <select name="status" class="form-control">
+                <option value="1" {{ status ? 'selected' : '' }}>{{ text_enabled }}</option>
+                <option value="0" {{ not status ? 'selected' : '' }}>{{ text_disabled }}</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- LANG TABS -->
+          <ul class="nav nav-tabs" id="language">
+            {% for language in languages %}
+              <li>
+                <a href="#lang{{ language.language_id }}" data-toggle="tab">
+                  <img src="language/{{ language.code }}/{{ language.code }}.png">
+                  {{ language.name }}
+                </a>
+              </li>
+            {% endfor %}
+          </ul>
+
+          <div class="tab-content">
+            {% set row = 0 %}
+
+            {% for language in languages %}
+            <div class="tab-pane" id="lang{{ language.language_id }}">
+
+              <table class="table table-bordered table-hover" id="images{{ language.language_id }}">
+                <thead>
+                  <tr>
+                    <th>{{ entry_title }}</th>
+                    <th>{{ entry_link }}</th>
+                    <th class="text-center">Images</th>
+                    <th class="text-center" style="width:170px;">Actions</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                {% if banner_images[language.language_id] %}
+                  {% for image in banner_images[language.language_id] %}
+                  <tr id="row{{ row }}">
+
+                    <td>
+                      <textarea
+                        name="banner_image[{{ language.language_id }}][{{ row }}][title]"
+                        class="form-control"
+                        rows="4">{{ image.title }}</textarea>
+                    </td>
+
+
+                    <td>
+                      <input type="text"
+                        name="banner_image[{{ language.language_id }}][{{ row }}][link]"
+                        value="{{ image.link }}"
+                        class="form-control">
+                    </td>
+
+                    <!-- IMAGES / VIDEO -->
+                    <td class="text-center">
+                      <div style="margin-bottom:8px;text-align:left;">
+                        <select class="form-control banner-type-select"
+                          name="banner_image[{{ language.language_id }}][{{ row }}][type]"
+                          data-target-block="video-block{{ language.language_id }}-{{ row }}">
+                          <option value="image"{% if image.type != 'video' %} selected{% endif %}>Зображення</option>
+                          <option value="video"{% if image.type == 'video' %} selected{% endif %}>Відео</option>
+                        </select>
+                      </div>
+                      <div class="banner-images-wrap">
+
+                        <div class="banner-image-item">
+                          <div class="banner-image-label">{% if image.type == 'video' %}Постер ПК{% else %}Desktop{% endif %}</div>
+                          <a
+                            id="thumb-image{{ language.language_id }}-{{ row }}"
+                            data-toggle="image"
+                            data-ext="image"
+                            data-target="input-image{{ language.language_id }}-{{ row }}"
+                            data-thumb="thumb-image{{ language.language_id }}-{{ row }}"
+                            class="img-thumbnail">
+                            <img src="{{ image.thumb ?: placeholder }}">
+                          </a>
+
+                          <input
+                            type="hidden"
+                            id="input-image{{ language.language_id }}-{{ row }}"
+                            name="banner_image[{{ language.language_id }}][{{ row }}][image]"
+                            value="{{ image.image }}">
+
+                        </div>
+
+                        <div class="banner-image-item">
+                          <div class="banner-image-label">Mobile</div>
+                          <a
+                            id="thumb-image-mob{{ language.language_id }}-{{ row }}"
+                            data-toggle="image"
+                            data-ext="image"
+                            data-target="input-image-mob{{ language.language_id }}-{{ row }}"
+                            data-thumb="thumb-image-mob{{ language.language_id }}-{{ row }}"
+                            class="img-thumbnail">
+                            <img src="{{ image.mob_thumb ?: placeholder }}">
+                          </a>
+
+                          <input
+                            type="hidden"
+                            id="input-image-mob{{ language.language_id }}-{{ row }}"
+                            name="banner_image[{{ language.language_id }}][{{ row }}][mob_image]"
+                            value="{{ image.mob_image }}">
+
+                        </div>
+
+                        <!-- VIDEO (показується при типі «Відео») -->
+                        <div class="banner-video-block" id="video-block{{ language.language_id }}-{{ row }}" style="display:{% if image.type == 'video' %}flex{% else %}none{% endif %};gap:10px;">
+
+                          <div class="banner-image-item">
+                            <div class="banner-image-label">Відео ПК</div>
+                            <a
+                              id="thumb-video{{ language.language_id }}-{{ row }}"
+                              data-toggle="image"
+                              data-ext="video"
+                              data-target="input-video{{ language.language_id }}-{{ row }}"
+                              data-thumb="thumb-video{{ language.language_id }}-{{ row }}"
+                              class="img-thumbnail">
+                              <img src="{{ image.video_thumb ?: placeholder }}">
+                            </a>
+                            <input
+                              type="hidden"
+                              id="input-video{{ language.language_id }}-{{ row }}"
+                              name="banner_image[{{ language.language_id }}][{{ row }}][video]"
+                              value="{{ image.video }}">
+                          </div>
+
+                          <div class="banner-image-item">
+                            <div class="banner-image-label">Відео Телефон</div>
+                            <a
+                              id="thumb-mob-video{{ language.language_id }}-{{ row }}"
+                              data-toggle="image"
+                              data-ext="video"
+                              data-target="input-mob-video{{ language.language_id }}-{{ row }}"
+                              data-thumb="thumb-mob-video{{ language.language_id }}-{{ row }}"
+                              class="img-thumbnail">
+                              <img src="{{ image.mob_video_thumb ?: placeholder }}">
+                            </a>
+                            <input
+                              type="hidden"
+                              id="input-mob-video{{ language.language_id }}-{{ row }}"
+                              name="banner_image[{{ language.language_id }}][{{ row }}][mob_video]"
+                              value="{{ image.mob_video }}">
+                          </div>
+
+                        </div>
+
+                      </div>
+                    </td>
+
+                    <!-- ACTIONS -->
+                    <td class="text-center" style="display:flex;justify-content:space-between;gap:10px;width:170px;">
+                      <input type="text"
+                        name="banner_image[{{ language.language_id }}][{{ row }}][sort_order]"
+                        value="{{ image.sort_order }}"
+                        class="form-control">
+                      <button type="button"
+                        class="btn btn-primary"
+                        title="Description"
+                        onclick="openDescription({{ language.language_id }}, {{ row }})">
+                        <i class="fa fa-file-text"></i>
+                      </button>
+
+                      <button type="button"
+                        class="btn btn-danger"
+                        title="Remove"
+                        onclick="$('#row{{ row }}').remove()">
+                        <i class="fa fa-minus-circle"></i>
+                      </button>
+
+                      <input type="hidden"
+                        id="desc{{ language.language_id }}_{{ row }}"
+                        name="banner_image[{{ language.language_id }}][{{ row }}][description]"
+                        value="{{ image.description ?? '' }}">
+
+                    </td>
+
+                  </tr>
+                  {% set row = row + 1 %}
+                  {% endfor %}
+                {% endif %}
+                </tbody>
+
+                <tfoot>
+                  <tr>
+                    <td colspan="5">
+                      <button type="button"
+                        class="btn btn-primary"
+                        onclick="addRow({{ language.language_id }})">
+                        <i class="fa fa-plus-circle"></i> {{ button_banner_add }}
+                      </button>
+                    </td>
+                  </tr>
+                </tfoot>
+
+              </table>
+
+            </div>
+            {% endfor %}
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<style>
+.banner-images-wrap {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.banner-image-item {
+  width: 90px;
+}
+
+.banner-image-label {
+  font-size: 11px;
+  color: #777;
+  margin-bottom: 4px;
+}
+
+.banner-image-item img {
+  max-width: 100%;
+}
+</style>
+<script>
+let row = {{ row }};
+
+/* =========================
+   DESCRIPTION POPUP
+========================= */
+function openDescription(lang, rowId) {
+
+  $('#desc-modal').remove();
+
+  const input = $('#desc' + lang + '_' + rowId);
+  const value = input.val() || '';
+
+  $('body').append(`
+    <div id="desc-modal" style="
+      position:fixed; inset:0;
+      background:rgba(0,0,0,.5);
+      display:flex; align-items:center; justify-content:center;
+      z-index:9999">
+      <div style="background:#fff; padding:20px; width:520px; max-width:95%;">
+        <h4>Description</h4>
+        <textarea id="desc-text" class="form-control" style="height:170px;">${value}</textarea>
+        <div class="text-right" style="margin-top:10px;">
+          <button type="button" class="btn btn-default" onclick="$('#desc-modal').remove()">Cancel</button>
+          <button type="button" class="btn btn-primary" id="desc-save">Save</button>
+        </div>
+      </div>
+    </div>
+  `);
+
+  $('#desc-save').on('click', function () {
+    input.val($('#desc-text').val());
+    $('#desc-modal').remove();
+  });
+}
+
+/* =========================
+   ADD ROW
+========================= */
+function addRow(lang) {
+
+  const html = `
+    <tr id="row${row}">
+
+      <td>
+        <textarea
+          name="banner_image[${lang}][${row}][title]"
+          class="form-control"
+          rows="4"></textarea>
+      </td>
+
+      <td>
+        <input type="text" name="banner_image[${lang}][${row}][link]" class="form-control">
+      </td>
+
+      <td class="text-center">
+        <div style="margin-bottom:8px;text-align:left;">
+          <select class="form-control banner-type-select"
+            name="banner_image[${lang}][${row}][type]"
+            data-target-block="video-block${lang}-${row}">
+            <option value="image">Зображення</option>
+            <option value="video">Відео</option>
+          </select>
+        </div>
+        <div class="banner-images-wrap">
+
+          <div class="banner-image-item">
+            <div class="banner-image-label">Desktop</div>
+            <a
+              id="thumb-image${lang}-${row}"
+              data-toggle="image"
+              data-ext="image"
+              data-target="input-image${lang}-${row}"
+              data-thumb="thumb-image${lang}-${row}"
+              class="img-thumbnail">
+              <img src="{{ placeholder }}">
+            </a>
+
+            <input
+              type="hidden"
+              id="input-image${lang}-${row}"
+              name="banner_image[${lang}][${row}][image]">
+
+          </div>
+
+          <div class="banner-image-item">
+            <div class="banner-image-label">Mobile</div>
+            <a
+              id="thumb-image-mob${lang}-${row}"
+              data-toggle="image"
+              data-ext="image"
+              data-target="input-image-mob${lang}-${row}"
+              data-thumb="thumb-image-mob${lang}-${row}"
+              class="img-thumbnail">
+              <img src="{{ placeholder }}">
+            </a>
+
+            <input
+              type="hidden"
+              id="input-image-mob${lang}-${row}"
+              name="banner_image[${lang}][${row}][mob_image]">
+
+          </div>
+
+          <div class="banner-video-block" id="video-block${lang}-${row}" style="display:none;gap:10px;">
+
+            <div class="banner-image-item">
+              <div class="banner-image-label">Відео ПК</div>
+              <a
+                id="thumb-video${lang}-${row}"
+                data-toggle="image"
+                data-ext="video"
+                data-target="input-video${lang}-${row}"
+                data-thumb="thumb-video${lang}-${row}"
+                class="img-thumbnail">
+                <img src="{{ placeholder }}">
+              </a>
+              <input
+                type="hidden"
+                id="input-video${lang}-${row}"
+                name="banner_image[${lang}][${row}][video]">
+            </div>
+
+            <div class="banner-image-item">
+              <div class="banner-image-label">Відео Телефон</div>
+              <a
+                id="thumb-mob-video${lang}-${row}"
+                data-toggle="image"
+                data-ext="video"
+                data-target="input-mob-video${lang}-${row}"
+                data-thumb="thumb-mob-video${lang}-${row}"
+                class="img-thumbnail">
+                <img src="{{ placeholder }}">
+              </a>
+              <input
+                type="hidden"
+                id="input-mob-video${lang}-${row}"
+                name="banner_image[${lang}][${row}][mob_video]">
+            </div>
+
+          </div>
+
+        </div>
+      </td>
+
+      <td class="text-center" style="display:flex;justify-content:space-between;gap:10px;width:170px;">
+        <input type="text" name="banner_image[${lang}][${row}][sort_order]" class="form-control">
+        <button type="button" class="btn btn-primary"
+          onclick="openDescription(${lang}, ${row})">
+          <i class="fa fa-file-text"></i>
+        </button>
+
+        <button type="button" class="btn btn-danger"
+          onclick="$('#row${row}').remove()">
+          <i class="fa fa-minus-circle"></i>
+        </button>
+
+        <input type="hidden"
+          id="desc${lang}_${row}"
+          name="banner_image[${lang}][${row}][description]">
+      </td>
+
+    </tr>
+  `;
+
+  $('#images' + lang + ' tbody').append(html);
+  row++;
+}
+
+/* TYPE TOGGLE (Зображення / Відео) */
+$(document).on('change', '.banner-type-select', function () {
+  var block = document.getElementById($(this).data('target-block'));
+  if (block) block.style.display = (this.value === 'video') ? 'flex' : 'none';
+});
+
+/* INIT */
+$('#language a:first').tab('show');
+</script>
+
+{{ footer }}

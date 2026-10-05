@@ -1,0 +1,24 @@
+<?php
+$_['heading_title']    = 'About Us';
+$_['text_home']        = 'Головна';
+$_['text_extension']   = 'Розширення';
+$_['text_success']     = 'Налаштування модуля збережено!';
+$_['text_edit']        = 'Редагування модуля About Us';
+$_['text_enabled']     = 'Увімкнено';
+$_['text_disabled']    = 'Вимкнено';
+$_['text_stats']       = 'Статистика';
+$_['text_stat']        = 'Пункт';
+$_['text_cards']       = 'Рейтингові картки';
+$_['text_card']        = 'Картка';
+$_['entry_status']     = 'Статус';
+$_['entry_content']    = 'Контент блоку';
+$_['entry_stat_value'] = 'Значення';
+$_['entry_stat_suffix'] = 'Суфікс';
+$_['entry_stat_label'] = 'Підпис';
+$_['entry_card_title'] = 'Назва картки';
+$_['entry_card_accent'] = 'Акцент';
+$_['entry_card_link']  = 'Посилання';
+$_['button_save']      = 'Зберегти';
+$_['button_cancel']    = 'Скасувати';
+$_['error_permission'] = 'У вас немає прав для редагування модуля!';
+$_['error_heading']    = 'Заповніть контент блоку для цієї мови!';

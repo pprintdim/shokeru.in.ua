@@ -1,0 +1,335 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="pull-right">
+        <button type="submit" form="form-module" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-save"></i></button>
+        <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a>
+      </div>
+      <h1>{{ heading_title }}</h1>
+      <ul class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+          <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  <div class="container-fluid">
+    {% if error_warning %}
+      <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}<button type="button" class="close" data-dismiss="alert">&times;</button></div>
+    {% endif %}
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title"><i class="fa fa-pencil"></i> {{ text_edit }}</h3>
+      </div>
+      <div class="panel-body">
+        <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-module" class="form-horizontal">
+          <div class="form-group">
+            <label class="col-sm-2 control-label" for="input-name">{{ entry_name }}</label>
+            <div class="col-sm-10">
+              <input type="text" name="module_textrepeater[name]" value="{{ module_textrepeater.name }}" placeholder="{{ entry_name }}" id="input-name" class="form-control">
+              {% if error_name %}
+                <div class="text-danger">{{ error_name }}</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="col-sm-2 control-label" for="input-status">{{ entry_status }}</label>
+            <div class="col-sm-10">
+              <select name="module_textrepeater[status]" id="input-status" class="form-control">
+                <option value="1" {{ module_textrepeater.status ? 'selected' : '' }}>{{ text_enabled }}</option>
+                <option value="0" {{ not module_textrepeater.status ? 'selected' : '' }}>{{ text_disabled }}</option>
+              </select>
+            </div>
+          </div>
+
+          <ul class="nav nav-tabs textrepeater-lang-tabs">
+            {% for language in languages %}
+              <li class="{{ loop.first ? 'active' : '' }}"><a href="#tab-content-{{ language.language_id }}" data-language-id="{{ language.language_id }}" data-toggle="tab"><img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}"> {{ language.name }}</a></li>
+            {% endfor %}
+          </ul>
+
+          <div class="tab-content" style="margin-top: 15px;">
+            {% for language in languages %}
+              <div class="tab-pane {{ loop.first ? 'active' : '' }}" id="tab-content-{{ language.language_id }}">
+                <div class="form-group">
+                  <label class="col-sm-2 control-label">{{ entry_html }}</label>
+                  <div class="col-sm-10">
+                    <textarea name="module_textrepeater[content][{{ language.language_id }}][html]" class="form-control summernote">{{ module_textrepeater.content[language.language_id].html }}</textarea>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+
+          <hr>
+          <div class="clearfix">
+            <h4 class="pull-left">{{ text_items }}</h4>
+            <button type="button" class="btn btn-primary pull-right" id="btn-add-item"><i class="fa fa-plus-circle"></i> {{ button_add }}</button>
+          </div>
+
+          <table class="table table-bordered table-hover" id="textrepeater-table">
+            <thead>
+              <tr>
+                <th style="width:35px;"></th>
+                <th>{{ text_item_content }}</th>
+                <th style="width:120px;">{{ entry_meta }}</th>
+              </tr>
+            </thead>
+            <tbody id="textrepeater-body">
+              {% for item in module_textrepeater.items %}
+                {% set item_index = loop.index0 %}
+                <tr class="textrepeater-row">
+                  <td class="text-center drag-handle" style="cursor:move;"><i class="fa fa-bars"></i></td>
+                  <td>
+                    {% for language in languages %}
+                      <input type="hidden" name="module_textrepeater[items][{{ item_index }}][{{ language.language_id }}][btn_text]" value="{{ item[language.language_id].btn_text }}" class="item-btn-text" data-language-id="{{ language.language_id }}">
+                      <div class="textrepeater-item-language" data-language-id="{{ language.language_id }}" style="{{ loop.first ? '' : 'display:none;' }}">
+                        <div class="form-group" style="margin-left:0;margin-right:0;">
+                          <label>{{ entry_title }}</label>
+                          <input type="text" name="module_textrepeater[items][{{ item_index }}][{{ language.language_id }}][title]" value="{{ item[language.language_id].title }}" class="form-control" placeholder="{{ entry_title }}">
+                        </div>
+                        <div class="form-group" style="margin-left:0;margin-right:0;margin-bottom:0;">
+                          <label>{{ entry_text }}</label>
+                          <textarea name="module_textrepeater[items][{{ item_index }}][{{ language.language_id }}][text]" class="form-control summernote-item">{{ item[language.language_id].text }}</textarea>
+                        </div>
+                      </div>
+                    {% endfor %}
+                    <input type="hidden" name="module_textrepeater[items][{{ item_index }}][btn_link]" value="{{ item.btn_link }}" class="item-btn-link">
+                  </td>
+                  <td>
+                    <div class="form-group" style="margin-left:0;margin-right:0;">
+                      <label>{{ entry_sort_order }}</label>
+                      <input type="text" name="module_textrepeater[items][{{ item_index }}][sort_order]" value="{{ item.sort_order }}" class="form-control sort-order">
+                    </div>
+                    <button type="button" class="btn btn-default btn-btn-settings" style="width:100%;margin-bottom:5px;" title="{{ entry_btn_text }}"><i class="fa fa-link"></i></button>
+                    <button type="button" class="btn btn-danger btn-remove-item" data-toggle="tooltip" title="{{ button_remove }}" style="width:100%;"><i class="fa fa-trash-o"></i></button>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<link href="view/javascript/jquery/jquery-ui/jquery-ui.min.css" rel="stylesheet" />
+<style>
+.textrepeater-lang-tabs {
+  border-bottom: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0 0 14px;
+}
+
+.textrepeater-lang-tabs > li {
+  float: none;
+  margin: 0;
+}
+
+.textrepeater-lang-tabs > li > a {
+  border: 1px solid #d9e1e8;
+  border-radius: 4px;
+  color: #4d5b67;
+  line-height: 18px;
+  margin: 0;
+  padding: 7px 11px;
+}
+
+.textrepeater-lang-tabs > li > a:hover {
+  background: #f5f7f9;
+  border-color: #c8d2dc;
+}
+
+.textrepeater-lang-tabs > li.active > a,
+.textrepeater-lang-tabs > li.active > a:hover,
+.textrepeater-lang-tabs > li.active > a:focus {
+  background: #1e91cf;
+  border-color: #1e91cf;
+  color: #fff;
+}
+
+.textrepeater-lang-tabs img {
+  margin-right: 4px;
+  vertical-align: -1px;
+}
+</style>
+<script type="text/javascript" src="view/javascript/jquery/jquery-ui/jquery-ui.min.js"></script>
+<script type="text/javascript">
+$('.summernote').summernote({height: 180});
+$('.summernote-item').summernote({height: 120});
+
+var textrepeaterLanguages = Object.values({{ languages|json_encode|raw }});
+
+function escapeTextrepeaterHtml(value) {
+  return String(value).replace(/[&<>"']/g, function(match) {
+    return {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#039;'
+    }[match];
+  });
+}
+
+function rebuildTextrepeaterIndexes() {
+  $('#textrepeater-body .textrepeater-row').each(function(index) {
+    $(this).find('[name]').each(function() {
+      $(this).attr('name', $(this).attr('name').replace(/items\]\[\d+\]/g, 'items][' + index + ']'));
+    });
+
+    $(this).find('[id]').each(function() {
+      $(this).attr('id', $(this).attr('id').replace(/-(\d+)-/g, '-' + index + '-'));
+    });
+
+    $(this).find('a[data-toggle="tab"]').each(function() {
+      var href = $(this).attr('href');
+
+      if (href) {
+        $(this).attr('href', href.replace(/-(\d+)-/g, '-' + index + '-'));
+      }
+    });
+
+    $(this).find('.sort-order').val(index);
+  });
+}
+
+function buildTextrepeaterRow(index) {
+  var languageBlocks = '';
+
+  textrepeaterLanguages.forEach(function(language, languageIndex) {
+    var display = getTextrepeaterLanguageId() === String(language.language_id) ? '' : 'display:none;';
+
+    languageBlocks += '<input type="hidden" name="module_textrepeater[items][' + index + '][' + language.language_id + '][btn_text]" value="" class="item-btn-text" data-language-id="' + language.language_id + '">' +
+      '<div class="textrepeater-item-language" data-language-id="' + language.language_id + '" style="' + display + '">' +
+      '<div class="form-group" style="margin-left:0;margin-right:0;"><label>{{ entry_title|e('js') }}</label><input type="text" name="module_textrepeater[items][' + index + '][' + language.language_id + '][title]" value="" class="form-control" placeholder="{{ entry_title|e('js') }}"></div>' +
+      '<div class="form-group" style="margin-left:0;margin-right:0;margin-bottom:0;"><label>{{ entry_text|e('js') }}</label><textarea name="module_textrepeater[items][' + index + '][' + language.language_id + '][text]" class="form-control summernote-item-new"></textarea></div>' +
+    '</div>';
+  });
+
+  return '<tr class="textrepeater-row">' +
+    '<td class="text-center drag-handle" style="cursor:move;"><i class="fa fa-bars"></i></td>' +
+    '<td>' + languageBlocks + '<input type="hidden" name="module_textrepeater[items][' + index + '][btn_link]" value="" class="item-btn-link"></td>' +
+    '<td><div class="form-group" style="margin-left:0;margin-right:0;"><label>{{ entry_sort_order|e('js') }}</label><input type="text" name="module_textrepeater[items][' + index + '][sort_order]" value="' + index + '" class="form-control sort-order"></div>' +
+    '<button type="button" class="btn btn-default btn-btn-settings" style="width:100%;margin-bottom:5px;" title="{{ entry_btn_text|e('js') }}"><i class="fa fa-link"></i></button>' +
+    '<button type="button" class="btn btn-danger btn-remove-item" data-toggle="tooltip" title="{{ button_remove|e('js') }}" style="width:100%;"><i class="fa fa-trash-o"></i></button></td></tr>';
+}
+
+function getTextrepeaterLanguageId() {
+  return String($('.textrepeater-lang-tabs > li.active > a').data('language-id') || textrepeaterLanguages[0].language_id);
+}
+
+function showTextrepeaterLanguage(languageId) {
+  $('.textrepeater-item-language').hide();
+  $('.textrepeater-item-language[data-language-id="' + languageId + '"]').show();
+}
+
+$('#textrepeater-body').sortable({
+  handle: '.drag-handle',
+  helper: function(e, ui) {
+    ui.children().each(function() {
+      $(this).width($(this).width());
+    });
+
+    return ui;
+  },
+  update: rebuildTextrepeaterIndexes
+});
+
+$('#btn-add-item').on('click', function() {
+  var index = $('#textrepeater-body .textrepeater-row').length;
+  var $row = $(buildTextrepeaterRow(index));
+
+  $('#textrepeater-body').append($row);
+  $row.find('.summernote-item-new').summernote({height: 120});
+});
+
+$(document).on('click', '.btn-remove-item', function() {
+  var $row = $(this).closest('.textrepeater-row');
+  $row.find('.summernote-item, .summernote-item-new').each(function() {
+    if ($(this).data('summernote')) {
+      $(this).summernote('destroy');
+    }
+  });
+  $row.remove();
+  rebuildTextrepeaterIndexes();
+});
+
+rebuildTextrepeaterIndexes();
+showTextrepeaterLanguage(getTextrepeaterLanguageId());
+
+$('.textrepeater-lang-tabs a[data-toggle="tab"]').on('shown.bs.tab', function() {
+  showTextrepeaterLanguage($(this).data('language-id'));
+});
+
+var $currentBtnRow = null;
+
+$(document).on('click', '.btn-btn-settings', function() {
+  $currentBtnRow = $(this).closest('.textrepeater-row');
+
+  $('#modal-btn-link').val($currentBtnRow.find('.item-btn-link').val());
+
+  $('.modal-btn-text-input').each(function() {
+    var langId = $(this).data('language-id');
+    $(this).val($currentBtnRow.find('.item-btn-text[data-language-id="' + langId + '"]').val());
+  });
+
+  $('#modal-btn-settings').modal('show');
+});
+
+$(document).on('click', '#modal-btn-save', function() {
+  if (!$currentBtnRow) return;
+
+  $currentBtnRow.find('.item-btn-link').val($('#modal-btn-link').val());
+
+  $('.modal-btn-text-input').each(function() {
+    var langId = $(this).data('language-id');
+    $currentBtnRow.find('.item-btn-text[data-language-id="' + langId + '"]').val($(this).val());
+  });
+
+  $('#modal-btn-settings').modal('hide');
+  $currentBtnRow = null;
+});
+</script>
+
+<div class="modal fade" id="modal-btn-settings" tabindex="-1">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title"><i class="fa fa-link"></i> {{ entry_btn_link }}</h4>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>{{ entry_btn_link }}</label>
+          <input type="text" id="modal-btn-link" class="form-control" placeholder="https://">
+        </div>
+        <ul class="nav nav-tabs">
+          {% for language in languages %}
+            <li class="{{ loop.first ? 'active' : '' }}"><a href="#modal-btn-lang-{{ language.language_id }}" data-toggle="tab"><img src="language/{{ language.code }}/{{ language.code }}.png"> {{ language.name }}</a></li>
+          {% endfor %}
+        </ul>
+        <div class="tab-content" style="margin-top:10px;">
+          {% for language in languages %}
+            <div class="tab-pane {{ loop.first ? 'active' : '' }}" id="modal-btn-lang-{{ language.language_id }}">
+              <div class="form-group" style="margin-bottom:0;">
+                <label>{{ entry_btn_text }}</label>
+                <input type="text" class="form-control modal-btn-text-input" data-language-id="{{ language.language_id }}" placeholder="{{ entry_btn_text }}">
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" id="modal-btn-save">{{ button_save }}</button>
+        <button type="button" class="btn btn-default" data-dismiss="modal">{{ button_cancel }}</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{{ footer }}

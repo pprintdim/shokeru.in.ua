@@ -1,0 +1,181 @@
+{{ header }}{{ column_left }}
+
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="pull-right">
+        <button type="submit" form="form-partner-program" class="btn btn-primary">
+          <i class="fa fa-save"></i>
+        </button>
+        <a href="{{ cancel }}" class="btn btn-default">
+          <i class="fa fa-reply"></i>
+        </a>
+      </div>
+      <h1>{{ heading_title }}</h1>
+      <ul class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+          <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <div class="container-fluid">
+    {% if error_warning %}
+      <div class="alert alert-danger">
+        <i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+      </div>
+    {% endif %}
+
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title"><i class="fa fa-pencil"></i> {{ text_form }}</h3>
+      </div>
+
+      <div class="panel-body">
+        <form id="form-partner-program" action="{{ action }}" method="post" enctype="multipart/form-data" class="form-horizontal">
+
+          <!-- IMAGE -->
+          <div class="form-group">
+            <label class="col-sm-2 control-label">{{ entry_image }}</label>
+            <div class="col-sm-10">
+              <a href="" id="thumb-image" data-toggle="image" class="img-thumbnail">
+                <img src="{{ thumb }}" alt="" title="" />
+              </a>
+              <input type="hidden" name="module_different_shokers_image" value="{{ image }}" id="input-image" />
+            </div>
+          </div>
+
+          <!-- STATUS -->
+          <div class="form-group">
+            <label class="col-sm-2 control-label">{{ entry_status }}</label>
+            <div class="col-sm-10">
+              <select name="module_different_shokers_status" class="form-control">
+                <option value="1" {{ status ? 'selected' : '' }}>{{ text_enabled }}</option>
+                <option value="0" {{ not status ? 'selected' : '' }}>{{ text_disabled }}</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- LANGUAGE TABS -->
+          <ul class="nav nav-tabs" id="language">
+            {% for language in languages %}
+              <li>
+                <a href="#lang{{ language.language_id }}" data-toggle="tab">
+                  <img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" /> {{ language.name }}
+                </a>
+              </li>
+            {% endfor %}
+          </ul>
+
+          <div class="tab-content">
+            {% set row = 0 %}
+            {% for language in languages %}
+            {% set lang_id = language.language_id %}
+            <div class="tab-pane" id="lang{{ lang_id }}">
+
+              <div class="form-group">
+                <label class="col-sm-2 control-label">{{ entry_title }}</label>
+                <div class="col-sm-10">
+                  <input type="text" name="module_different_shokers_title[{{ lang_id }}]" value="{{ title[lang_id] ?? '' }}" class="form-control" />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="col-sm-2 control-label">{{ entry_description }}</label>
+                <div class="col-sm-10">
+                  <textarea name="module_different_shokers_content[{{ lang_id }}]" class="form-control summernote" rows="5">{{ content[lang_id] ?? '' }}</textarea>
+                </div>
+              </div>
+
+              <!-- REPEATER -->
+              <div id="repeater{{ lang_id }}" class="mb-3">
+                {% set row = 0 %}
+                {% if repeater[lang_id] %}
+                  {% for item in repeater[lang_id] %}
+                  <div class="panel panel-default repeater-item" id="row{{ row }}">
+                    <div class="panel-body">
+                      <div class="form-group">
+                        <label class="col-sm-2 control-label">{{ entry_title }}</label>
+                        <div class="col-sm-10">
+                          <input type="text" name="module_different_shokers_repeater[{{ lang_id }}][{{ row }}][title]" value="{{ item.title }}" class="form-control">
+                        </div>
+                      </div>
+                      <div class="form-group">
+                        <label class="col-sm-2 control-label">{{ entry_description }}</label>
+                        <div class="col-sm-10">
+                          <textarea name="module_different_shokers_repeater[{{ lang_id }}][{{ row }}][description]" class="form-control summernote">{{ item.description }}</textarea>
+                        </div>
+                      </div>
+                      <div class="form-group">
+                        <div class="col-sm-offset-2 col-sm-10">
+                          <button type="button" class="btn btn-danger" onclick="$('#row{{ row }}').remove()">
+                            <i class="fa fa-minus-circle"></i> {{ button_remove }}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  {% set row = row + 1 %}
+                  {% endfor %}
+                {% endif %}
+                <button type="button" class="btn btn-primary" onclick="addRow({{ lang_id }})">
+                  <i class="fa fa-plus-circle"></i> {{ button_add }}
+                </button>
+              </div>
+
+            </div>
+            {% endfor %}
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript" src="view/javascript/summernote/summernote.min.js"></script>
+<link href="view/javascript/summernote/summernote.min.css" rel="stylesheet" />
+<script type="text/javascript" src="view/javascript/summernote/summernote-image-attributes.js"></script>
+<script type="text/javascript" src="view/javascript/summernote/opencart.js"></script>
+
+<script>
+$('.summernote').summernote({height: 160});
+
+// show first language tab
+$('#language a:first').tab('show');
+
+let row = {{ row }};
+function addRow(lang) {
+    const newRow = `
+    <div class="panel panel-default repeater-item" id="row${row}">
+      <div class="panel-body">
+        <div class="form-group">
+          <label class="col-sm-2 control-label">{{ entry_title }}</label>
+          <div class="col-sm-10">
+            <input type="text" name="module_different_shokers_repeater[${lang}][${row}][title]" class="form-control">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="col-sm-2 control-label">{{ entry_description }}</label>
+          <div class="col-sm-10">
+            <textarea name="module_different_shokers_repeater[${lang}][${row}][description]" class="form-control summernote"></textarea>
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="col-sm-offset-2 col-sm-10">
+            <button type="button" class="btn btn-danger" onclick="$('#row${row}').remove()">
+              <i class="fa fa-minus-circle"></i> {{ button_remove }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+    $('#repeater' + lang + ' button.btn-primary').before(newRow);
+    $(`#row${row} .summernote`).summernote({height: 160});
+    row++;
+}
+window.addRow = addRow;
+</script>
+
+{{ footer }}

@@ -1,0 +1,24 @@
+<?php
+$_['heading_title']    = 'About Us';
+$_['text_home']        = 'Home';
+$_['text_extension']   = 'Extensions';
+$_['text_success']     = 'Success: You have modified the module!';
+$_['text_edit']        = 'Edit About Us Module';
+$_['text_enabled']     = 'Enabled';
+$_['text_disabled']    = 'Disabled';
+$_['text_stats']       = 'Stats';
+$_['text_stat']        = 'Item';
+$_['text_cards']       = 'Rating Cards';
+$_['text_card']        = 'Card';
+$_['entry_status']     = 'Status';
+$_['entry_content']    = 'Block Content';
+$_['entry_stat_value'] = 'Value';
+$_['entry_stat_suffix'] = 'Suffix';
+$_['entry_stat_label'] = 'Label';
+$_['entry_card_title'] = 'Card Title';
+$_['entry_card_accent'] = 'Accent';
+$_['entry_card_link']  = 'Link';
+$_['button_save']      = 'Save';
+$_['button_cancel']    = 'Cancel';
+$_['error_permission'] = 'Warning: You do not have permission to modify the module!';
+$_['error_heading']    = 'Block content is required for this language!';
