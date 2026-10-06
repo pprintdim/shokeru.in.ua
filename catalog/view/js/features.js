@@ -434,7 +434,8 @@
 
     // перший ролик у кеші — відповідному <video> hero (data-src, src ставить script.js) даємо src із preload="metadata"
     // і лише за 1 с preload="auto": так Chrome бере його з HTTP-кешу, а з auto/autoplay одразу — качає заново
-    firstReady.then(function () {
+    // пауза після fetch, щоб відповідь встигла лягти в HTTP-кеш — інакше запит <video> зависає й іде в мережу
+    firstReady.then(function () { setTimeout(function () {
       if (!firstUrl) return;
 
       var hero = document.querySelector('.hero');
@@ -452,7 +453,7 @@
       if (!target.getAttribute('src')) target.src = firstUrl;
 
       setTimeout(function () { target.preload = 'auto'; }, 1000);
-    });
+    }, 1500); });
 
     function buffered() {
       try {
