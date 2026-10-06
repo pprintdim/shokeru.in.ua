@@ -177,8 +177,8 @@ class ControllerCommonHeader extends Controller {
 		// CSS/JS: мініфікація з авто-перегенерацією за mtime (зміниш файл — перемініфікується сам)
 		$data['css_main']  = $this->assetMin('catalog/view/css/style.css', 'css', '20261004');
 		$data['css_anim']  = $this->assetMin('catalog/view/css/animations.css', 'css', '20260626b');
-		$data['css_features'] = $this->assetMin('catalog/view/css/features.css', 'css', '20261006');
-		$data['js_common'] = $this->assetMin('catalog/view/js/common.js', 'js', '20260630');
+		$data['css_features'] = $this->assetMin('catalog/view/css/features.css', 'css', '20261006b');
+		$data['js_common'] = $this->assetMin('catalog/view/js/common.js', 'js', '20261006');
 		// «Показувати в шапці» (info_flags.sql): сторінки інформації в верхньому меню
 		$this->load->model('catalog/information');
 

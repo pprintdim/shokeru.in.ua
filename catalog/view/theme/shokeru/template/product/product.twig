@@ -87,7 +87,7 @@
                                 	{% endif %}
                                 	{{ special ?: price }}
                                 </p>
-                                <p class="prod__about-avaliable" data-product-avaliable="yes">{{ text_in_stock }}</p>
+                                <p class="prod__about-avaliable" data-product-avaliable="{{ in_stock ? 'yes' : 'no' }}">{{ in_stock ? text_in_stock : stock }}</p>
                                 <div class="prod__about-quantity">
                                     <button class="quantity-minus" type="button" aria-label="{{ text_qty_minus }}"></button>
                                     <input class="quantity-count" type="number" name="quantity" value="{{ minimum ?: 1 }}" min="{{ minimum ?: 1 }}" max="{{ qty_max }}" step="1" inputmode="numeric" aria-label="{{ text_qty_label }}">
@@ -101,8 +101,8 @@
                             </nav>
                             <div class="prod__buttons">
                                 <input type="hidden" name="product_id" value="{{ product_id }}">
-                                <button class="prod__add btn-4" type="button" data-product-id="{{ product_id }}" data-ga4-name="{{ name|e('html_attr') }}" data-ga4-price="{{ ga4_item_price }}" data-ga4-brand="{{ manufacturer|e('html_attr') }}">
-                                    <span>{{ text_product_add }}</span>
+                                <button class="prod__add btn-4" type="button" data-product-id="{{ product_id }}" data-ga4-name="{{ name|e('html_attr') }}" data-ga4-price="{{ ga4_item_price }}" data-ga4-brand="{{ manufacturer|e('html_attr') }}"{% if not in_stock %} disabled{% endif %}>
+                                    <span>{{ in_stock ? text_product_add : text_out_of_stock_btn }}</span>
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
                                         <path d="M9.33496 6.66675H13.335V9.33374H9.33496V13.3337H6.66797V9.33374H2.66797V6.66675H6.66797V2.66675H9.33496V6.66675Z" fill="white"/>
                                     </svg>
@@ -110,7 +110,8 @@
                                 <button class="prod__fav" type="button" data-product-id="{{ product_id }}"></button>
                                 <button class="prod__compare" type="button" data-compare-id="{{ product_id }}" aria-label="{{ text_compare_add }}" title="{{ text_compare_add }}"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v18M5 7h14M5 7l-3 8a4 4 0 0 0 6 0L5 7zM19 7l-3 8a4 4 0 0 0 6 0l-3-8z"/></svg></button>
                             </div>
-                            <button class="prod__quick quick-btn btn-3" type="button" data-quick-order="{{ product_id }}" data-quick-name="{{ name|e('html_attr') }}" data-quick-price="{{ special ?: price }}">
+                            <p class="prod__incart" data-cart-status data-product-id="{{ product_id }}" data-cart-qty="{{ cart_qty }}" data-template="{{ text_in_cart_qty|e }}"{% if not in_cart %} hidden{% endif %}><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg><span data-cart-status-text>{{ text_in_cart_qty|format(cart_qty) }}</span> &middot; <a href="{{ cart_href }}">{{ text_go_to_cart }}</a></p>
+                            <button class="prod__quick quick-btn btn-3" type="button"{% if not in_stock %} disabled{% endif %} data-quick-order="{{ product_id }}" data-quick-name="{{ name|e('html_attr') }}" data-quick-price="{{ special ?: price }}">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg>
                                 {{ button_quick_order }}
                             </button>
@@ -244,6 +245,18 @@
     </div>
 </section>
 {% endif %}
+
+<div class="skbar" data-purchase-bar aria-hidden="true">
+    <div class="container skbar__in">
+        {% if thumb %}<img src="{{ thumb }}" alt="" class="skbar__img" width="48" height="48" loading="lazy">{% endif %}
+        <div class="skbar__info">
+            <p class="skbar__name">{{ heading_title }}</p>
+            <p class="skbar__meta"><strong class="skbar__price">{{ special ?: price }}</strong>{% if special and special != price %}<s>{{ price }}</s>{% endif %}<span class="skbar__stock{{ in_stock ? '' : ' is-out' }}">{{ in_stock ? text_in_stock : stock }}</span></p>
+        </div>
+        <button type="button" class="btn-4 skbar__btn" data-pbar-buy{% if not in_stock %} disabled{% endif %}{% if in_cart %} hidden{% endif %}>{{ in_stock ? text_bar_buy : text_out_of_stock_btn }}</button>
+        <a href="{{ checkout_href }}" class="btn-3 skbar__btn skbar__btn--incart" data-pbar-incart{% if not in_cart %} hidden{% endif %}><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>{{ text_in_cart_checkout }}</a>
+    </div>
+</div>
 
 <script>
 function prodToggle(item, open) {
@@ -390,6 +403,57 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
         });
+    }
+
+    // стан «вже в кошику»: common.js шле cart:added після успішного додавання
+    const cartStatus = document.querySelector('[data-cart-status]');
+    const bar = document.querySelector('[data-purchase-bar]');
+    const barBuy = document.querySelector('[data-pbar-buy]');
+    const barInCart = document.querySelector('[data-pbar-incart]');
+
+    document.addEventListener('cart:added', (e) => {
+        const d = e.detail || {};
+
+        if (!cartStatus || String(d.product_id) !== cartStatus.dataset.productId) return;
+
+        const total = (parseInt(cartStatus.dataset.cartQty, 10) || 0) + (parseInt(d.quantity, 10) || 1);
+        const text = cartStatus.querySelector('[data-cart-status-text]');
+
+        cartStatus.dataset.cartQty = total;
+        if (text) text.textContent = (cartStatus.dataset.template || '%s').replace('%s', total);
+        cartStatus.hidden = false;
+
+        if (barBuy && barInCart) {
+            barBuy.hidden = true;
+            barInCart.hidden = false;
+        }
+    });
+
+    // липка панель покупки: «Купити» = клік по основній кнопці (кількість береться з поля)
+    if (barBuy && addButton) {
+        barBuy.addEventListener('click', () => addButton.click());
+    }
+
+    // зʼявляється, коли основна кнопка пішла вгору за екран; ховається біля футера
+    if (bar && addButton) {
+        const footer = document.querySelector('.footer');
+        let barTicking = false;
+
+        const syncBar = () => {
+            const passed = addButton.getBoundingClientRect().bottom < 0;
+            const nearFooter = footer ? footer.getBoundingClientRect().top < window.innerHeight : false;
+            const visible = passed && !nearFooter;
+
+            bar.classList.toggle('is-visible', visible);
+            bar.setAttribute('aria-hidden', String(!visible));
+            barTicking = false;
+        };
+
+        window.addEventListener('scroll', () => {
+            if (!barTicking) { barTicking = true; requestAnimationFrame(syncBar); }
+        }, { passive: true });
+        window.addEventListener('resize', syncBar);
+        syncBar();
     }
 });
 

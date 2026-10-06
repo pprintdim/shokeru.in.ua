@@ -772,3 +772,53 @@ button.header__lang-selected { padding: 0; background: none; text-transform: non
     .reviews__list { display: flex; gap: 12px; margin: 28px -16px 0; padding: 0 16px 8px; overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
     .reviews__item { flex: 0 0 82%; scroll-snap-align: start; padding: 20px; }
 }
+
+/* ------------------------------------------------------------------ сторінка товару: стан покупки + липка панель (product.twig) */
+.prod__add:disabled, .prod__quick:disabled, .skbar__btn:disabled { opacity: .45; cursor: not-allowed; background: #8a909b; border-color: #8a909b; color: #fff; }
+.prod__incart[hidden], .skbar [hidden] { display: none !important; }
+.prod__incart { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; margin: 12px 0 0; font-size: 14px; color: #202222; }
+.prod__incart svg { flex: none; padding: 2px; border-radius: 50%; background: #C5FF24; color: #202222; }
+.prod__incart a { display: inline-flex; align-items: center; min-height: 36px; font-weight: 700; color: #202222; text-decoration: underline; text-underline-offset: 3px; }
+.prod__incart a:hover { color: #5a7a00; }
+.skbar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 80;
+    background: #fff;
+    border-top: 1px solid #202222;
+    box-shadow: 0 -10px 30px rgba(0, 0, 0, .12);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    transform: translateY(110%);
+    visibility: hidden;
+    transition: transform .3s ease, visibility 0s linear .3s;
+}
+.skbar.is-visible { transform: none; visibility: visible; transition: transform .3s ease, visibility 0s; }
+.skbar__in { display: flex; align-items: center; gap: 14px; min-height: 72px; padding-top: 10px; padding-bottom: 10px; }
+.skbar__img { flex: none; width: 48px; height: 48px; object-fit: contain; border: 1px solid #e3e3e3; background: #fff; }
+.skbar__info { flex: 1; min-width: 0; }
+.skbar__name { margin: 0 0 2px; font-size: 14px; font-weight: 600; color: #202222; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.skbar__meta { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; margin: 0; }
+.skbar__price { font-size: 18px; font-weight: 800; color: #202222; }
+.skbar__meta s { font-size: 13px; color: #6b7076; }
+.skbar__stock { font-size: 12px; font-weight: 600; color: #3a9a00; }
+.skbar__stock.is-out { color: #c41c1c; }
+.skbar__btn { flex: none; min-width: 180px; min-height: 48px; height: auto; padding: 12px 20px; font-size: 14px; white-space: nowrap; text-decoration: none; }
+.skbar__btn--incart { gap: 8px; border-color: #202222; background: #fff; color: #202222; }
+.skbar__btn--incart svg { padding: 2px; border-radius: 50%; background: #C5FF24; color: #202222; }
+.skbar__btn--incart:hover svg { background: #C5FF24; color: #202222; }
+@media (max-width: 767px) {
+    .skbar__in { gap: 10px; min-height: 64px; padding-top: 8px; padding-bottom: 8px; }
+    .skbar__img { width: 44px; height: 44px; }
+    .skbar__name { font-size: 13px; }
+    .skbar__price { font-size: 16px; }
+    .skbar__btn { min-width: 0; min-height: 44px; padding: 10px 14px; font-size: 12px; }
+    .skbar__btn--incart { max-width: 46%; white-space: normal; line-height: 1.2; }
+}
+@media (max-width: 374px) {
+    .skbar__img { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .skbar, .skbar.is-visible { transition: none; }
+}

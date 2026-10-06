@@ -428,6 +428,8 @@ var cart = {
                     $('.header__cart span').text(json['total']);
                     reloadThemeCart();
                     themeToast(json['success'], 'success');
+                    // сторінка товару слухає, щоб показати «Вже в кошику»
+                    document.dispatchEvent(new CustomEvent('cart:added', { detail: { product_id: product_id, quantity: parseInt(quantity, 10) || 1 } }));
 
                     if (typeof callback === 'function') {
                         callback(json);

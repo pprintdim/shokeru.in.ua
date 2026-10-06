@@ -270,6 +270,19 @@ class ControllerProductProduct extends Controller {
 			$data['heading_title'] = $product_info['name'];
 			$data['name'] = $product_info['name'];
 			$data['qty_max'] = ((int)$product_info['quantity'] > 0) ? min(99, (int)$product_info['quantity']) : 99;
+			$data['in_stock'] = ((int)$product_info['quantity'] > 0);
+			// чи товар уже в кошику (усі рядки з цим product_id, з будь-якими опціями)
+			$data['cart_qty'] = 0;
+
+			foreach ($this->cart->getProducts() as $cart_product) {
+				if ((int)$cart_product['product_id'] == (int)$product_info['product_id']) {
+					$data['cart_qty'] += (int)$cart_product['quantity'];
+				}
+			}
+
+			$data['in_cart'] = ($data['cart_qty'] > 0);
+			$data['cart_href'] = $this->url->link('checkout/cart');
+			$data['checkout_href'] = $this->url->link('checkout/checkout', '', true);
 
 			$data['text_minimum'] = sprintf($this->language->get('text_minimum'), $product_info['minimum']);
 			$data['text_login'] = sprintf($this->language->get('text_login'), $this->url->link('account/login', '', true), $this->url->link('account/register', '', true));
