@@ -378,9 +378,93 @@
     }
 
     /* ── 1. завантаження ── */
+    // ролики першого екрана головної (data-prefetch, на телефоні — легкі копії): перший (data-prefetch-first) тягнеться
+    // паралельно з тизером і прелоадер чекає на нього, решта — одразу з низьким пріоритетом; тіло читаємо до кінця,
+    // щоб відповідь лягла в HTTP-кеш
+    var prefetch = [], first = {};
+
+    try { prefetch = JSON.parse(vid.getAttribute('data-prefetch') || '[]'); } catch (e) {}
+    try { first = JSON.parse(vid.getAttribute('data-prefetch-first') || '{}') || {}; } catch (e) {}
+
+    var picked = prefetch.filter(function (u) { return /mob/i.test(u) === !!mobile; });
+
+    if (!picked.length) picked = prefetch;
+
+    var firstUrl = (mobile && first.mobile) || first.desktop || '';
+    var firstProg = firstUrl ? 0 : 100;
+
+    function drain(res, onChunk) {
+      if (!res || !res.body || !res.body.getReader) return res && res.arrayBuffer ? res.arrayBuffer() : null;
+
+      var reader = res.body.getReader();
+
+      return reader.read().then(function pump(chunk) {
+        if (chunk.done) return;
+        if (onChunk) onChunk(chunk.value.length);
+
+        return reader.read().then(pump);
+      });
+    }
+
+    var firstReady = new Promise(function (resolve) {
+      var done = function () { firstProg = 100; resolve(); };
+
+      if (!firstUrl || typeof fetch !== 'function') { done(); return; }
+
+      try {
+        fetch(firstUrl).then(function (res) {
+          var total = Number(res.headers.get('Content-Length')) || 0;
+          var got = 0;
+
+          return drain(res, function (n) {
+            got += n;
+            if (total) firstProg = Math.min(99, got / total * 100);
+          });
+        }).then(done, done);
+      } catch (e) { done(); }
+    });
+
+    picked.forEach(function (url) {
+      if (url === firstUrl || typeof fetch !== 'function') return;
+
+      try { fetch(url, { priority: 'low' }).then(drain).catch(function () {}); } catch (e) {}
+    });
+
+    // перший ролик у кеші — відповідному <video> hero ставимо preload="auto", хай буферизується з кешу
+    firstReady.then(function () {
+      if (!firstUrl) return;
+
+      var hero = document.querySelector('.hero');
+      var target = null;
+
+      if (hero) {
+        hero.querySelectorAll('.hero__slide video').forEach(function (v) {
+          if (!target && v.getAttribute('src') === firstUrl) target = v;
+        });
+      }
+
+      if (target) target.preload = 'auto';
+    });
+
+    function buffered() {
+      try {
+        if (vid.duration && isFinite(vid.duration) && vid.buffered.length) {
+          return vid.buffered.end(vid.buffered.length - 1) / vid.duration * 100;
+        }
+      } catch (e) {}
+
+      return 0;
+    }
+
+    // прогрес: ≈60% — буфер тизера (поки тривалості нема — повзе до 35), 40% — перший ролик hero
+    var fake = 0;
     var prog = 0;
     var progTimer = setInterval(function () {
-      prog = Math.min(90, prog + Math.random() * 7 + 2);
+      var real = buffered();
+
+      fake = Math.min(35, fake + Math.random() * 4 + 1);
+      prog = Math.max(prog, Math.min(97, (real > 0 ? real : fake) * 0.6 + firstProg * 0.4));
+
       if (progEl) progEl.style.width = prog + '%';
       if (pctEl) pctEl.textContent = Math.round(prog) + '%';
     }, 180);
@@ -450,7 +534,7 @@
     // мінімум, скільки прелоадер лишається: при закешованому ролику він інакше лише мигне
     var minShow = new Promise(function (resolve) { setTimeout(resolve, reduced ? 0 : 1200); });
 
-    Promise.all([videoReady, pageReady, minShow]).then(ready);
+    Promise.all([videoReady, firstReady, pageReady, minShow]).then(ready);
     setTimeout(ready, 6000);
 
     /* Що вважаємо командою «грай зі звуком». Якщо на екрані cookie-банер — лише відповідь йому (клік або зникнення):
@@ -496,21 +580,6 @@
         if (late && !playing) { stopMoves(); waitForCookie(late); }
       }, 600);
     }
-
-    // прогрів: ролики першого екрана головної (на телефоні — легкі копії)
-    var prefetch = [];
-
-    try { prefetch = JSON.parse(vid.getAttribute('data-prefetch') || '[]'); } catch (e) {}
-
-    var picked = prefetch.filter(function (u) { return /mob/i.test(u) === !!mobile; });
-
-    if (!picked.length) picked = prefetch;
-
-    setTimeout(function () {
-      picked.forEach(function (url) {
-        try { fetch(url, { priority: 'low' }).catch(function () {}); } catch (e) {}
-      });
-    }, 1200);
 
     /* ── 3. перегляд ── */
     function syncSound() {

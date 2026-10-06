@@ -105,6 +105,7 @@
                             <span class="header__box-line"></span>
                             <div class="header__user">
                                 <a class="header__favourite" href="{{ wishlist }}" aria-label="{{ text_wishlist|e('html_attr') }}"><span>{{ wishlist_total }}</span></a>
+                                <a class="header__compare" href="{{ compare }}" aria-label="{{ text_compare|e('html_attr') }}"><span data-compare-count>{{ compare_total }}</span></a>
                                 <button type="button" class="header__cart cart-open" aria-label="{{ text_shopping_cart|e('html_attr') }}" aria-haspopup="dialog"><span>{{ cart_total }}</span></button>
                             </div>
                             <span class="header__box-line"></span>

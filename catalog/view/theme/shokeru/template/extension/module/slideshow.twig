@@ -51,6 +51,9 @@
                   >
                 {% endif %}
 
+                {# індикатор завантаження відео активного слайда (script.js, стилі features.css .hero-spinner) #}
+                {% if banner.is_video or banner.is_video_mob %}<span class="hero-spinner" data-hero-spinner hidden aria-hidden="true"></span>{% endif %}
+
                 {# електро-ефект (анімовані блискавки + неонове свічіння) — і для відео, і для картинки #}
                 <div class="hero__fx" aria-hidden="true">
                   <span class="hero__fx-glow"></span>

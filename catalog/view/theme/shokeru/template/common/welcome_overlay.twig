@@ -1,6 +1,7 @@
 {# Вітальний тизер поверх головної (як у hydrophob; логіка — js/features.js initWelcome, стилі — css/features.css .welcome-*).
    Життя накладки — чотири стани:
-     1. завантаження — прелоадер із лого вантажить ролик у кеш (смужка й відсотки);
+     1. завантаження — прелоадер із лого вантажить ролик у кеш (смужка й відсотки); паралельно тягнеться перший ролик hero
+                       (data-prefetch-first), решта роликів головної (data-prefetch) — одразу з низьким пріоритетом;
      2. очікування   — ролик одразу йде приглушеним і розмитим, друкується лід; зʼявляється справжній cookie-банер сайту;
      3. перегляд     — відповідь на банер (прийняти / лише необхідні) = дозвіл на звук: ролик грає з початку до кінця зі звуком,
                        без розмиття; «Пропустити» по центру внизу;
@@ -18,7 +19,7 @@
 
   <div class="welcome-intro is-blurred" data-welcome-intro>
     <div class="welcome-intro__video">
-      <video class="welcome-video" data-welcome-video src="{{ video }}"{% if video_mobile %} data-src-mobile="{{ video_mobile }}"{% endif %} data-prefetch="{{ prefetch|json_encode|e('html_attr') }}"{% if has_audio %} data-has-audio="1"{% endif %}{% if has_audio_mobile %} data-has-audio-mobile="1"{% endif %}{% if poster %} poster="{{ poster }}"{% endif %} preload="auto" muted loop playsinline aria-label="{{ heading_title }}"></video>
+      <video class="welcome-video" data-welcome-video src="{{ video }}"{% if video_mobile %} data-src-mobile="{{ video_mobile }}"{% endif %} data-prefetch="{{ prefetch|json_encode|e('html_attr') }}" data-prefetch-first="{{ prefetch_first|default({})|json_encode|e('html_attr') }}"{% if has_audio %} data-has-audio="1"{% endif %}{% if has_audio_mobile %} data-has-audio-mobile="1"{% endif %}{% if poster %} poster="{{ poster }}"{% endif %} preload="auto" muted loop playsinline aria-label="{{ heading_title }}"></video>
     </div>
     <div class="welcome-intro__shade" aria-hidden="true"></div>
     <div class="welcome-intro__content">

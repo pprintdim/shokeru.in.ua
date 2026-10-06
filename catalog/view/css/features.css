@@ -286,6 +286,37 @@ body.welcome-loading .cookie-banner { opacity: 0; pointer-events: none; }
     body.welcome-behind main > :not([data-welcome]) { filter: none; transition: none; }
 }
 
+/* ------------------------------------------------------------------ hero: індикатор завантаження відео-слайда
+   (slideshow.twig [data-hero-spinner], показує script.js поки видиме відео активного слайда не готове грати) */
+.hero-spinner {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    z-index: 3;
+    width: 44px;
+    height: 44px;
+    margin: -22px 0 0 -22px;
+    border-radius: 50%;
+    background: rgba(32, 34, 34, .55);
+    display: grid;
+    place-items: center;
+    pointer-events: none;
+}
+.hero-spinner[hidden] { display: none; }
+.hero-spinner::before {
+    content: "";
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 2px solid rgba(197, 255, 36, .22);
+    border-top-color: #C5FF24;
+    animation: hero-spin .8s linear infinite;
+}
+@keyframes hero-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+    .hero-spinner::before { animation: none; border-color: #C5FF24; }
+}
+
 /* ------------------------------------------------------------------ мова + валюта в шапці й мобільному меню */
 .header__switch { display: flex; align-items: center; gap: 18px; }
 .header__lang-selected { min-height: 24px; }

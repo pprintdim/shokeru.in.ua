@@ -647,7 +647,6 @@ var compare = {
         // лічильник у шапці: [data-compare-count] (розмітка шапки — окремо)
         document.querySelectorAll('[data-compare-count]').forEach(function(el) {
             el.textContent = String(count !== undefined ? count : ids.length);
-            el.hidden = !(count !== undefined ? count : ids.length);
         });
     },
     'request': function(route, product_id) {

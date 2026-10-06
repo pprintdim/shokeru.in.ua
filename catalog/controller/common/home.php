@@ -60,18 +60,24 @@ class ControllerCommonHome extends Controller {
 		$data['has_audio'] = $this->hasAudio($data['video']);
 		$data['has_audio_mobile'] = $data['video_mobile'] ? $this->hasAudio($data['video_mobile']) : $data['has_audio'];
 
-		// ролики першого екрана головної — прогріваємо в кеш, поки йде тизер
-		$data['prefetch'] = $this->welcomeHeroVideos();
+		// ролики першого екрана головної — прогріваємо в кеш, поки йде тизер (сам тизер-ролик у список не входить);
+		// перший відео-банер тягнеться паралельно з тизером, прелоадер чекає й на нього
+		$hero = $this->welcomeHeroVideos(array($data['video'], $data['video_mobile']));
+
+		$data['prefetch'] = $hero['all'];
+		$data['prefetch_first'] = $hero['first'];
 
 		return $this->load->view('common/welcome_overlay', $data);
 	}
 
 	/**
 	 * Відео hero-слайдера (модулі slideshow зі статусом «увімкнено», банери типу video): коли тизер поїде,
-	 * головна вже має їх у кеші. Фолбек — типовий hero-ролик теми. Лише ті, що є на диску.
+	 * головна вже має їх у кеші. Фолбек — типовий hero-ролик теми. Лише ті, що є на диску, без самого тизер-ролика.
+	 * 'first' — ролики першого відео-банера (ПК / телефон).
 	 */
-	private function welcomeHeroVideos() {
+	private function welcomeHeroVideos($welcome = array()) {
 		$videos = array();
+		$first = array('desktop' => '', 'mobile' => '');
 
 		$this->load->model('design/banner');
 
@@ -85,25 +91,45 @@ class ControllerCommonHome extends Controller {
 			}
 
 			foreach ($this->model_design_banner->getBanner($setting['banner_id']) as $banner) {
-				if (!empty($banner['type']) && $banner['type'] === 'video') {
-					foreach (array('video', 'mob_video') as $field) {
-						if (!empty($banner[$field]) && is_file(DIR_IMAGE . $banner[$field])) {
-							$videos[] = 'image/' . $banner[$field];
-						}
-					}
+				if (empty($banner['type']) || $banner['type'] !== 'video' || empty($banner['video']) || !is_file(DIR_IMAGE . $banner['video'])) {
+					continue;
+				}
+
+				$desktop = 'image/' . $banner['video'];
+				$mobile = (!empty($banner['mob_video']) && is_file(DIR_IMAGE . $banner['mob_video'])) ? 'image/' . $banner['mob_video'] : '';
+
+				$videos[] = $desktop;
+
+				if ($mobile !== '') {
+					$videos[] = $mobile;
+				}
+
+				if ($first['desktop'] === '') {
+					$first = array('desktop' => $desktop, 'mobile' => $mobile);
 				}
 			}
 		}
 
 		if (!$videos) {
-			foreach (array('hero-video.mp4', 'hero-video-mobile.mp4') as $file) {
+			foreach (array('hero-video.mp4' => 'desktop', 'hero-video-mobile.mp4' => 'mobile') as $file => $side) {
 				if (is_file(DIR_IMAGE . 'catalog/hero/' . $file)) {
 					$videos[] = 'image/catalog/hero/' . $file;
+					$first[$side] = 'image/catalog/hero/' . $file;
 				}
 			}
 		}
 
-		return array_values(array_unique($videos));
+		$skip = function ($path) use ($welcome) {
+			return $path !== '' && !in_array($path, $welcome, true);
+		};
+
+		return array(
+			'all'   => array_values(array_unique(array_filter($videos, $skip))),
+			'first' => array(
+				'desktop' => $skip($first['desktop']) ? $first['desktop'] : '',
+				'mobile'  => $skip($first['mobile']) ? $first['mobile'] : ''
+			)
+		);
 	}
 
 	// Чи має MP4 звукову доріжку: у moov шукаємо hdlr із типом «soun». Результат кешується за шляхом і mtime.

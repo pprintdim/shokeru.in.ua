@@ -506,6 +506,60 @@ document.addEventListener("DOMContentLoaded", function () {
             mousewheel: { forceToAxis: true, releaseOnEdges: true },
         });
 
+        // Індикатор завантаження hero (slideshow.twig [data-hero-spinner], стилі features.css): кільце на активному слайді,
+        // поки його видиме відео (ПК/телефон — різні <video>) не готове грати; ховається на playing/canplay/loadeddata/error
+        // і запобіжником за 6 с. Відтворення не чіпаємо.
+        if (heroSwiper && heroSwiper.el && heroSwiper.slides) {
+            var spinTimer = 0;
+
+            var heroActiveSlide = function () {
+                return heroSwiper.slides[heroSwiper.activeIndex] || null;
+            };
+
+            var heroVisibleVideo = function (slide) {
+                var found = null;
+
+                slide.querySelectorAll("video").forEach(function (v) { if (!found && v.offsetParent !== null) found = v; });
+
+                return found;
+            };
+
+            var hideHeroSpinner = function () {
+                window.clearTimeout(spinTimer);
+                heroSwiper.el.querySelectorAll("[data-hero-spinner]").forEach(function (s) { s.hidden = true; });
+            };
+
+            var syncHeroSpinner = function () {
+                hideHeroSpinner();
+
+                var slide = heroActiveSlide();
+                var spinner = slide && slide.querySelector("[data-hero-spinner]");
+                var video = slide && heroVisibleVideo(slide);
+
+                if (!spinner || !video || video.error || video.readyState >= 3) return;
+
+                spinner.hidden = false;
+                spinTimer = window.setTimeout(hideHeroSpinner, 6000);
+            };
+
+            var isHeroActiveVideo = function (v) {
+                return v.offsetParent !== null && v.closest(".swiper-slide") === heroActiveSlide();
+            };
+
+            heroSwiper.el.querySelectorAll("video").forEach(function (v) {
+                ["playing", "canplay", "loadeddata", "error"].forEach(function (name) {
+                    v.addEventListener(name, function () { if (isHeroActiveVideo(v)) hideHeroSpinner(); });
+                });
+                ["waiting", "stalled"].forEach(function (name) {
+                    v.addEventListener(name, function () { if (v.readyState < 3 && isHeroActiveVideo(v)) syncHeroSpinner(); });
+                });
+            });
+
+            heroSwiper.on("slideChange", syncHeroSpinner);
+            heroSwiper.on("slideChangeTransitionEnd", syncHeroSpinner);
+            syncHeroSpinner();
+        }
+
         document.querySelectorAll(".productSlider__slider").forEach(function (sliderEl) {
             var slideCount = sliderEl.querySelectorAll(".swiper-slide").length;
             var scope = sliderEl.closest(".productSlider") || document;

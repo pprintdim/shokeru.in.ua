@@ -110,6 +110,12 @@ class ControllerCommonHeader extends Controller {
 		$data['wishlist_product_ids'] = $wishlist_product_ids;
 		$data['cart_total']     = $this->cart->countProducts();
 
+		// Порівняння — іконка з лічильником поруч із обраним (список у сесії, оновлює compare.state у common.js)
+		$compare_total = isset($this->session->data['compare']) && is_array($this->session->data['compare']) ? count($this->session->data['compare']) : 0;
+		$data['compare_total'] = $compare_total;
+		$data['text_compare'] = sprintf($this->language->get('text_compare'), $compare_total);
+		$data['compare'] = $this->url->link('product/compare');
+
 
 		$data['text_logged'] = sprintf($this->language->get('text_logged'), $this->url->link('account/account', '', true), $this->customer->getFirstName(), $this->url->link('account/logout', '', true));
 		
@@ -175,10 +181,10 @@ class ControllerCommonHeader extends Controller {
 
 
 		// CSS/JS: мініфікація з авто-перегенерацією за mtime (зміниш файл — перемініфікується сам)
-		$data['css_main']  = $this->assetMin('catalog/view/css/style.css', 'css', '20261004');
+		$data['css_main']  = $this->assetMin('catalog/view/css/style.css', 'css', '20261006');
 		$data['css_anim']  = $this->assetMin('catalog/view/css/animations.css', 'css', '20260626b');
-		$data['css_features'] = $this->assetMin('catalog/view/css/features.css', 'css', '20261006b');
-		$data['js_common'] = $this->assetMin('catalog/view/js/common.js', 'js', '20261006');
+		$data['css_features'] = $this->assetMin('catalog/view/css/features.css', 'css', '20261006h');
+		$data['js_common'] = $this->assetMin('catalog/view/js/common.js', 'js', '20261006b');
 		// «Показувати в шапці» (info_flags.sql): сторінки інформації в верхньому меню
 		$this->load->model('catalog/information');
 
