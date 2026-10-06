@@ -277,7 +277,8 @@ class ControllerExtensionFeedGoogleSitemap extends Controller {
 		$x_default = isset($alternates[$default_code]) ? $alternates[$default_code] : reset($alternates);
 		$output = '';
 
-		foreach ($alternates as $href) {
+		// слаги каталогу однакові для всіх мов — один <url> на унікальну адресу, інакше кожен товар іде тричі
+		foreach (array_unique($alternates) as $href) {
 			$output .= "\n<url>";
 			$output .= '<loc>' . $this->xmlUrl($href) . '</loc>';
 
