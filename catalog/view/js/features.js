@@ -374,6 +374,8 @@
         overlay.remove();
         body.classList.remove('welcome-behind', 'welcome-behind--out', 'welcome-loading');
         root.classList.remove('welcome-lock');
+        // hero чекав за накладкою — тепер може стартувати (script.js playActive)
+        document.dispatchEvent(new CustomEvent('welcome:closed'));
       }, 1700);
     }
 
@@ -430,7 +432,8 @@
       try { fetch(url, { priority: 'low' }).then(drain).catch(function () {}); } catch (e) {}
     });
 
-    // перший ролик у кеші — відповідному <video> hero ставимо preload="auto", хай буферизується з кешу
+    // перший ролик у кеші — відповідному <video> hero (data-src, src ставить script.js) даємо src із preload="metadata"
+    // і лише за 1 с preload="auto": так Chrome бере його з HTTP-кешу, а з auto/autoplay одразу — качає заново
     firstReady.then(function () {
       if (!firstUrl) return;
 
@@ -439,11 +442,16 @@
 
       if (hero) {
         hero.querySelectorAll('.hero__slide video').forEach(function (v) {
-          if (!target && v.getAttribute('src') === firstUrl) target = v;
+          if (!target && (v.getAttribute('data-src') === firstUrl || v.getAttribute('src') === firstUrl)) target = v;
         });
       }
 
-      if (target) target.preload = 'auto';
+      if (!target) return;
+
+      target.preload = 'metadata';
+      if (!target.getAttribute('src')) target.src = firstUrl;
+
+      setTimeout(function () { target.preload = 'auto'; }, 1000);
     });
 
     function buffered() {

@@ -536,7 +536,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 var spinner = slide && slide.querySelector("[data-hero-spinner]");
                 var video = slide && heroVisibleVideo(slide);
 
-                if (!spinner || !video || video.error || video.readyState >= 3) return;
+                // без src (ще не призначений playActive) нічого не вантажиться — кільце не показуємо
+                if (!spinner || !video || !video.getAttribute("src") || video.error || video.readyState >= 3) return;
 
                 spinner.hidden = false;
                 spinTimer = window.setTimeout(hideHeroSpinner, 6000);
@@ -558,6 +559,67 @@ document.addEventListener("DOMContentLoaded", function () {
             heroSwiper.on("slideChange", syncHeroSpinner);
             heroSwiper.on("slideChangeTransitionEnd", syncHeroSpinner);
             syncHeroSpinner();
+
+            // Відтворення hero: у розмітці відео без src/autoplay (slideshow.twig data-src), грає лише видиме відео
+            // активного слайда. src ставимо з preload="metadata", і лише за ~800 мс preload="auto" + play() — так ролик,
+            // який welcome-прелоадер уже поклав у HTTP-кеш, береться з кешу, а не качається вдруге. Поки зверху
+            // вітальний екран (body.welcome-behind) — не стартуємо; features.js після закриття шле welcome:closed.
+            var heroReduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+            var heroPlayTimer = 0;
+            var heroPending = null; // відео, що чекає на metadata→auto
+
+            var heroPlay = function (v) {
+                var p = v.play();
+                if (p && p.catch) p.catch(function () {});
+            };
+
+            var playActive = function () {
+                if (heroReduced || document.body.classList.contains("welcome-behind")) return;
+
+                var slide = heroActiveSlide();
+                var video = slide && heroVisibleVideo(slide);
+
+                heroSwiper.el.querySelectorAll("video").forEach(function (v) {
+                    if (v === video) return;
+                    if (!v.paused) v.pause();
+                    if (v.getAttribute("src") && v.currentTime > 0) v.currentTime = 0;
+                });
+
+                // те саме відео вже чекає на свій таймер (slideChange → slideChangeTransitionEnd) — не зриваємо
+                if (video && video === heroPending) return;
+
+                window.clearTimeout(heroPlayTimer);
+                heroPending = null;
+
+                if (!video) return;
+
+                if (video.getAttribute("src")) { syncHeroSpinner(); heroPlay(video); return; }
+
+                video.preload = "metadata";
+                video.src = video.getAttribute("data-src") || "";
+                syncHeroSpinner();
+
+                heroPending = video;
+                heroPlayTimer = window.setTimeout(function () {
+                    heroPending = null;
+                    if (!isHeroActiveVideo(video)) return;
+                    video.preload = "auto";
+                    heroPlay(video);
+                }, 800);
+            };
+
+            heroSwiper.on("slideChange", playActive);
+            heroSwiper.on("slideChangeTransitionEnd", playActive);
+            document.addEventListener("welcome:closed", playActive, { once: true });
+
+            // перетин брейкпоінта (767px) міняє видиме відео ПК/телефон
+            if (window.matchMedia) {
+                var heroMq = window.matchMedia("(max-width: 767px)");
+                if (heroMq.addEventListener) heroMq.addEventListener("change", playActive);
+                else if (heroMq.addListener) heroMq.addListener(playActive);
+            }
+
+            playActive();
         }
 
         document.querySelectorAll(".productSlider__slider").forEach(function (sliderEl) {

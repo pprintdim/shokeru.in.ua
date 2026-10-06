@@ -13,12 +13,12 @@
             {% if banner.images %}
               <div class="hero__slide-image">
 
-                {# desktop #}
+                {# desktop; src ставить script.js (playActive) лише видимому відео активного слайда — інакше качались обидва #}
                 {% if banner.is_video %}
                   <video
                     class="hide-mobile"
-                    src="{{ banner.images.desktop }}"{% if banner.audio %} data-has-audio="1"{% endif %}
-                    autoplay loop muted playsinline preload="metadata"
+                    data-src="{{ banner.images.desktop }}"{% if banner.audio %} data-has-audio="1"{% endif %}
+                    loop muted playsinline preload="none"
                     controlslist="nodownload noplaybackrate"
                     disablepictureinpicture
                     {% if banner.poster %}poster="{{ banner.poster }}"{% endif %}
@@ -36,8 +36,8 @@
                 {% if banner.is_video_mob %}
                   <video
                     class="show-mobile"
-                    src="{{ banner.images.mob_image }}"{% if banner.audio_mob %} data-has-audio="1"{% endif %}
-                    autoplay loop muted playsinline preload="metadata"
+                    data-src="{{ banner.images.mob_image }}"{% if banner.audio_mob %} data-has-audio="1"{% endif %}
+                    loop muted playsinline preload="none"
                     controlslist="nodownload noplaybackrate"
                     disablepictureinpicture
                     {% if banner.mob_poster %}poster="{{ banner.mob_poster }}"{% endif %}
