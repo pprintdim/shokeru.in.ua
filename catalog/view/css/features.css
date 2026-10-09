@@ -207,32 +207,6 @@ html.welcome-lock, html.welcome-lock body { overflow: hidden !important; overscr
     animation: welcome-caret .8s steps(1) infinite;
 }
 
-/* «Пропустити» — по центру внизу (з'являється, коли ролик готовий) */
-.welcome-skip {
-    position: absolute;
-    left: 50%;
-    bottom: 120px;
-    z-index: 3;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
-    min-width: 44px;
-    min-height: 44px;
-    padding: 0 12px;
-    color: #fff;
-    background: none;
-    opacity: 0;
-    pointer-events: none;
-    transform: translateX(-50%) translateY(10px);
-    transition: opacity .6s ease, transform .6s ease, color .2s ease;
-}
-.welcome-intro.is-ready .welcome-skip { opacity: 1; pointer-events: auto; transform: translateX(-50%); transition-delay: .9s; }
-.welcome-skip:hover { color: #C5FF24; }
-.welcome-skip__track { display: block; width: 1px; height: 40px; overflow: hidden; background: rgba(255, 255, 255, .25); }
-.welcome-skip__line { display: block; width: 100%; height: 100%; background: #C5FF24; transform: translateY(-100%); animation: welcome-skip-line 1.8s cubic-bezier(.16, 1, .3, 1) infinite; }
-.welcome-skip__text { font-size: 13px; font-weight: 700; letter-spacing: .24em; text-transform: uppercase; }
-
 /* звук: кругла кнопка справа внизу; доступна, коли ролик грає зі звуком */
 .welcome-sound {
     position: absolute;
@@ -271,17 +245,15 @@ body.welcome-behind .sk-fab { display: none; }
 body.welcome-loading .cookie-banner { opacity: 0; pointer-events: none; }
 @media (max-width: 767px) {
     .welcome-sound { right: 16px; bottom: 24px; width: 44px; height: 44px; }
-    .welcome-skip { bottom: 190px; }
     .welcome-intro__descr { padding: 0 8px; }
 }
 @keyframes welcome-pre-in { to { opacity: 1; transform: none; } }
 @keyframes welcome-pre-pulse { 0%, 100% { opacity: .45; transform: scale(.98); } 50% { opacity: 1; transform: scale(1); } }
-@keyframes welcome-skip-line { 0% { transform: translateY(-100%); } 55% { transform: translateY(0); } 100% { transform: translateY(100%); } }
 @keyframes welcome-caret { 50% { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) {
-    .welcome-overlay, .welcome-preloader, .welcome-preloader__inner, .welcome-video, .welcome-skip, .welcome-sound { transition: none !important; animation: none !important; }
+    .welcome-overlay, .welcome-preloader, .welcome-preloader__inner, .welcome-video, .welcome-sound { transition: none !important; animation: none !important; }
     .welcome-preloader__inner { opacity: 1; transform: none; }
-    .welcome-preloader__logo, .welcome-skip__line { animation: none !important; }
+    .welcome-preloader__logo { animation: none !important; }
     .welcome-intro__eyebrow, .welcome-intro__title, .welcome-intro__descr { transition: none; }
     body.welcome-behind main > :not([data-welcome]) { filter: none; transition: none; }
 }

@@ -36,13 +36,13 @@ class ControllerCommonHome extends Controller {
 
 	/**
 	 * Вітальний тизер поверх головної (як у hydrophob): прелоадер із лого вантажить ролик у кеш, ролик одразу йде
-	 * приглушеним і розмитим; після відповіді на cookie-банер він грає з початку до кінця зі звуком і без розмиття,
-	 * «Пропустити» — по центру внизу. Файли — з Дизайн → Вітальний екран, інакше hero-ролик слайдера.
+	 * приглушеним і розмитим; після відповіді на cookie-банер він грає з початку до кінця зі звуком і без розмиття
+	 * й сам закривається (кнопки «Пропустити» нема, Esc теж закриває). Файли — з Дизайн → Вітальний екран, інакше hero-ролик слайдера.
 	 */
 	private function welcomeOverlay() {
 		$this->load->language('common/welcome');
 
-		foreach (array('heading_title', 'text_aria', 'text_eyebrow', 'text_lead', 'text_skip', 'text_skip_aria', 'text_sound_on', 'text_sound_off') as $key) {
+		foreach (array('heading_title', 'text_aria', 'text_eyebrow', 'text_lead', 'text_sound_on', 'text_sound_off') as $key) {
 			$data[$key] = $this->language->get($key);
 		}
 

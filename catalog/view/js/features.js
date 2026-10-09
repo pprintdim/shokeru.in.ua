@@ -323,8 +323,8 @@
        1. завантаження — прелоадер із лого вантажить ролик у кеш;
        2. очікування   — ролик іде приглушеним і розмитим, друкується лід, зʼявляється cookie-банер сайту;
        3. перегляд     — відповідь на банер (або будь-яка дія, якщо банера нема) = дозвіл на звук: ролик з початку до кінця
-                         зі звуком і без розмиття; «Пропустити» по центру внизу;
-       4. вихід        — ролик догрався або «Пропустити»: накладка їде вниз.
+                         зі звуком і без розмиття; звук заблокували — грає беззвучно, кнопок нема;
+       4. вихід        — ролик догрався або Esc: накладка їде вниз.
      Поки людина дивиться тизер, у кеш тягнуться ролики першого екрана головної (data-prefetch). */
   function initWelcome() {
     var overlay = document.querySelector('[data-welcome]');
@@ -335,7 +335,6 @@
     var body = document.body;
     var intro = overlay.querySelector('[data-welcome-intro]') || overlay;
     var vid = overlay.querySelector('[data-welcome-video]');
-    var skip = overlay.querySelector('[data-welcome-skip]');
     var pre = overlay.querySelector('[data-welcome-preloader]');
     var progEl = overlay.querySelector('[data-welcome-progress]');
     var pctEl = overlay.querySelector('[data-welcome-pct]');
@@ -672,8 +671,6 @@
 
     // ролик не завантажився — показувати нічого, йдемо далі
     vid.addEventListener('error', close);
-
-    if (skip) skip.addEventListener('click', close);
 
     document.addEventListener('keydown', function (event) { if (event.key === 'Escape') close(); });
   }
