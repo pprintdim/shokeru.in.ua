@@ -19,7 +19,7 @@
 
   <div class="welcome-intro is-blurred" data-welcome-intro>
     <div class="welcome-intro__video">
-      <video class="welcome-video" data-welcome-video src="{{ video }}"{% if video_mobile %} data-src-mobile="{{ video_mobile }}"{% endif %} data-prefetch="{{ prefetch|json_encode|e('html_attr') }}" data-prefetch-first="{{ prefetch_first|default({})|json_encode|e('html_attr') }}"{% if has_audio %} data-has-audio="1"{% endif %}{% if has_audio_mobile %} data-has-audio-mobile="1"{% endif %}{% if poster %} poster="{{ poster }}"{% endif %} preload="auto" muted loop playsinline aria-label="{{ heading_title }}"></video>
+      <video class="welcome-video" data-welcome-video data-warm="skip" src="{{ video }}"{% if video_mobile %} data-src-mobile="{{ video_mobile }}"{% endif %} data-prefetch="{{ prefetch|json_encode|e('html_attr') }}" data-prefetch-first="{{ prefetch_first|default({})|json_encode|e('html_attr') }}"{% if has_audio %} data-has-audio="1"{% endif %}{% if has_audio_mobile %} data-has-audio-mobile="1"{% endif %}{% if poster %} poster="{{ poster }}"{% endif %} preload="auto" muted loop playsinline aria-label="{{ heading_title }}"></video>
     </div>
     <div class="welcome-intro__shade" aria-hidden="true"></div>
     <div class="welcome-intro__content">

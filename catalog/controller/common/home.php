@@ -67,6 +67,9 @@ class ControllerCommonHome extends Controller {
 		$data['prefetch'] = $hero['all'];
 		$data['prefetch_first'] = $hero['first'];
 
+		// прогрів роликів під прелоадером (спільний модуль групи) — у <head>, features.js initWelcome чекає на нього
+		$this->document->addScript('catalog/view/js/video-warmup.js?v=20261025');
+
 		return $this->load->view('common/welcome_overlay', $data);
 	}
 

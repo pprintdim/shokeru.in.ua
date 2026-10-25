@@ -379,80 +379,40 @@
     }
 
     /* ── 1. завантаження ── */
-    // ролики першого екрана головної (data-prefetch, на телефоні — легкі копії): перший (data-prefetch-first) тягнеться
-    // паралельно з тизером і прелоадер чекає на нього, решта — одразу з низьким пріоритетом; тіло читаємо до кінця,
-    // щоб відповідь лягла в HTTP-кеш
-    var prefetch = [], first = {};
+    // ролики головної прогріває спільний модуль video-warmup.js (підключає common/home): hero — у кеш і як blob
+    // (data-src стає blob:, script.js playActive бере його як є), решта — лише в кеш; прелоадер чекає на hero до 6 с,
+    // firstProg (0..100) — частка докачаних hero для смужки; серверний список data-prefetch (на телефоні — легкі копії) — довантаження
+    var warm = window.videoWarmup;
+    var prefetch = [];
 
     try { prefetch = JSON.parse(vid.getAttribute('data-prefetch') || '[]'); } catch (e) {}
-    try { first = JSON.parse(vid.getAttribute('data-prefetch-first') || '{}') || {}; } catch (e) {}
 
     var picked = prefetch.filter(function (u) { return /mob/i.test(u) === !!mobile; });
 
     if (!picked.length) picked = prefetch;
 
-    var firstUrl = (mobile && first.mobile) || first.desktop || '';
-    var firstProg = firstUrl ? 0 : 100;
+    var firstProg = warm ? 0 : 100;
 
-    function drain(res, onChunk) {
-      if (!res || !res.body || !res.body.getReader) return res && res.arrayBuffer ? res.arrayBuffer() : null;
-
-      var reader = res.body.getReader();
-
-      return reader.read().then(function pump(chunk) {
-        if (chunk.done) return;
-        if (onChunk) onChunk(chunk.value.length);
-
-        return reader.read().then(pump);
+    // відео ПК і телефона в hero — окремі <video> (hide-mobile / show-mobile): сховане на цьому екрані не тягнемо
+    if (warm) {
+      document.querySelectorAll('.hero__slide video').forEach(function (v) {
+        if (!v.getClientRects().length) v.setAttribute('data-warm', 'skip');
       });
     }
 
     var firstReady = new Promise(function (resolve) {
-      var done = function () { firstProg = 100; resolve(); };
+      if (!warm) { resolve(); return; }
 
-      if (!firstUrl || typeof fetch !== 'function') { done(); return; }
+      warm.start({ urls: picked });
 
-      try {
-        fetch(firstUrl).then(function (res) {
-          var total = Number(res.headers.get('Content-Length')) || 0;
-          var got = 0;
+      var tick = setInterval(function () {
+        var hero = warm.items.filter(function (it) { return it.kind === 'hero'; });
 
-          return drain(res, function (n) {
-            got += n;
-            if (total) firstProg = Math.min(99, got / total * 100);
-          });
-        }).then(done, done);
-      } catch (e) { done(); }
+        firstProg = hero.length ? hero.filter(function (it) { return it.done; }).length / hero.length * 100 : 100;
+      }, 150);
+
+      warm.gate(6000).then(function () { clearInterval(tick); firstProg = 100; resolve(); });
     });
-
-    picked.forEach(function (url) {
-      if (url === firstUrl || typeof fetch !== 'function') return;
-
-      try { fetch(url, { priority: 'low' }).then(drain).catch(function () {}); } catch (e) {}
-    });
-
-    // перший ролик у кеші — відповідному <video> hero (data-src, src ставить script.js) даємо src із preload="metadata"
-    // і лише за 1 с preload="auto": так Chrome бере його з HTTP-кешу, а з auto/autoplay одразу — качає заново
-    // пауза після fetch, щоб відповідь встигла лягти в HTTP-кеш — інакше запит <video> зависає й іде в мережу
-    firstReady.then(function () { setTimeout(function () {
-      if (!firstUrl) return;
-
-      var hero = document.querySelector('.hero');
-      var target = null;
-
-      if (hero) {
-        hero.querySelectorAll('.hero__slide video').forEach(function (v) {
-          if (!target && (v.getAttribute('data-src') === firstUrl || v.getAttribute('src') === firstUrl)) target = v;
-        });
-      }
-
-      if (!target) return;
-
-      target.preload = 'metadata';
-      if (!target.getAttribute('src')) target.src = firstUrl;
-
-      setTimeout(function () { target.preload = 'auto'; }, 1000);
-    }, 1500); });
 
     function buffered() {
       try {
