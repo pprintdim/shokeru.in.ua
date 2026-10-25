@@ -8,13 +8,13 @@
 
 $root = rtrim(str_replace('\\', '/', __DIR__), '/') . '/';
 $host = $_SERVER['HTTP_HOST'] ?? '';
-$is_mamp_root = strpos($root, '/Applications/MAMP/htdocs/') === 0;
+$is_mamp_root = strpos($root, '/Applications/MAMP/htdocs/') === 0 || strpos($root, '/Volumes/Projects/MAMP/htdocs/') === 0;
 $is_local = $is_mamp_root || in_array($host, array('localhost:8888', '127.0.0.1:8888', 'localhost', '127.0.0.1'), true);
 
 $settings = array(
 	'root' => $root,
-	'http_catalog' => $is_local ? 'http://localhost:8888/shokeru/' : 'https://shokeru.autochemicals.s3.monosite.com.ua/',
-	'https_catalog' => $is_local ? 'http://localhost:8888/shokeru/' : 'https://shokeru.autochemicals.s3.monosite.com.ua/',
+	'http_catalog' => $is_local ? 'http://localhost:8888/NanoChemicalGroup/central-office/trading-house/shokeru.in.ua/' : 'https://shokeru.autochemicals.s3.monosite.com.ua/',
+	'https_catalog' => $is_local ? 'http://localhost:8888/NanoChemicalGroup/central-office/trading-house/shokeru.in.ua/' : 'https://shokeru.autochemicals.s3.monosite.com.ua/',
 	'admin_path' => $is_local ? 'admin' : 'shk_panel',
 	'storage' => $is_local ? $root . 'system/storage/' : '/home/m366/web/shokeru.autochemicals.s3.monosite.com.ua/private/storage/',
 	'db' => array(
