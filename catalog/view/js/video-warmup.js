@@ -95,8 +95,25 @@
             apply(v);
             var sources = v.querySelectorAll('source');
             for (var i = 0; i < sources.length; i++) apply(sources[i]);
+            if (touched) v.addEventListener('error', revert, true);
             // якщо src уже стояв (не лінивий) — перезавантажуємо з blob, постер лишається
             if (touched && (v.getAttribute('src') === it.blob || (sources.length && v.getAttribute('src') === null))) {
+                try { v.load(); } catch (e) {}
+            }
+
+            // blob усе ж не заграв — повертаємо оригінальні шляхи (файл уже в кеші)
+            function revert() {
+                v.removeEventListener('error', revert, true);
+                var els = [v].concat(Array.prototype.slice.call(v.querySelectorAll('source')));
+                els.forEach(function (el) {
+                    var orig = '';
+                    attrs.forEach(function (a) {
+                        var o = el.getAttribute(a + '-orig');
+                        if (o) { orig = orig || o; el.removeAttribute(a + '-orig'); }
+                    });
+                    if (!orig) return;
+                    attrs.forEach(function (a) { if (el.getAttribute(a) === it.blob) el.setAttribute(a, orig); });
+                });
                 try { v.load(); } catch (e) {}
             }
         });
@@ -119,6 +136,9 @@
                 spent += len;
                 if (wantBlob && (!len || blobSpent + len <= BLOB_BUDGET)) {
                     return res.blob().then(function (b) {
+                        // тіло коротше за Content-Length — обірване (ролик із src уже тягнув той самий файл
+                        // range-запитами і перебив запис у кеш); такий blob не грає — лишаємо http-джерело
+                        if (len && b.size !== len) return;
                         blobSpent += b.size;
                         it.blob = URL.createObjectURL(b);
                         swapToBlob(it);
